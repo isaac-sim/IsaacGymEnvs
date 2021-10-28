@@ -1,0 +1,2 @@
+*.dae filter=lfs diff=lfs merge=lfs -text
+*.obj filter=lfs diff=lfs merge=lfs -text

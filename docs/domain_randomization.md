@@ -1,0 +1,250 @@
+Domain Randomization
+====================
+
+Overview
+--------
+
+We sometimes need our reinforcement learning agents to be robust to
+different physics than they are trained with, such as when attempting a
+sim2real policy transfer. Using domain randomization, we repeatedly
+randomize the simulation dynamics during training in order to learn a
+good policy under a wide range of physical parameters.
+
+IsaacGymEnvs supports "on the fly" domain randomization, allowing dynamics
+to be changed when resetting the environment, but without requiring
+reloading of assets. This allows us to efficiently apply domain
+randomizations without common overheads like re-parsing asset files.
+Domain randomization must take place at environment reset time, as some
+environment properties are reset when applying randomizations at the
+physics simulation level.
+
+We provide two interfaces to add domain randomization to your `isaacgymenvs`
+tasks:
+
+1.  Adding domain randomization parameters to your task's YAML config
+2.  Directly calling the `apply_randomizations` class method
+
+Underneath both interfaces is a nested dictionary that allows you to
+fully specify which parameters to randomize, what distribution to sample
+for each parameter, and an option to schedule when the randomizations
+are applied or anneal the range over time. We will first discuss all the
+"knobs and dials" you can tune in this dictionary, and then how to
+incorporate either of the interfaces within your tasks.
+
+Domain Randomization Dictionary
+-------------------------------
+
+We will first explain what can be randomized in the scene and the
+sampling distributions and schedulers available. There are four main
+parameter groups that support randomization. They are:
+
+-   `observations`
+    :   -   Add noise directly to the agent observations
+
+-   `actions`
+    :   -   Add noise directly to the agent actions
+
+-   `sim_params`
+    :   -   Add noise to physical parameters defined for the entire
+            scene, such as `gravity`
+
+-   `actor_params`
+    :   -   Add noise to properties belonging to your actors, such as
+            the `dof_properties` of a ShadowHand
+
+For each parameter you wish to randomize, you can specify the following
+settings:
+
+-   `distribution`
+    :   -   The distribution to generate a sample `x` from.
+        -   Choices: `uniform`, `loguniform`, `gaussian`.
+            :   -   `x ~ unif(a, b)`
+                -   `x ~ exp(unif(log(a), log(b)))`
+                -   `x ~ normal(a, b)`
+
+        -   Parameters `a` and `b` are defined by the `range` setting.
+
+-   `range`
+    :   -   Specified as tuple `[a, b]` of real numbers.
+        -   For `uniform` and `loguniform` distributions, `a` and `b`
+            are the lower and upper bounds.
+        -   For `gaussian`, `a` is the distribution mean and `b` is the
+            variance.
+
+-   `operation`
+    :   -   Defines how the generated sample `x` will be applied to the
+            original simulation parameter.
+        -   Choices: `additive`, `scaling`
+            :   -   For `additive` noise, add the sample to the original
+                    value.
+                -   For `scaling` noise, multiply the original value by
+                    the sample.
+
+-   `schedule`
+    :   -   Optional parameter to specify how to change the
+            randomization distribution over time
+        -   Choices: `constant`, `linear`
+            :   -   For a `constant` schedule, randomizations are only
+                    applied after `schedule_steps` frames.
+                -   For a `linear` schedule, linearly interpolate
+                    between no randomization and maximum randomization
+                    as defined by your `range`.
+
+-   `schedule_steps`
+    :   -   Integer frame count used in `schedule` feature
+
+-   `setup_only`
+    :   -   Specifies whether the parameter is to be randomized during setup only. Defaults to `False`
+        -   If set to `True`, the parameter will not be randomized or set during simulation
+        -   `Mass` and `Scale` must have this set to `True` - the GPU pipeline API does not currently support changing these properties at runtime. See Programming/Physics documentation for Isaac Gym for more details
+        -   Requires making a call to `apply_randomization` before simulation begins (i.e. inside `create_sim`)
+
+We additionally can define a `frequency` parameter that will specify how
+often (in number of environment steps) to wait before applying the next
+randomization. Observation and action noise is randomized every frame,
+but the range of rathey are oldandomization is updated per the schedule only every
+`frequency` environment steps.
+
+YAML Interface
+--------------
+
+Now that we know what options are available for domain randomization,
+let's put it all together in the YAML config. In your isaacgymenvs/cfg/task yaml
+file, you can specify your domain randomization parameters under the
+`task` key. First, we turn on domain randomization by setting
+`randomize` to `True`:
+
+    task:
+        randomize: True
+        randomization_params:
+            ...
+
+Next, we will define our parameters under the `randomization_params`
+keys. Here you can see how we used the previous settings to define some
+randomization parameters for a ShadowHand cube manipulation task:
+
+    randomization_params:
+        frequency: 600  # Define how many frames between generating new randomizations
+        observations:
+            range: [0, .05]
+            operation: "additive"
+            distribution: "uniform"
+            schedule: "constant"  # turn on noise after `schedule_steps` num steps
+            schedule_steps: 5000
+        actions:
+            range: [0., .05]
+            operation: "additive"
+            distribution: "uniform"
+            schedule: "linear"  # linearly interpolate between 0 randomization and full range
+            schedule_steps: 5000
+        sim_params: 
+            gravity:
+                range: [0, 0.4]
+                operation: "additive"
+                distribution: "uniform"
+        actor_params:
+            hand:
+                color: True
+                dof_properties:
+                    upper:
+                        range: [0, 0.15]
+                        operation: "additive"
+                        distribution: "uniform"
+            cube:
+                rigid_body_properties:
+                    mass: 
+                        range: [0.5, 1.5]
+                        operation: "scaling"
+                        distribution: "uniform"
+                        setup_only: True
+
+Note how we structured the `actor_params` randomizations. When creating
+actors using `gym.create_actor`, you have the option to specify a name
+for your actor. We figure out which randomizations to apply to actors
+based on this name option. **To use domain randomization, your agents
+must have the same name in** `create_actor` **and in the randomization
+YAML**. In our case, we wish to randomize all ShadowHand instances the
+same way, so we will name all our ShadowHand actors as `hand`. Depending
+on the asset, you have access to randomize `rigid_body_properties`,
+`rigid_shape_properties`, `dof_properties`, and `tendon_properties`. We
+also include an option to set the `color` of each rigid body in an actor
+(mostly for debugging purposes), but do not suppot extensive visual
+randomizations (like lighting and camera directions) currently. The
+exact properties available are listed as follows.
+
+**rigid\_body\_properties**:
+
+        (float) mass # mass value, in kg
+        (float) invMass # Inverse of mass value.
+
+**rigid\_shape\_properties**:
+
+    (float) friction # Coefficient of static friction. Value should be equal or greater than zero.
+    (float) rolling_friction # Coefficient of rolling friction.
+    (float) torsion_friction # Coefficient of torsion friction.
+    (float) restitution # Coefficient of restitution. It's the ratio of the final to initial velocity after the rigid body collides. Range: [0,1]
+    (float) compliance # Coefficient of compliance. Determines how compliant the shape is. The smaller the value, the stronger the material will hold its shape. Value should be greater or equal to zero.
+    (float) thickness # How far objects should come to rest from the surface of this body
+
+**dof\_properties**:
+
+    (float) lower # lower limit of DOF. In radians or meters
+    (float) upper \# upper limit of DOF. In radians or meters
+    (float) velocity \# Maximum velocity of DOF. In Radians/s, or m/s
+    (float) effort \# Maximum effort of DOF. in N or Nm.
+    (float) stiffness \# DOF stiffness.    
+    (float) damping \# DOF damping.    
+    (float) friction \# DOF friction coefficient, a generalized friction force is calculated as DOF force multiplied by friction.
+    (float) armature \# DOF armature, a value added to the diagonal of the joint-space inertia matrix. Physically, it corresponds to the rotating part of a motor - which increases the inertia of the joint, even when the rigid bodies connected by the joint can have very little inertia.
+
+**tendon\_properties**:
+
+        (float) stiffness # Tendon spring stiffness
+        (float) damping # Tendon and limit damping. Applies to both tendon and limit spring-damper dynamics.
+        (float) fixed_spring_rest_length # Fixed tendon spring rest length. When tendon length = springRestLength the tendon spring force is equal to zero
+        (float) fixed_lower_limit # Fixed tendon length lower limit
+        (float) fixed_upper_limit # Fixed tendon length upper limit
+
+To actually apply randomizations during training, you will need to have
+a copy of the params available in your task class instance, and to call
+`self.apply_randomizations`. The easiest way to do is to instantiate a
+dictionary with the parameters in your Task's `__init__` call:
+
+    self.randomization_params = self.cfg["task"]["randomization_params"]
+
+We also recommend that you call `self.apply_randomizations` once in your
+`create_sim()` code to do an initial randomization pass before simulation 
+starts. This is required for randomizing `mass` or `scale` properties.
+
+Supporting scheduled randomization also requires adding an additional
+line of code to your `post_physics_step()` code to update how far along
+in randomization scheduling each environment is - this is stored in the
+`randomize_buf` tensor in the base class:
+
+    def post_physics_step(self):
+        self.randomize_buf += 1
+
+Finally, add a call to `apply_randomizations` during the reset portion
+of the training loop. The function takes as arguments a domain
+randomization dictionary:
+
+    def reset(self, env_ids):
+        self.apply_randomizations(self.randomization_params)
+                ...
+
+Only environments that are in the reset buffer and which have exceeded
+the specified `frequency` timesteps since last randomized are will have
+new randomizations applied.
+
+Custom domain randomizations
+----------------------------
+
+**Custom ramdomizations via a class method**:
+
+Provided your task inherits from our `VecTask` class, you have great
+flexibility in choosing when to randomize and what distributions to
+sample, and can even change the entire domain randomization dictionary
+at every call to `apply_randomizations` if you wish. By using your own
+logic to generate these dictionaries, our current framework can be
+easily extended to use more intelligent algorithms for domain
+randomization, such as ADR or BayesSim.
