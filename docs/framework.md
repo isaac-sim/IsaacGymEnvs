@@ -204,5 +204,6 @@ If you have existing environments set up with Isaac Gym Preview 2 release or ear
 
 ### Configs ###
 * Some config parameters are now updated to work with resolvers and Hydra. Please refer to an example config in `cfg/` for details.
-* For task configs, the following are modified: `physics_engine`, `numEnvs`, `use_gpu_pipeline`, `use_gpu`.
-* For train configs, the following are modified: `seed`, `load_checkpoint`, `load_path`, `name`, `num_actors`.
+* For task configs, the following are modified: `physics_engine`, `numEnvs`, `use_gpu_pipeline`, `num_threads`, `solver_type`, `use_gpu`, `num_subscenes`.
+* For train configs, the following are modified: `seed`, `load_checkpoint`, `load_path`, `name`, `full_experiment_name`, `num_actors`, `max_epochs`.
+* Also note a few naming changes required for the latest version of rl_games: `lr_threshold` --> `kl_threshold`, `steps_num` --> `horizon_length`.
