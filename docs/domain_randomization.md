@@ -102,7 +102,7 @@ settings:
 We additionally can define a `frequency` parameter that will specify how
 often (in number of environment steps) to wait before applying the next
 randomization. Observation and action noise is randomized every frame,
-but the range of rathey are oldandomization is updated per the schedule only every
+but the range of randomization is updated per the schedule only every
 `frequency` environment steps.
 
 YAML Interface
@@ -168,7 +168,7 @@ same way, so we will name all our ShadowHand actors as `hand`. Depending
 on the asset, you have access to randomize `rigid_body_properties`,
 `rigid_shape_properties`, `dof_properties`, and `tendon_properties`. We
 also include an option to set the `color` of each rigid body in an actor
-(mostly for debugging purposes), but do not suppot extensive visual
+(mostly for debugging purposes), but do not support extensive visual
 randomizations (like lighting and camera directions) currently. The
 exact properties available are listed as follows.
 
@@ -233,13 +233,13 @@ randomization dictionary:
                 ...
 
 Only environments that are in the reset buffer and which have exceeded
-the specified `frequency` timesteps since last randomized are will have
+the specified `frequency` time-steps since last randomized will have
 new randomizations applied.
 
 Custom domain randomizations
 ----------------------------
 
-**Custom ramdomizations via a class method**:
+**Custom randomizations via a class method**:
 
 Provided your task inherits from our `VecTask` class, you have great
 flexibility in choosing when to randomize and what distributions to

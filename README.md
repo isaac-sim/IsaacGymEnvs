@@ -59,7 +59,7 @@ can stop it early using Control-C in the command line window.
 ### Loading trained models // Checkpoints
 
 Checkpoints are saved in the folder `runs/EXPERIMENT_NAME/nn` where `EXPERIMENT_NAME` 
-defaults to the task name, but can also be overidden via the `experiment` argument.
+defaults to the task name, but can also be overridden via the `experiment` argument.
 
 To load a trained checkpoint and continue training, use the `checkpoint` argument:
 
@@ -130,9 +130,9 @@ Full details on each of the tasks available can be found in the [RL examples doc
 IsaacGymEnvs includes a framework for Domain Randomization to improve Sim-to-Real transfer of trained
 RL policies. You can read more about it [here](docs/domain_randomization.md).
 
-## Reproducability and Determinism
+## Reproducibility and Determinism
 
-If deterministic training of RL policies is important for your work, you may wish to review our [Reproducibility and Determinism Documentation](docs/reproducability.md).
+If deterministic training of RL policies is important for your work, you may wish to review our [Reproducibility and Determinism Documentation](docs/reproducibility.md).
 
 ## Troubleshooting
 

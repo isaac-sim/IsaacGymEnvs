@@ -53,7 +53,7 @@ The `VecTask` constructor takes a configuration dictionary containing numerous p
 `env` - a dictionary with environment-specific parameters.
 Can include anything in here you want depending on the specific parameters, but key ones which you must provide are:
 * `numEnvs` - number of environments being simulated in parallel
-* `numObservatons` - size of the observation vector used for each environment.
+* `numObservations` - size of the observation vector used for each environment.
 * `numActions` - size of the actions vector.
 
 Other optional parameters are 

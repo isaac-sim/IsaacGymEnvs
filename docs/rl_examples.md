@@ -54,7 +54,7 @@ It can be launched with command line argument `task=Humanoid`.
 
 Config files used for this task are:
 
--   **Task config**: [Humonoid.yaml](../isaacgymenvs/cfg/task/Humanoid.yaml)
+-   **Task config**: [Humanoid.yaml](../isaacgymenvs/cfg/task/Humanoid.yaml)
 -   **rl_games training config**: [HumanoidPPO.yaml](../isaacgymenvs/cfg/train/HumanoidPPO.yaml)
 
 ![Humanoid_running](https://user-images.githubusercontent.com/463063/125266095-4edf8d00-e2ba-11eb-9c1a-4dc1524adf71.gif)
@@ -254,7 +254,7 @@ Config files used for this task are:
 ### Ball Balance [ball_balance.py](../isaacgymenvs/tasks/ball_balance.py)
 
 This example trains balancing tables to balance a ball on the table top.
-This is a great example to showcase the use of force and torque sensors, as well as DOF states for the table and root states for the ball. In this example, the three-legged table has a force sensor attached to each leg using the `create_force_sensor` API. We use the force sensor tensor APIs to collect force and torque data on the legs, which guide position target ouputs produced by the policy. The example shows usage of `set_dof_position_target_tensor` to set position targets to keep the ball balanced on the table.
+This is a great example to showcase the use of force and torque sensors, as well as DOF states for the table and root states for the ball. In this example, the three-legged table has a force sensor attached to each leg using the `create_force_sensor` API. We use the force sensor tensor APIs to collect force and torque data on the legs, which guide position target outputs produced by the policy. The example shows usage of `set_dof_position_target_tensor` to set position targets to keep the ball balanced on the table.
 
 It can be launched with command line argument `task=BallBalance`.
 
