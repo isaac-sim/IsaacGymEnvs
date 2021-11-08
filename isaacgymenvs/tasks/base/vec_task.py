@@ -260,9 +260,10 @@ class VecTask(Env):
         """
         if axis == 'z':
             sim_params.up_axis = gymapi.UP_AXIS_Z
-            sim_params.gravity.x = 0
-            sim_params.gravity.y = 0
-            sim_params.gravity.z = -9.81
+            if not hasattr(sim_params, 'gravity'):
+                sim_params.gravity.x = 0
+                sim_params.gravity.y = 0
+                sim_params.gravity.z = -9.81
             return 2
         return 1
 
