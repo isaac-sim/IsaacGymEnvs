@@ -295,3 +295,60 @@ Config files used for this task are:
 -   **rl_games training config**: [QuadcopterPPO.yaml](../isaacgymenvs/cfg/train/QuadcopterPPO.yaml)
 
 ![image](images/rl_quadcopter.png)
+
+
+### AMP: Adversarial Motion Priors [HumanoidAMP.py](../isaacgymenvs/tasks/humanoid_amp.py)
+
+This example trains a simulated human model to imitate different pre-recorded human animations stored in the mocap data - walking, running and backflip.
+
+It can be launched with command line argument `task=HumanoidAMP`. The Animation file to train with can be set with `motion_file` in the task config (also see below for more information). Note: in test mode the viewer camera follows the humanoid from the first env. This can be changed in the environment yaml config by setting `cameraFollow=False`, or on the command line with a hydra override as follows: `++task.env.cameraFollow=False
+
+A few motions from the CMU motion capture library (http://mocap.cs.cmu.edu/) are included with this repository, but additional animations can be converted from FBX into a trainable format using the poselib `fbx_importer.py`. You can learn more about poselib and this conversion tool in `isaacgymenvs/tasks/amp/poselib/README.md`
+
+Several animations from the SFU Motion Capture Database (https://mocap.cs.sfu.ca/) are known to train well, including ones for martial arts moves such as a spin-kick, walking, jogging, and running animations, and several dance captures. The spinning kick portion of the SFU 0017_WushuKicks001 (shown below) trains in 6 minutes on a GA100 GPU. The SFU motions are not included directly in this repository due to licensing restrictions.
+
+Config files used for this task are:
+
+-   **Task config**: [HumanoidAMP.yaml](../isaacgymenvs/cfg/task/HumanoidAMP.yaml)
+-   **rl_games training config**: [HumanoidAMPPPO.yaml](../isaacgymenvs/cfg/train/HumanoidPPOAMP.yaml)
+-   **mocap data**: [motions](../assets/amp/motions)
+
+**Note** When training using new motion clips, the single most important hyperparameter to tune for AMP is `disc_grad_penalty` in `HumanoidAMPPPO.yaml`. Typical values are between [0.1, 10]. For a new motion, start with large values first, and if the policy is not able to closely imitate the motion, then try smaller coefficients for the gradient penalty. The `HumanoidAMPPPOLowGP.yaml` training configuration is provided as a convenience for this purpose.
+
+Use the following command lines for training the currently included AMP motions:  
+(Walk is the default config motion, so doesn't need the motion file specified)  
+`python train.py task=HumanoidAMP experiment=AMP_walk`  
+`python train.py task=HumanoidAMP ++task.env.motion_file=amp_humanoid_run.npy experiment=AMP_run`  
+`python train.py task=HumanoidAMP ++task.env.motion_file=amp_humanoid_dance.npy experiment=AMP_dance`
+
+(Backflip and Hop require the LowGP training config)  
+`python train.py task=HumanoidAMP train=HumanoidAMPPPOLowGP ++task.env.motion_file=amp_humanoid_backflip.npy experiment=AMP_backflip`  
+`python train.py task=HumanoidAMP train=HumanoidAMPPPOLowGP ++task.env.motion_file=amp_humanoid_hop.npy experiment=AMP_hop`  
+
+(Cartwheel requires hands in the contact body list and the LowGP training config; the default motion for the HumanoidAMPHand task is Cartwheel)  
+`python train.py task=HumanoidAMPHand train=HumanoidAMPPPOLowGP experiment=AMP_cartwheel`
+
+**Note** If you use the AMP: Adversarial Motion Priors environment in your work, please ensure you cite the following work:
+```
+@article{
+	2021-TOG-AMP,
+	author = {Peng, Xue Bin and Ma, Ze and Abbeel, Pieter and Levine, Sergey and Kanazawa, Angjoo},
+	title = {AMP: Adversarial Motion Priors for Stylized Physics-Based Character Control},
+	journal = {ACM Trans. Graph.},
+	issue_date = {August 2021},
+	volume = {40},
+	number = {4},
+	month = jul,
+	year = {2021},
+	articleno = {1},
+	numpages = {15},
+	url = {http://doi.acm.org/10.1145/3450626.3459670},
+	doi = {10.1145/3450626.3459670},
+	publisher = {ACM},
+	address = {New York, NY, USA},
+	keywords = {motion control, physics-based character animation, reinforcement learning},
+} 
+```
+
+Images below are from SFU SpinKick training.
+![image](images/amp_spinkick.png)

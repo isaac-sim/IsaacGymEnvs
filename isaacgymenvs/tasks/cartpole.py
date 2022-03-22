@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2021, NVIDIA Corporation
+# Copyright (c) 2018-2022, NVIDIA Corporation
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ class Cartpole(VecTask):
 
     def create_sim(self):
         # set the up axis to be z-up given that assets are y-up by default
-        self.up_axis_idx = self.set_sim_params_up_axis(self.sim_params, 'z')
+        self.up_axis = self.cfg["sim"]["up_axis"]
 
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
         self._create_ground_plane()
@@ -64,12 +64,12 @@ class Cartpole(VecTask):
     def _create_ground_plane(self):
         plane_params = gymapi.PlaneParams()
         # set the normal force to be z dimension
-        plane_params.normal = gymapi.Vec3(0.0, 0.0, 1.0)
+        plane_params.normal = gymapi.Vec3(0.0, 0.0, 1.0) if self.up_axis == 'z' else gymapi.Vec3(0.0, 1.0, 0.0)
         self.gym.add_ground(self.sim, plane_params)
 
     def _create_envs(self, num_envs, spacing, num_per_row):
         # define plane on which environments are initialized
-        lower = gymapi.Vec3(0.5 * -spacing, -spacing, 0.0)
+        lower = gymapi.Vec3(0.5 * -spacing, -spacing, 0.0) if self.up_axis == 'z' else gymapi.Vec3(0.5 * -spacing, 0.0, -spacing)
         upper = gymapi.Vec3(0.5 * spacing, spacing, spacing)
 
         asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../assets")
@@ -89,9 +89,13 @@ class Cartpole(VecTask):
         self.num_dof = self.gym.get_asset_dof_count(cartpole_asset)
 
         pose = gymapi.Transform()
-        pose.p.z = 2.0
-        # asset is rotated z-up by default, no additional rotations needed
-        pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
+        if self.up_axis == 'z':
+            pose.p.z = 2.0
+            # asset is rotated z-up by default, no additional rotations needed
+            pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
+        else:
+            pose.p.y = 2.0
+            pose.r = gymapi.Quat(-np.sqrt(2)/2, 0.0, 0.0, np.sqrt(2)/2)
 
         self.cartpole_handles = []
         self.envs = []

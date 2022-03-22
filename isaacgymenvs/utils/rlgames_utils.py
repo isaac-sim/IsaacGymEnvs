@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2021, NVIDIA Corporation
+# Copyright (c) 2018-2022, NVIDIA Corporation
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -163,6 +163,9 @@ class RLGPUEnv(vecenv.IVecEnv):
 
     def reset(self):
         return self.env.reset()
+    
+    def reset_done(self):
+        return self.env.reset_done()
 
     def get_number_of_agents(self):
         return self.env.get_number_of_agents()
@@ -171,6 +174,8 @@ class RLGPUEnv(vecenv.IVecEnv):
         info = {}
         info['action_space'] = self.env.action_space
         info['observation_space'] = self.env.observation_space
+        if hasattr(self.env, "amp_observation_space"):
+            info['amp_observation_space'] = self.env.amp_observation_space
 
         if self.env.num_states > 0:
             info['state_space'] = self.env.state_space

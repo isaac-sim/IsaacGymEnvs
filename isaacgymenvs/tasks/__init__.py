@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2021, NVIDIA Corporation
+# Copyright (c) 2018-2022, NVIDIA Corporation
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,10 +35,11 @@ from tasks.ball_balance import BallBalance
 from tasks.cartpole import Cartpole 
 from tasks.franka_cabinet import FrankaCabinet
 from tasks.humanoid import Humanoid
+from tasks.humanoid_amp import HumanoidAMP
 from tasks.ingenuity import Ingenuity
 from tasks.quadcopter import Quadcopter
 from tasks.shadow_hand import ShadowHand
-from isaacgymenvs.tasks.trifinger import Trifinger
+from tasks.trifinger import Trifinger
 
 # Mappings from strings to environments
 isaacgym_task_map = {
@@ -50,6 +51,7 @@ isaacgym_task_map = {
     "Cartpole": Cartpole,
     "FrankaCabinet": FrankaCabinet,
     "Humanoid": Humanoid,
+    "HumanoidAMP": HumanoidAMP,
     "Ingenuity": Ingenuity,
     "Quadcopter": Quadcopter,
     "ShadowHand": ShadowHand,

@@ -171,3 +171,25 @@ If you use the Trifinger environment in your work, please ensure you cite the fo
   journal = {arXiv preprint arXiv:2108.09779}
 }
 ```
+
+If you use the AMP: Adversarial Motion Priors environment in your work, please ensure you cite the following work:
+```
+@article{
+	2021-TOG-AMP,
+	author = {Peng, Xue Bin and Ma, Ze and Abbeel, Pieter and Levine, Sergey and Kanazawa, Angjoo},
+	title = {AMP: Adversarial Motion Priors for Stylized Physics-Based Character Control},
+	journal = {ACM Trans. Graph.},
+	issue_date = {August 2021},
+	volume = {40},
+	number = {4},
+	month = jul,
+	year = {2021},
+	articleno = {1},
+	numpages = {15},
+	url = {http://doi.acm.org/10.1145/3450626.3459670},
+	doi = {10.1145/3450626.3459670},
+	publisher = {ACM},
+	address = {New York, NY, USA},
+	keywords = {motion control, physics-based character animation, reinforcement learning},
+} 
+```

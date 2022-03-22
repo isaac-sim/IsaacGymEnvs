@@ -1,7 +1,7 @@
 # train.py
 # Script to train policies in Isaac Gym
 #
-# Copyright (c) 2018-2021, NVIDIA Corporation
+# Copyright (c) 2018-2022, NVIDIA Corporation
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,11 @@ from rl_games.common import env_configurations, vecenv
 from rl_games.torch_runner import Runner
 
 import yaml
+
+from isaacgymenvs.learning import amp_continuous
+from isaacgymenvs.learning import amp_players
+from isaacgymenvs.learning import amp_models
+from isaacgymenvs.learning import amp_network_builder
 
 
 ## OmegaConf & Hydra Config
@@ -93,11 +98,21 @@ def launch_rlg_hydra(cfg: DictConfig):
         'env_creator': lambda **kwargs: create_rlgpu_env(**kwargs),
     })
 
+    # register new AMP network builder and agent
+    def build_runner(algo_observer):
+        runner = Runner(algo_observer)
+        runner.algo_factory.register_builder('amp_continuous', lambda **kwargs : amp_continuous.AMPAgent(**kwargs))
+        runner.player_factory.register_builder('amp_continuous', lambda **kwargs : amp_players.AMPPlayerContinuous(**kwargs))
+        runner.model_builder.model_factory.register_builder('continuous_amp', lambda network, **kwargs : amp_models.ModelAMPContinuous(network))  
+        runner.model_builder.network_factory.register_builder('amp', lambda **kwargs : amp_network_builder.AMPBuilder())
+
+        return runner
+
     rlg_config_dict = omegaconf_to_dict(cfg.train)
 
     # convert CLI arguments into dictionory
     # create runner and set the settings
-    runner = Runner(RLGPUAlgoObserver())
+    runner = build_runner(RLGPUAlgoObserver())
     runner.load(rlg_config_dict)
     runner.reset()
 

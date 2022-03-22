@@ -196,6 +196,7 @@ If you have existing environments set up with Isaac Gym Preview 2 release or ear
 * Arguments required for class initialization has been simplified. The task `__init__()` method now only requires `cfg`, `sim_device`, and `headless` as arguments.
 * It is no longer required to set `self.sim_params` and `self.physics_engine` in the `__init__()` method of your task definition.
 * Making a call to `VecTask`'s `__init__()` method requires 2 more arguments: `sim_device` and `headless`. As an example, modify the line of code to `super().__init__(config=self.cfg, sim_device=sim_device, headless=headless)`.
+* `VecTask` now defines a `reset_idx()` function that should be implemented in an environment class. It resets environments with the provided indices.
 * Note that `VecTask` now defines a `reset()` method that does not accept environment indices as arguments. To avoid naming conflicts, consider renaming the `reset()` method inside your task definition.
 
 ### Asset Loading ###

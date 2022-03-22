@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2021, NVIDIA Corporation
+# Copyright (c) 2018-2022, NVIDIA Corporation
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -146,7 +146,7 @@ class Anymal(VecTask):
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
 
     def create_sim(self):
-        self.up_axis_idx = self.set_sim_params_up_axis(self.sim_params, 'z')
+        self.up_axis_idx = 2 # index of up axis: Y=1, Z=2
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
         self._create_ground_plane()
         self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))

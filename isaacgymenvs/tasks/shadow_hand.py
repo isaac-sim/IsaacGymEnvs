@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2021, NVIDIA Corporation
+# Copyright (c) 2018-2022, NVIDIA Corporation
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -201,7 +201,7 @@ class ShadowHand(VecTask):
 
     def create_sim(self):
         self.dt = self.cfg["sim"]["dt"]
-        self.up_axis_idx = self.set_sim_params_up_axis(self.sim_params, self.up_axis)
+        self.up_axis_idx = 2 if self.up_axis == 'z' else 1 # index of up axis: Y=1, Z=2
 
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
         self._create_ground_plane()
