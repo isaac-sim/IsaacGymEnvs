@@ -31,15 +31,15 @@ from rl_games.common.algo_observer import AlgoObserver
 from rl_games.algos_torch import torch_ext
 import torch
 import numpy as np
-from typing import Callable
+from typing import Callable, Type
 
-from tasks import isaacgym_task_map
+from isaacgymenvs.tasks.base.vec_task import VecTask
 
 
 def get_rlgames_env_creator(
         # used to create the vec task
         task_config: dict,
-        task_name: str,
+        task_class: Type[VecTask],
         sim_device: str,
         rl_device: str,
         graphics_device_id: int,
@@ -84,7 +84,7 @@ def get_rlgames_env_creator(
             _rl_device = rl_device
 
         # create native task and pass custom config
-        env = isaacgym_task_map[task_name](
+        env = task_class(
             cfg=task_config,
             sim_device=_sim_device,
             graphics_device_id=graphics_device_id,

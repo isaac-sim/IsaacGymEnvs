@@ -51,6 +51,19 @@ from isaacgymenvs.learning import amp_players
 from isaacgymenvs.learning import amp_models
 from isaacgymenvs.learning import amp_network_builder
 
+from tasks.allegro_hand import AllegroHand
+from tasks.ant import Ant
+from tasks.anymal import Anymal
+from tasks.anymal_terrain import AnymalTerrain
+from tasks.ball_balance import BallBalance
+from tasks.cartpole import Cartpole 
+from tasks.franka_cabinet import FrankaCabinet
+from tasks.humanoid import Humanoid
+from tasks.humanoid_amp import HumanoidAMP
+from tasks.ingenuity import Ingenuity
+from tasks.quadcopter import Quadcopter
+from tasks.shadow_hand import ShadowHand
+from tasks.trifinger import Trifinger
 
 ## OmegaConf & Hydra Config
 
@@ -78,11 +91,28 @@ def launch_rlg_hydra(cfg: DictConfig):
     # sets seed. if seed is -1 will pick a random one
     cfg.seed = set_seed(cfg.seed, torch_deterministic=cfg.torch_deterministic)
 
+    # Mappings from strings to environments
+    isaacgym_task_map = {
+        "AllegroHand": AllegroHand,
+        "Ant": Ant,
+        "Anymal": Anymal,
+        "AnymalTerrain": AnymalTerrain,
+        "BallBalance": BallBalance,
+        "Cartpole": Cartpole,
+        "FrankaCabinet": FrankaCabinet,
+        "Humanoid": Humanoid,
+        "HumanoidAMP": HumanoidAMP,
+        "Ingenuity": Ingenuity,
+        "Quadcopter": Quadcopter,
+        "ShadowHand": ShadowHand,
+        "Trifinger": Trifinger,
+    }
+
     # `create_rlgpu_env` is environment construction function which is passed to RL Games and called internally.
     # We use the helper function here to specify the environment config.
     create_rlgpu_env = get_rlgames_env_creator(
         omegaconf_to_dict(cfg.task),
-        cfg.task_name,
+        isaacgym_task_map[cfg.task_name],
         cfg.sim_device,
         cfg.rl_device,
         cfg.graphics_device_id,
