@@ -33,7 +33,7 @@ import torch
 import numpy as np
 from typing import Callable
 
-from tasks import isaacgym_task_map
+from isaacgymenvs.tasks import isaacgym_task_map
 
 
 def get_rlgames_env_creator(

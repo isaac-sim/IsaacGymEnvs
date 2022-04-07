@@ -31,7 +31,7 @@ import os
 import torch
 
 from isaacgym import gymutil, gymtorch, gymapi
-from tasks.base.vec_task import VecTask
+from isaacgymenvs.tasks.base.vec_task import VecTask
 
 class Cartpole(VecTask):
 
