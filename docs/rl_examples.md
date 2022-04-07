@@ -325,8 +325,8 @@ Use the following command lines for training the currently included AMP motions:
 `python train.py task=HumanoidAMP train=HumanoidAMPPPOLowGP ++task.env.motion_file=amp_humanoid_backflip.npy experiment=AMP_backflip`  
 `python train.py task=HumanoidAMP train=HumanoidAMPPPOLowGP ++task.env.motion_file=amp_humanoid_hop.npy experiment=AMP_hop`  
 
-(Cartwheel requires hands in the contact body list and the LowGP training config; the default motion for the HumanoidAMPHand task is Cartwheel)  
-`python train.py task=HumanoidAMPHand train=HumanoidAMPPPOLowGP experiment=AMP_cartwheel`
+(Cartwheel requires hands in the contact body list and the LowGP training config; the default motion for the HumanoidAMPHands task is Cartwheel)  
+`python train.py task=HumanoidAMPHands train=HumanoidAMPPPOLowGP experiment=AMP_cartwheel`
 
 **Note** If you use the AMP: Adversarial Motion Priors environment in your work, please ensure you cite the following work:
 ```
