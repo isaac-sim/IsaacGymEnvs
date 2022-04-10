@@ -34,7 +34,7 @@ import xml.etree.ElementTree as ET
 
 from isaacgym import gymutil, gymtorch, gymapi
 from isaacgym.torch_utils import *
-from tasks.base.vec_task import VecTask
+from isaacgymenvs.tasks.base.vec_task import VecTask
 
 
 def _indent_xml(elem, level=0):

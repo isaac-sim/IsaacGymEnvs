@@ -32,7 +32,7 @@ import os, time
 from isaacgym.torch_utils import *
 from isaacgym import gymtorch
 from isaacgym import gymapi
-from tasks.base.vec_task import VecTask
+from isaacgymenvs.tasks.base.vec_task import VecTask
 
 import torch
 from typing import Tuple, Dict

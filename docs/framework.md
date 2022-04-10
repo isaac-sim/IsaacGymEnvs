@@ -106,7 +106,7 @@ To use Isaac Gym's APIs, we need the following imports
 from isaacgym import gymtorch
 from isaacgym import gymapi
 
-from tasks.base.vec_task import VecTask
+from isaacgymenvs.tasks.base.vec_task import VecTask
 ```
 
 Then, we need to create a Task class that extends from VecTask
@@ -162,7 +162,7 @@ task to the imports and `isaacgym_task_map` dict in the `tasks` [\_\_init\_\_.py
 
 
 ```python
-from tasks.my_new_task import MyNewTask
+from isaacgymenvs.tasks.my_new_task import MyNewTask
 ...
 isaac_gym_task_map = {
     'Anymal': Anymal,
@@ -189,7 +189,7 @@ If you have existing environments set up with Isaac Gym Preview 2 release or ear
 
 ### Imports ###
 * The `torch_jit_utils` script has been moved to IsaacGymEnvs. Tasks that are importing from `rlgpu.utils.torch_jit_utils` should now import from `utils.torch_jit_utils`.
-* The original `BaseTask` class has been converted to `VecTask` in IsaacGymEnvs. All tasks inheriting from the previous `BaseTask` should modify `from rlgpu.tasks.base.base_task import BaseTask` to `from tasks.base.vec_task import VecTask`.
+* The original `BaseTask` class has been converted to `VecTask` in IsaacGymEnvs. All tasks inheriting from the previous `BaseTask` should modify `from rlgpu.tasks.base.base_task import BaseTask` to `from isaacgymenvs.tasks.base.vec_task import VecTask`.
 
 ### Class Definition ###
 * Your task class should now inherit from `VecTask` instead of the previous `BaseTask`.

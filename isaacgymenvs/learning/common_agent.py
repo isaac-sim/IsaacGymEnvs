@@ -46,7 +46,7 @@ from rl_games.common import vecenv
 import torch
 from torch import optim
 
-import learning.amp_datasets as amp_datasets
+import isaacgymenvs.learning.amp_datasets as amp_datasets
 
 from tensorboardX import SummaryWriter
 

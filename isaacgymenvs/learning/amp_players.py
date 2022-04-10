@@ -32,7 +32,7 @@ from rl_games.algos_torch import torch_ext
 from rl_games.algos_torch.running_mean_std import RunningMeanStd
 from rl_games.common.player import BasePlayer
 
-import learning.common_player as common_player
+import isaacgymenvs.learning.common_player as common_player
 
 
 class AMPPlayerContinuous(common_player.CommonPlayer):

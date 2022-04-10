@@ -39,7 +39,7 @@ from hydra.utils import to_absolute_path
 from isaacgymenvs.utils.reformat import omegaconf_to_dict, print_dict
 from isaacgymenvs.utils.rlgames_utils import RLGPUEnv, RLGPUAlgoObserver, get_rlgames_env_creator
 
-from utils.utils import set_np_formatting, set_seed
+from isaacgymenvs.utils.utils import set_np_formatting, set_seed
 
 from rl_games.common import env_configurations, vecenv
 from rl_games.torch_runner import Runner

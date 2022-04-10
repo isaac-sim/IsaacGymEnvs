@@ -45,10 +45,10 @@ from rl_games.common import vecenv
 import torch
 from torch import optim
 
-import learning.common_agent as common_agent 
-import learning.gen_amp as gen_amp
-import learning.gen_amp_models as gen_amp_models
-import learning.gen_amp_network_builder as gen_amp_network_builder
+import isaacgymenvs.learning.common_agent as common_agent 
+import isaacgymenvs.learning.gen_amp as gen_amp
+import isaacgymenvs.learning.gen_amp_models as gen_amp_models
+import isaacgymenvs.learning.gen_amp_network_builder as gen_amp_network_builder
 
 from tensorboardX import SummaryWriter
 
