@@ -15,9 +15,9 @@ from gym import spaces
 from isaacgym import gymapi
 from isaacgym import gymtorch
 
-from .amp.humanoid_amp_base import HumanoidAMPBase, dof_to_obs
-from .amp.utils_amp import gym_util
-from .amp.utils_amp.motion_lib import MotionLib
+from isaacgymenvs.tasks.amp.humanoid_amp_base import HumanoidAMPBase, dof_to_obs
+from isaacgymenvs.tasks.amp.utils_amp import gym_util
+from isaacgymenvs.tasks.amp.utils_amp.motion_lib import MotionLib
 
 from isaacgym.torch_utils import *
 from isaacgymenvs.utils.torch_jit_utils import *

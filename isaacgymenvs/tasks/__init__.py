@@ -34,6 +34,7 @@ from isaacgymenvs.tasks.anymal_terrain import AnymalTerrain
 from isaacgymenvs.tasks.ball_balance import BallBalance
 from isaacgymenvs.tasks.cartpole import Cartpole 
 from isaacgymenvs.tasks.franka_cabinet import FrankaCabinet
+from isaacgymenvs.tasks.franka_cube_stack import FrankaCubeStack
 from isaacgymenvs.tasks.humanoid import Humanoid
 from isaacgymenvs.tasks.humanoid_amp import HumanoidAMP
 from isaacgymenvs.tasks.ingenuity import Ingenuity
@@ -50,6 +51,7 @@ isaacgym_task_map = {
     "BallBalance": BallBalance,
     "Cartpole": Cartpole,
     "FrankaCabinet": FrankaCabinet,
+    "FrankaCubeStack": FrankaCubeStack,
     "Humanoid": Humanoid,
     "HumanoidAMP": HumanoidAMP,
     "Ingenuity": Ingenuity,

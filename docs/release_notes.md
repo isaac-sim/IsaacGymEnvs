@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+1.3.0
+-----
+
+Added Franka Cube Stacking task. Can use Operational Space Control (OSC) or joint torque control.
+
 1.2.0
 -----
 

@@ -283,6 +283,20 @@ Config files used for this task are:
 
 ![image](images/rl_franka.png)
 
+### Franka Cube Stack [franka_cube_stack.py](../isaacgymenvs/tasks/franka_cube_stack.py)
+
+The Franka Cube Stack example shows solving a cube stack task using either operational space control (OSC) or joint space torque control.
+OSC control provides an example of using direct GPU mass-matrix access API.
+
+It can be launched with command line argument `task=FrankaCubeStack`.
+
+Config files used for this task are:
+
+-   **Task config**: [FrankaCubeStack.yaml](../isaacgymenvs/cfg/task/FrankaCubeStack.yaml)
+-   **rl_games training config**: [FrankaCubeStackPPO.yaml](../isaacgymenvs/cfg/train/FrankaCubeStackPPO.yaml)
+
+![image](images/rl_franka_cube_stack.png)
+
 ### Quadcopter [quadcopter.py](../isaacgymenvs/tasks/quadcopter.py)
 
 This example trains a very simple quadcopter model to reach and hover near a fixed position.  The quadcopter model is generated procedurally and doesn't actually include any rotating blades.  Lift is achieved by applying thrust forces to the "rotor" bodies, which are modeled as flat cylinders.  This is a good example of using LOCAL_SPACE forces.  In addition to thrust, the pitch and roll of each rotor is controlled using DOF position targets.
@@ -325,8 +339,8 @@ Use the following command lines for training the currently included AMP motions:
 `python train.py task=HumanoidAMP train=HumanoidAMPPPOLowGP ++task.env.motion_file=amp_humanoid_backflip.npy experiment=AMP_backflip`  
 `python train.py task=HumanoidAMP train=HumanoidAMPPPOLowGP ++task.env.motion_file=amp_humanoid_hop.npy experiment=AMP_hop`  
 
-(Cartwheel requires hands in the contact body list and the LowGP training config; the default motion for the HumanoidAMPHand task is Cartwheel)  
-`python train.py task=HumanoidAMPHand train=HumanoidAMPPPOLowGP experiment=AMP_cartwheel`
+(Cartwheel requires hands in the contact body list and the LowGP training config; the default motion for the HumanoidAMPHands task is Cartwheel)
+`python train.py task=HumanoidAMPHands train=HumanoidAMPPPOLowGP experiment=AMP_cartwheel`
 
 **Note** If you use the AMP: Adversarial Motion Priors environment in your work, please ensure you cite the following work:
 ```

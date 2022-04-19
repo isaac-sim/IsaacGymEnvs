@@ -39,7 +39,8 @@ from collections import OrderedDict
 project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 from isaacgymenvs.utils.torch_jit_utils import *
-from .base.vec_task import VecTask
+from isaacgymenvs.tasks.base.vec_task import VecTask
+
 from types import SimpleNamespace
 from collections import deque
 from typing import Deque, Dict, Tuple, Union

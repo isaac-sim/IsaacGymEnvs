@@ -35,7 +35,7 @@ from isaacgym import gymapi
 from isaacgym.torch_utils import *
 
 from isaacgymenvs.utils.torch_jit_utils import *
-from .base.vec_task import VecTask
+from isaacgymenvs.tasks.base.vec_task import VecTask
 
 
 class Humanoid(VecTask):

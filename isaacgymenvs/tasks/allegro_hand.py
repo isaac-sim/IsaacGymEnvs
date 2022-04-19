@@ -34,7 +34,7 @@ from isaacgym import gymtorch
 from isaacgym import gymapi
 from isaacgym.torch_utils import *
 
-from .base.vec_task import VecTask
+from isaacgymenvs.tasks.base.vec_task import VecTask
 
 
 class AllegroHand(VecTask):
