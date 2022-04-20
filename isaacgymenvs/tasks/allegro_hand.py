@@ -39,7 +39,7 @@ from isaacgymenvs.tasks.base.vec_task import VecTask
 
 class AllegroHand(VecTask):
 
-    def __init__(self, cfg, sim_device, graphics_device_id, headless):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless):
 
         self.cfg = cfg
 
@@ -124,7 +124,7 @@ class AllegroHand(VecTask):
         self.cfg["env"]["numStates"] = num_states
         self.cfg["env"]["numActions"] = 16
 
-        super().__init__(config=self.cfg, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
 
         self.dt = self.sim_params.dt
         control_freq_inv = self.cfg["env"].get("controlFrequencyInv", 1)

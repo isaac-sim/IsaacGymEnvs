@@ -106,7 +106,7 @@ To use Isaac Gym's APIs, we need the following imports
 from isaacgym import gymtorch
 from isaacgym import gymapi
 
-from tasks.base.vec_task import VecTask
+from .base.vec_task import VecTask
 ```
 
 Then, we need to create a Task class that extends from VecTask
@@ -189,13 +189,13 @@ If you have existing environments set up with Isaac Gym Preview 2 release or ear
 
 ### Imports ###
 * The `torch_jit_utils` script has been moved to IsaacGymEnvs. Tasks that are importing from `rlgpu.utils.torch_jit_utils` should now import from `utils.torch_jit_utils`.
-* The original `BaseTask` class has been converted to `VecTask` in IsaacGymEnvs. All tasks inheriting from the previous `BaseTask` should modify `from rlgpu.tasks.base.base_task import BaseTask` to `from tasks.base.vec_task import VecTask`.
+* The original `BaseTask` class has been converted to `VecTask` in IsaacGymEnvs. All tasks inheriting from the previous `BaseTask` should modify `from rlgpu.tasks.base.base_task import BaseTask` to `from .base.vec_task import VecTask`.
 
 ### Class Definition ###
 * Your task class should now inherit from `VecTask` instead of the previous `BaseTask`.
 * Arguments required for class initialization has been simplified. The task `__init__()` method now only requires `cfg`, `sim_device`, and `headless` as arguments.
 * It is no longer required to set `self.sim_params` and `self.physics_engine` in the `__init__()` method of your task definition.
-* Making a call to `VecTask`'s `__init__()` method requires 2 more arguments: `sim_device` and `headless`. As an example, modify the line of code to `super().__init__(config=self.cfg, sim_device=sim_device, headless=headless)`.
+* Making a call to `VecTask`'s `__init__()` method requires 3 more arguments: `rl_device`, `sim_device` and `headless`. As an example, modify the line of code to `super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, headless=headless)`.
 * `VecTask` now defines a `reset_idx()` function that should be implemented in an environment class. It resets environments with the provided indices.
 * Note that `VecTask` now defines a `reset()` method that does not accept environment indices as arguments. To avoid naming conflicts, consider renaming the `reset()` method inside your task definition.
 

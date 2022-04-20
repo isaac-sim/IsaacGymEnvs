@@ -40,7 +40,7 @@ from isaacgymenvs.tasks.base.vec_task import VecTask
 
 class Ant(VecTask):
 
-    def __init__(self, cfg, sim_device, graphics_device_id, headless):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless):
 
         self.cfg = cfg
 
@@ -67,7 +67,7 @@ class Ant(VecTask):
         self.cfg["env"]["numObservations"] = 60
         self.cfg["env"]["numActions"] = 8
 
-        super().__init__(config=self.cfg, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
 
         if self.viewer != None:
             cam_pos = gymapi.Vec3(50.0, 25.0, 2.4)

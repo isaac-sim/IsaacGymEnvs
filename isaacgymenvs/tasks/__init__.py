@@ -27,20 +27,20 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from isaacgymenvs.tasks.allegro_hand import AllegroHand
-from isaacgymenvs.tasks.ant import Ant
-from isaacgymenvs.tasks.anymal import Anymal
-from isaacgymenvs.tasks.anymal_terrain import AnymalTerrain
-from isaacgymenvs.tasks.ball_balance import BallBalance
-from isaacgymenvs.tasks.cartpole import Cartpole 
-from isaacgymenvs.tasks.franka_cabinet import FrankaCabinet
-from isaacgymenvs.tasks.franka_cube_stack import FrankaCubeStack
-from isaacgymenvs.tasks.humanoid import Humanoid
-from isaacgymenvs.tasks.humanoid_amp import HumanoidAMP
-from isaacgymenvs.tasks.ingenuity import Ingenuity
-from isaacgymenvs.tasks.quadcopter import Quadcopter
-from isaacgymenvs.tasks.shadow_hand import ShadowHand
-from isaacgymenvs.tasks.trifinger import Trifinger
+from .allegro_hand import AllegroHand
+from .ant import Ant
+from .anymal import Anymal
+from .anymal_terrain import AnymalTerrain
+from .ball_balance import BallBalance
+from .cartpole import Cartpole 
+from .franka_cabinet import FrankaCabinet
+from .franka_cube_stack import FrankaCubeStack
+from .humanoid import Humanoid
+from .humanoid_amp import HumanoidAMP
+from .ingenuity import Ingenuity
+from .quadcopter import Quadcopter
+from .shadow_hand import ShadowHand
+from .trifinger import Trifinger
 
 # Mappings from strings to environments
 isaacgym_task_map = {

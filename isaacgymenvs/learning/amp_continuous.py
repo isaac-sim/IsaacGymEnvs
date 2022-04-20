@@ -41,8 +41,8 @@ from torch import optim
 import torch 
 from torch import nn
 
-import learning.replay_buffer as replay_buffer
-import learning.common_agent as common_agent 
+import isaacgymenvs.learning.replay_buffer as replay_buffer
+import isaacgymenvs.learning.common_agent as common_agent 
 
 from tensorboardX import SummaryWriter
 

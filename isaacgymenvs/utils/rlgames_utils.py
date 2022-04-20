@@ -86,6 +86,7 @@ def get_rlgames_env_creator(
         # create native task and pass custom config
         env = isaacgym_task_map[task_name](
             cfg=task_config,
+            rl_device=rl_device,
             sim_device=_sim_device,
             graphics_device_id=graphics_device_id,
             headless=headless

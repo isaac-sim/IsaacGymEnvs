@@ -32,7 +32,7 @@ import os, time
 from isaacgym.torch_utils import *
 from isaacgym import gymtorch
 from isaacgym import gymapi
-from isaacgymenvs.tasks.base.vec_task import VecTask
+from .base.vec_task import VecTask
 
 import torch
 from typing import Tuple, Dict
@@ -40,7 +40,7 @@ from typing import Tuple, Dict
 
 class AnymalTerrain(VecTask):
 
-    def __init__(self, cfg, sim_device, graphics_device_id, headless):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless):
 
         self.cfg = cfg
         self.height_samples = None
@@ -102,7 +102,7 @@ class AnymalTerrain(VecTask):
         for key in self.rew_scales.keys():
             self.rew_scales[key] *= self.dt
 
-        super().__init__(config=self.cfg, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
 
         if self.graphics_device_id != -1:
             p = self.cfg["env"]["viewer"]["pos"]

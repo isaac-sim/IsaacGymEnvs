@@ -45,10 +45,19 @@ import sys
 import abc
 from abc import ABC
 
+EXISTING_SIM = None
+
+def _create_sim_once(gym, *args, **kwargs):
+    global EXISTING_SIM
+    if EXISTING_SIM is not None:
+        return EXISTING_SIM
+    else:
+        EXISTING_SIM = gym.create_sim(*args, **kwargs)
+        return EXISTING_SIM
 
 
 class Env(ABC):
-    def __init__(self, config: Dict[str, Any], sim_device: str, graphics_device_id: int,  headless: bool):
+    def __init__(self, config: Dict[str, Any], rl_device: str, sim_device: str, graphics_device_id: int, headless: bool):
         """Initialise the env.
 
         Args:
@@ -70,7 +79,7 @@ class Env(ABC):
                 print("GPU Pipeline can only be used with GPU simulation. Forcing CPU Pipeline.")
                 config["sim"]["use_gpu_pipeline"] = False
 
-        self.rl_device = config.get("rl_device", "cuda:0")
+        self.rl_device = rl_device
 
         # Rendering
         # if training in a headless mode
@@ -154,7 +163,7 @@ class Env(ABC):
 
 class VecTask(Env):
 
-    def __init__(self, config, sim_device, graphics_device_id, headless):
+    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless):
         """Initialise the `VecTask`.
 
         Args:
@@ -163,7 +172,7 @@ class VecTask(Env):
             graphics_device_id: the device ID to render with.
             headless: Set to False to disable viewer rendering.
         """
-        super().__init__(config, sim_device, graphics_device_id, headless)
+        super().__init__(config, rl_device, sim_device, graphics_device_id, headless)
 
         self.sim_params = self.__parse_sim_params(self.cfg["physics_engine"], self.cfg["sim"])
         if self.cfg["physics_engine"] == "physx":
@@ -266,7 +275,7 @@ class VecTask(Env):
         Returns:
             the Isaac Gym sim object.
         """
-        sim = self.gym.create_sim(compute_device, graphics_device, physics_engine, sim_params)
+        sim = _create_sim_once(self.gym, compute_device, graphics_device, physics_engine, sim_params)
         if sim is None:
             print("*** Failed to create sim")
             quit()

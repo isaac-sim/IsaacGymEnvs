@@ -41,7 +41,7 @@ from typing import Tuple, Dict
 
 class Anymal(VecTask):
 
-    def __init__(self, cfg, sim_device, graphics_device_id, headless):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless):
 
         self.cfg = cfg
         
@@ -87,7 +87,7 @@ class Anymal(VecTask):
         self.cfg["env"]["numObservations"] = 48
         self.cfg["env"]["numActions"] = 12
 
-        super().__init__(config=self.cfg, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
 
         # other
         self.dt = self.sim_params.dt

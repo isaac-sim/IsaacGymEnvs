@@ -46,7 +46,7 @@ from rl_games.common import vecenv
 import torch
 from torch import optim
 
-import learning.amp_datasets as amp_datasets
+from . import amp_datasets as amp_datasets
 
 from tensorboardX import SummaryWriter
 
@@ -213,6 +213,7 @@ class CommonAgent(a2c_continuous.A2CAgent):
             ep_kls = []
             for i in range(len(self.dataset)):
                 curr_train_info = self.train_actor_critic(self.dataset[i])
+                print(type(curr_train_info))
                 
                 if self.schedule_type == 'legacy':  
                     if self.multi_gpu:

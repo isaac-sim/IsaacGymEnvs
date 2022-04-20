@@ -48,7 +48,7 @@ KEY_BODY_NAMES = ["right_hand", "left_hand", "right_foot", "left_foot"]
 
 class HumanoidAMPBase(VecTask):
 
-    def __init__(self, config, sim_device, graphics_device_id, headless):
+    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless):
         self.cfg = config
 
         self._pd_control = self.cfg["env"]["pdControl"]
@@ -70,7 +70,7 @@ class HumanoidAMPBase(VecTask):
         self.cfg["env"]["numObservations"] = self.get_obs_size()
         self.cfg["env"]["numActions"] = self.get_action_size()
 
-        super().__init__(config=self.cfg, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
         
         dt = self.cfg["sim"]["dt"]
         self.dt = self.control_freq_inv * dt
@@ -222,6 +222,7 @@ class HumanoidAMPBase(VecTask):
                 self.sim, lower, upper, num_per_row
             )
             contact_filter = 0
+            
             handle = self.gym.create_actor(env_ptr, humanoid_asset, start_pose, "humanoid", i, contact_filter, 0)
 
             self.gym.enable_actor_dof_force_sensors(env_ptr, handle)
