@@ -1,7 +1,6 @@
 from hydra import compose, initialize
 from omegaconf import OmegaConf
 from isaacgymenvs.utils.reformat import omegaconf_to_dict
-from isaacgymenvs.utils.rlgames_utils import get_rlgames_env_creator
 
 
 OmegaConf.register_new_resolver('eq', lambda x, y: x.lower()==y.lower())
@@ -11,6 +10,7 @@ OmegaConf.register_new_resolver('resolve_default', lambda default, arg: default 
 
 
 def make(task: str, num_envs: int):
+    from isaacgymenvs.utils.rlgames_utils import get_rlgames_env_creator
     initialize(config_path="./cfg")
     cfg = compose(config_name="config", overrides=[f"task={task}"])
     cfg_dict = omegaconf_to_dict(cfg.task)

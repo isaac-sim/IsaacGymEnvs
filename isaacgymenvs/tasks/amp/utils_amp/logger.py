@@ -11,9 +11,14 @@ import logging
 import sys
 import os
 import datetime
-from termcolor import colored
 
 __all__ = ['set_file_handler']  # the actual worker is the '_logger'
+
+color2id = {"grey": 30, "red": 31, "green": 32, "yellow": 33, "blue": 34, "magenta": 35, "cyan": 36, "white": 37}
+
+def colored(text, color):
+    return f"\033[{color2id[color]}m{text}\033[0m"
+
 
 
 class _MyFormatter(logging.Formatter):
