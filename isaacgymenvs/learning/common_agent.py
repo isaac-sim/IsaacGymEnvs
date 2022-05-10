@@ -52,9 +52,12 @@ from tensorboardX import SummaryWriter
 
 
 class CommonAgent(a2c_continuous.A2CAgent):
-    def __init__(self, base_name, config):
-        a2c_common.A2CBase.__init__(self, base_name, config)
 
+    def __init__(self, base_name, params):
+    
+        a2c_common.A2CBase.__init__(self, base_name, params)
+
+        config = params['config']
         self._load_config_params(config)
 
         self.is_discrete = False
@@ -75,10 +78,6 @@ class CommonAgent(a2c_continuous.A2CAgent):
         self.last_lr = float(self.last_lr)
 
         self.optimizer = optim.Adam(self.model.parameters(), float(self.last_lr), eps=1e-08, weight_decay=self.weight_decay)
-
-        if self.normalize_input:
-            obs_shape = torch_ext.shape_whc_to_cwh(self.obs_shape)
-            self.running_mean_std = RunningMeanStd(obs_shape).to(self.ppo_device)
 
         if self.has_central_value:
             cv_config = {
@@ -446,6 +445,8 @@ class CommonAgent(a2c_continuous.A2CAgent):
             'input_shape' : obs_shape,
             'num_seqs' : self.num_actors * self.num_agents,
             'value_size': self.env_info.get('value_size', 1),
+            'normalize_value' : self.normalize_value,
+            'normalize_input': self.normalize_input,
         }
         return config
 
@@ -468,7 +469,10 @@ class CommonAgent(a2c_continuous.A2CAgent):
     def _eval_critic(self, obs_dict):
         self.model.eval()
         obs = obs_dict['obs']
+
         processed_obs = self._preproc_obs(obs)
+        if self.normalize_input:
+            processed_obs = self.model.norm_obs(processed_obs)
         value = self.model.a2c_network.eval_critic(processed_obs)
 
         if self.normalize_value:

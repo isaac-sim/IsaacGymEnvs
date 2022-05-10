@@ -33,15 +33,18 @@ from rl_games.algos_torch import torch_ext
 from rl_games.algos_torch.running_mean_std import RunningMeanStd
 from rl_games.common.player import BasePlayer
 
+
 class CommonPlayer(players.PpoPlayerContinuous):
-    def __init__(self, config):
-        BasePlayer.__init__(self, config)
-        self.network = config['network']
+
+    def __init__(self, params):
+        BasePlayer.__init__(self, params)
+        self.network = self.config['network']
+
+        self.normalize_input = self.config['normalize_input']
+        self.normalize_value = self.config['normalize_value']
         
         self._setup_action_space()
         self.mask = [False]
-
-        self.normalize_input = self.config['normalize_input']
         
         net_config = self._build_net_config()
         self._build_net(net_config)   
@@ -164,10 +167,7 @@ class CommonPlayer(players.PpoPlayerContinuous):
         self.model.to(self.device)
         self.model.eval()
         self.is_rnn = self.model.is_rnn()
-        if self.normalize_input:
-            obs_shape = torch_ext.shape_whc_to_cwh(self.obs_shape)
-            self.running_mean_std = RunningMeanStd(obs_shape).to(self.device)
-            self.running_mean_std.eval() 
+
         return
 
     def _env_reset_done(self):
@@ -182,7 +182,10 @@ class CommonPlayer(players.PpoPlayerContinuous):
         config = {
             'actions_num' : self.actions_num,
             'input_shape' : obs_shape,
-            'num_seqs' : self.num_agents
+            'num_seqs' : self.num_agents,
+            'value_size': self.env_info.get('value_size', 1),
+            'normalize_value': self.normalize_value,
+            'normalize_input': self.normalize_input,
         } 
         return config
 

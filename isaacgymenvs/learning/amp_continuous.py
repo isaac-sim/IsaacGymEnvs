@@ -48,9 +48,12 @@ from tensorboardX import SummaryWriter
 
 
 class AMPAgent(common_agent.CommonAgent):
-    def __init__(self, base_name, config):
-        super().__init__(base_name, config)
 
+    def __init__(self, base_name, params):
+        super().__init__(base_name, params)
+
+        if self.normalize_value:
+            self.value_mean_std = self.central_value_net.model.value_mean_std if self.has_central_value else self.model.value_mean_std
         if self._normalize_amp_input:
             self._amp_input_mean_std = RunningMeanStd(self._amp_observation_space.shape).to(self.ppo_device)
 
@@ -81,7 +84,7 @@ class AMPAgent(common_agent.CommonAgent):
 
     def set_stats_weights(self, weights):
         super().set_stats_weights(weights)
-        if self.normalize_value:
+        if self._normalize_amp_input:
             self._amp_input_mean_std.load_state_dict(weights['amp_input_mean_std'])
         return
 

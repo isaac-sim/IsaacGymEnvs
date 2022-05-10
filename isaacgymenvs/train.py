@@ -43,6 +43,7 @@ from isaacgymenvs.utils.utils import set_np_formatting, set_seed
 
 from rl_games.common import env_configurations, vecenv
 from rl_games.torch_runner import Runner
+from rl_games.algos_torch import model_builder
 
 import yaml
 
@@ -55,7 +56,6 @@ from isaacgymenvs.learning import amp_network_builder
 ## OmegaConf & Hydra Config
 
 # Resolvers used in hydra configs (see https://omegaconf.readthedocs.io/en/2.1_branch/usage.html#resolvers)
-
 @hydra.main(config_name="config", config_path="./cfg")
 def launch_rlg_hydra(cfg: DictConfig):
 
@@ -97,8 +97,8 @@ def launch_rlg_hydra(cfg: DictConfig):
         runner = Runner(algo_observer)
         runner.algo_factory.register_builder('amp_continuous', lambda **kwargs : amp_continuous.AMPAgent(**kwargs))
         runner.player_factory.register_builder('amp_continuous', lambda **kwargs : amp_players.AMPPlayerContinuous(**kwargs))
-        runner.model_builder.model_factory.register_builder('continuous_amp', lambda network, **kwargs : amp_models.ModelAMPContinuous(network))  
-        runner.model_builder.network_factory.register_builder('amp', lambda **kwargs : amp_network_builder.AMPBuilder())
+        model_builder.register_model('continuous_amp', lambda network, **kwargs : amp_models.ModelAMPContinuous(network))
+        model_builder.register_network('amp', lambda **kwargs : amp_network_builder.AMPBuilder())
 
         return runner
 
@@ -119,6 +119,8 @@ def launch_rlg_hydra(cfg: DictConfig):
     runner.run({
         'train': not cfg.test,
         'play': cfg.test,
+        'checkpoint' : cfg.checkpoint,
+        'sigma' : None
     })
 
 if __name__ == "__main__":

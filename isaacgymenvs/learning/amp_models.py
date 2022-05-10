@@ -39,11 +39,19 @@ class ModelAMPContinuous(ModelA2CContinuousLogStd):
         net = self.network_builder.build('amp', **config)
         for name, _ in net.named_parameters():
             print(name)
-        return ModelAMPContinuous.Network(net)
+
+        obs_shape = config['input_shape']
+        normalize_value = config.get('normalize_value', False)
+        normalize_input = config.get('normalize_input', False)
+        value_size = config.get('value_size', 1)
+
+        return self.Network(net, obs_shape=obs_shape,
+            normalize_value=normalize_value, normalize_input=normalize_input, value_size=value_size)
+
 
     class Network(ModelA2CContinuousLogStd.Network):
-        def __init__(self, a2c_network):
-            super().__init__(a2c_network)
+        def __init__(self, a2c_network, **kwargs):
+            super().__init__(a2c_network, **kwargs)
             return
 
         def forward(self, input_dict):
