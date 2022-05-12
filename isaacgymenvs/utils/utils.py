@@ -40,12 +40,15 @@ def set_np_formatting():
                         suppress=False, threshold=10000, formatter=None)
 
 
-def set_seed(seed, torch_deterministic=False):
+def set_seed(seed, torch_deterministic=False, rank=0):
     """ set seed across modules """
     if seed == -1 and torch_deterministic:
-        seed = 42
+        seed = 42 + rank
     elif seed == -1:
         seed = np.random.randint(0, 10000)
+    else:
+        seed = seed + rank
+
     print("Setting seed: {}".format(seed))
 
     random.seed(seed)

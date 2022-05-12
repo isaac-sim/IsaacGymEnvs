@@ -134,6 +134,15 @@ RL policies. You can read more about it [here](docs/domain_randomization.md).
 
 If deterministic training of RL policies is important for your work, you may wish to review our [Reproducibility and Determinism Documentation](docs/reproducibility.md).
 
+## Multi-GPU Training
+
+You can run multi-GPU training on NGC using horovod using this repository. Horovod will be installed alongside RL Games.
+
+Here is an example command for how to run in this way -
+`horovodrun -np 8 python -m train multi_gpu=True task=<YOUR_TASK> <OTHER_ARGS>`
+
+Where the `-np` flag specifies how many processes to run and note the multi-gpu flag must be set on the train script in order for multi-GPU training to run.
+
 ## Troubleshooting
 
 Please review the Isaac Gym installation instructions first if you run into any issues.

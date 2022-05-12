@@ -69,12 +69,25 @@ def launch_rlg_hydra(cfg: DictConfig):
     # set numpy formatting for printing only
     set_np_formatting()
 
+    if cfg.multi_gpu:
+        import horovod.torch as hvd
+
+        hvd.init()
+
+        rank = hvd.rank()
+
+        cfg.sim_device = f'cuda:{rank}'
+        cfg.rl_device = f'cuda:{rank}'
+    else:
+        rank = 0
+
     # sets seed. if seed is -1 will pick a random one
-    cfg.seed = set_seed(cfg.seed, torch_deterministic=cfg.torch_deterministic)
+    cfg.seed = set_seed(cfg.seed, torch_deterministic=cfg.torch_deterministic, rank=rank)
 
     # `create_rlgpu_env` is environment construction function which is passed to RL Games and called internally.
     # We use the helper function here to specify the environment config.
     create_rlgpu_env = get_rlgames_env_creator(
+        cfg.seed,
         omegaconf_to_dict(cfg.task),
         cfg.task_name,
         cfg.sim_device,

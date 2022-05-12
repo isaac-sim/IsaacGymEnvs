@@ -29,6 +29,7 @@
 from rl_games.common import env_configurations, vecenv
 from rl_games.common.algo_observer import AlgoObserver
 from rl_games.algos_torch import torch_ext
+from isaacgymenvs.utils.utils import set_seed
 import torch
 import numpy as np
 from typing import Callable
@@ -38,6 +39,7 @@ from isaacgymenvs.tasks import isaacgym_task_map
 
 def get_rlgames_env_creator(
         # used to create the vec task
+        seed: int,
         task_config: dict,
         task_name: str,
         sim_device: str,
@@ -63,31 +65,16 @@ def get_rlgames_env_creator(
     Returns:
         A VecTaskPython object.
     """
-    def create_rlgpu_env(_sim_device=sim_device, _rl_device=rl_device, **kwargs):
+    def create_rlgpu_env():
         """
         Creates the task from configurations and wraps it using RL-games wrappers if required.
         """
-
-        if multi_gpu:
-            import horovod.torch as hvd
-
-            rank = hvd.rank()
-            print("Horovod rank: ", rank)
-
-            _sim_device = f'cuda:{rank}'
-            _rl_device = f'cuda:{rank}'
-
-            task_config['rank'] = rank
-            task_config['rl_device'] = 'cuda:' + str(rank)
-        else:
-            _sim_device = sim_device
-            _rl_device = rl_device
 
         # create native task and pass custom config
         env = isaacgym_task_map[task_name](
             cfg=task_config,
             rl_device=rl_device,
-            sim_device=_sim_device,
+            sim_device=sim_device,
             graphics_device_id=graphics_device_id,
             headless=headless
         )
