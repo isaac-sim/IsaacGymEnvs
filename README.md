@@ -143,6 +143,10 @@ Here is an example command for how to run in this way -
 
 Where the `-np` flag specifies how many processes to run and note the multi-gpu flag must be set on the train script in order for multi-GPU training to run.
 
+## WandB support
+
+You can run (WandB)[https://wandb.ai/] with Isaac Gym Envs by setting `wandb_activate=True` flag from the command line. You can set the group, name, entity, and project for the run by setting the `wandb_group`, `wandb_name`, `wandb_entity` and `wandb_project` set. Make sure you have WandB installed with `pip install wandb` before activating.
+
 ## Troubleshooting
 
 Please review the Isaac Gym installation instructions first if you run into any issues.

@@ -84,6 +84,33 @@ def launch_rlg_hydra(cfg: DictConfig):
     # sets seed. if seed is -1 will pick a random one
     cfg.seed = set_seed(cfg.seed, torch_deterministic=cfg.torch_deterministic, rank=rank)
 
+    def wandb_hook():
+        """Hook to setup WandB after the environment has been created."""
+        if cfg.multi_gpu:
+            import horovod.torch as hvd
+
+            rank = hvd.rank()
+        else:
+            rank = 0
+
+        if cfg.wandb_activate and rank == 0:
+            import datetime
+
+            # Make sure to install WandB if you actually use this.
+            import wandb
+
+            time_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            wandb.init(
+                project=cfg.wandb_project,
+                group=cfg.wandb_group,
+                entity=cfg.wandb_entity,
+                config=cfg_dict,
+                sync_tensorboard=True,
+                id=f"{cfg.wandb_name}_{time_str}",
+                resume="allow",
+            )
+
+
     # `create_rlgpu_env` is environment construction function which is passed to RL Games and called internally.
     # We use the helper function here to specify the environment config.
     create_rlgpu_env = get_rlgames_env_creator(
@@ -95,6 +122,7 @@ def launch_rlg_hydra(cfg: DictConfig):
         cfg.graphics_device_id,
         cfg.headless,
         multi_gpu=cfg.multi_gpu,
+        post_create_hook=wandb_hook
     )
 
     # register the rl-games adapter to use inside the runner

@@ -39,6 +39,12 @@ checkpoint: ''
 # set to True to use multi-gpu horovod training
 multi_gpu: False
 
+wandb_activate: False
+wandb_group: ''
+wandb_name: ${train.params.config.name}
+wandb_entity: ''
+wandb_project: 'isaacgymenvs'
+
 # disables rendering
 headless: False
 
