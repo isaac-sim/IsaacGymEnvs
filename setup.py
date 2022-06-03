@@ -19,8 +19,10 @@ INSTALL_REQUIRES = [
     "omegaconf",
     "termcolor",
     "hydra-core>=1.1",
-    "rl-games==1.4.0",
+    'rl-games @ git+https://github.com/Denys88/rl_games'
 ]
+
+
 
 # Installation operation
 setup(

@@ -136,12 +136,12 @@ If deterministic training of RL policies is important for your work, you may wis
 
 ## Multi-GPU Training
 
-You can run multi-GPU training on NGC using horovod using this repository. Horovod will be installed alongside RL Games.
+You can run multi-GPU training on NGC using `torchrun` (i.e., `torch.distributed`) using this repository.
 
 Here is an example command for how to run in this way -
-`horovodrun -np 8 python -m train multi_gpu=True task=<YOUR_TASK> <OTHER_ARGS>`
+`torchrun --standalone --nnodes=1 --nproc_per_node=2 train.py multi_gpu=True task=Ant <OTHER_ARGS>`
 
-Where the `-np` flag specifies how many processes to run and note the multi-gpu flag must be set on the train script in order for multi-GPU training to run.
+Where the `--nproc_per_node=` flag specifies how many processes to run and note the `multi_gpu=True` flag must be set on the train script in order for multi-GPU training to run.
 
 ## WandB support
 

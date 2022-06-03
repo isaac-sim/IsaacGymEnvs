@@ -29,6 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import datetime
 import isaacgym
 
 import os
@@ -55,6 +56,9 @@ def launch_rlg_hydra(cfg: DictConfig):
     from isaacgymenvs.learning import amp_models
     from isaacgymenvs.learning import amp_network_builder
 
+    time_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    run_name = f"{cfg.wandb_name}_{time_str}"
+
     # ensure checkpoints can be specified as relative paths
     if cfg.checkpoint:
         cfg.checkpoint = to_absolute_path(cfg.checkpoint)
@@ -66,11 +70,8 @@ def launch_rlg_hydra(cfg: DictConfig):
     set_np_formatting()
 
     if cfg.multi_gpu:
-        import horovod.torch as hvd
-
-        hvd.init()
-
-        rank = hvd.rank()
+        # torchrun --standalone --nnodes=1 --nproc_per_node=2 train.py
+        rank = int(os.getenv("LOCAL_RANK", "0"))
 
         cfg.sim_device = f'cuda:{rank}'
         cfg.rl_device = f'cuda:{rank}'
@@ -80,31 +81,22 @@ def launch_rlg_hydra(cfg: DictConfig):
     # sets seed. if seed is -1 will pick a random one
     cfg.seed = set_seed(cfg.seed, torch_deterministic=cfg.torch_deterministic, rank=rank)
 
-    def wandb_hook():
-        """Hook to setup WandB after the environment has been created."""
-        if cfg.multi_gpu:
-            import horovod.torch as hvd
+    rank = int(os.getenv("LOCAL_RANK", "0"))
+    cfg.seed += rank
 
-            rank = hvd.rank()
-        else:
-            rank = 0
+    if cfg.wandb_activate and rank == 0:
+        # Make sure to install WandB if you actually use this.
+        import wandb
 
-        if cfg.wandb_activate and rank == 0:
-            import datetime
-
-            # Make sure to install WandB if you actually use this.
-            import wandb
-
-            time_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            wandb.init(
-                project=cfg.wandb_project,
-                group=cfg.wandb_group,
-                entity=cfg.wandb_entity,
-                config=cfg_dict,
-                sync_tensorboard=True,
-                id=f"{cfg.wandb_name}_{time_str}",
-                resume="allow",
-            )
+        run = wandb.init(
+            project=cfg.wandb_project,
+            group=cfg.wandb_group,
+            entity=cfg.wandb_entity,
+            config=cfg_dict,
+            sync_tensorboard=True,
+            name=run_name,
+            resume="allow",
+        )
 
 
     # `create_rlgpu_env` is environment construction function which is passed to RL Games and called internally.
@@ -118,7 +110,6 @@ def launch_rlg_hydra(cfg: DictConfig):
         cfg.graphics_device_id,
         cfg.headless,
         multi_gpu=cfg.multi_gpu,
-        post_create_hook=wandb_hook
     )
 
     # register the rl-games adapter to use inside the runner
@@ -159,6 +150,9 @@ def launch_rlg_hydra(cfg: DictConfig):
         'checkpoint' : cfg.checkpoint,
         'sigma' : None
     })
+
+    if cfg.wandb_activate and rank == 0:
+        wandb.finish()
 
 if __name__ == "__main__":
     launch_rlg_hydra()
