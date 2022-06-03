@@ -325,11 +325,15 @@ class VecTask(Env):
         if self.device == 'cpu':
             self.gym.fetch_results(self.sim, True)
 
-        # fill time out buffer
-        self.timeout_buf = torch.where(self.progress_buf >= self.max_episode_length - 1, torch.ones_like(self.timeout_buf), torch.zeros_like(self.timeout_buf))
-        
+        # reset time outs
+        env_ids = self.reset_buf.nonzero(as_tuple=False).flatten()
+        self.timeout_buf[env_ids] = 0
+
         # compute observations, rewards, resets, ...
         self.post_physics_step()
+
+        # fill time out buffer
+        self.timeout_buf = torch.where(self.progress_buf >= self.max_episode_length - 1, torch.ones_like(self.timeout_buf), self.timeout_buf)
 
         # randomize observations
         if self.dr_randomizations.get('observations', None):
