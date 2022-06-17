@@ -59,7 +59,7 @@ def configure_gym(gym, config):
     elif(engine == 'PHYSX'):
         sim_engine = gymapi.SIM_PHYSX
     else:
-        logger.warn("Uknown physics engine. defaulting to FLEX")
+        logger.warn("Unknown physics engine. defaulting to FLEX")
         sim_engine = gymapi.SIM_FLEX
 
     # gym viewer

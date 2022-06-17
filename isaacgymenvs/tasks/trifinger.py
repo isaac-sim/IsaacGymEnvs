@@ -90,7 +90,7 @@ class TrifingerDimensions(enum.Enum):
 # ################# #
 
 
-# readius of the area
+# radius of the area
 ARENA_RADIUS = 0.195
 
 
@@ -125,7 +125,7 @@ class CuboidalObject:
             self._size = (size, size, size)
         else:
             self._size = size
-        # compute remaning attributes
+        # compute remaining attributes
         self.__compute()
 
     """
@@ -841,7 +841,7 @@ class Trifinger(VecTask):
              - "none" means that robot is configuration is not reset between episodes.
 
         Args:
-            instances: A tensor contraining indices of environment instances to reset.
+            instances: A tensor constraining indices of environment instances to reset.
             distribution: Name of distribution to sample initial state from: ['default', 'random']
             dof_pos_stddev: Noise scale to DOF position (used if 'type' is 'random')
             dof_vel_stddev: Noise scale to DOF velocity (used if 'type' is 'random')
@@ -888,7 +888,7 @@ class Trifinger(VecTask):
              - "none" means no resetting of object pose between episodes.
 
         Args:
-            instances: A tensor contraining indices of environment instances to reset.
+            instances: A tensor constraining indices of environment instances to reset.
             distribution: Name of distribution to sample initial state from: ['default', 'random']
         """
         # number of samples to generate
@@ -929,7 +929,7 @@ class Trifinger(VecTask):
         """Sample goal poses for the cube and sets them into the desired goal pose buffer.
 
         Args:
-            instances: A tensor contraining indices of environment instances to reset.
+            instances: A tensor constraining indices of environment instances to reset.
             difficulty: Difficulty level. The higher, the more difficult is the goal.
 
         Possible levels are:
@@ -1066,7 +1066,7 @@ class Trifinger(VecTask):
         """
         # Extract configuration for termination conditions
         termination_config = self.cfg["env"]["termination_conditions"]
-        # Termination condition - successful completition
+        # Termination condition - successful completion
         # Calculate distance between current object and goal
         object_goal_position_dist = torch.norm(
             self._object_goal_poses_buf[:, 0:3] - self._object_state_history[0][:, 0:3],

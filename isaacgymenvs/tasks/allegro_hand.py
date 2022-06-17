@@ -443,7 +443,7 @@ class AllegroHand(VecTask):
         elif self.obs_type == "full_state":
              self.compute_full_state()
         else:
-            print("Unkown observations type!")
+            print("Unknown observations type!")
 
         if self.asymmetric_obs:
             self.compute_full_state(True)
@@ -729,7 +729,7 @@ def compute_hand_reward(
     # Success bonus: orientation is within `success_tolerance` of goal orientation
     reward = torch.where(goal_resets == 1, reward + reach_goal_bonus, reward)
 
-    # Fall penalty: distance to the goal is larger than a threashold
+    # Fall penalty: distance to the goal is larger than a threshold
     reward = torch.where(goal_dist >= fall_dist, reward + fall_penalty, reward)
 
     # Check env termination conditions, including maximum success number

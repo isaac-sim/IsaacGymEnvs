@@ -42,7 +42,7 @@ class _MyFormatter(logging.Formatter):
             fmt = date + ' ' + msg
 
         if hasattr(self, '_style'):
-            # Python3 compatibilty
+            # Python3 compatibility
             self._style._fmt = fmt
         self._fmt = fmt
 

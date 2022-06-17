@@ -1120,7 +1120,7 @@ class SkeletonMotion(SkeletonState):
     ):
         """
         Construct a skeleton motion from a skeleton state. The velocities are estimated using second
-        order guassian filter along the last axis. The skeleton state must have at least .dim >= 1
+        order gaussian filter along the last axis. The skeleton state must have at least .dim >= 1
 
         :param skeleton_state: the skeleton state that the motion is based on 
         :type skeleton_state: SkeletonState

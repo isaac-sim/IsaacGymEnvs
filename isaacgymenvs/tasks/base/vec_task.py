@@ -294,7 +294,7 @@ class VecTask(Env):
         return sim
 
     def get_state(self):
-        """Returns the state buffer of the environment (the priviledged observations for asymmetric training)."""
+        """Returns the state buffer of the environment (the privileged observations for asymmetric training)."""
         return torch.clamp(self.states_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
 
     @abc.abstractmethod

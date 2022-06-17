@@ -227,6 +227,11 @@ You can also automatically upload the videos to Weights and Biases:
 python train.py task=Ant wandb_activate=True wandb_entity=nvidia wandb_project=rl_games capture_video=True force_render=False
 ```
 
+## Pre-commit
+
+We use [pre-commit](https://pre-commit.com/) to helps us automate short tasks that improve code quality. Before making a commit to the repository, please ensure `pre-commit run --all-files` runs without error.
+
+
 ## Troubleshooting
 
 Please review the Isaac Gym installation instructions first if you run into any issues.
