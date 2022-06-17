@@ -7,6 +7,7 @@ Release Notes
 * Added Franka Cube Stacking task. Can use Operational Space Control (OSC) or joint torque control.
 * Improved handling of episode timeouts (`self.timeout_buf`, see 1.1.0) which might have caused training issues for 
 configurations with `value_bootstrap: True`. This fix results in slightly faster training on Ant & Humanoid locomotion tasks.
+* Added retargeting data for SFU Motion Capture Database.
 
 1.2.0
 -----

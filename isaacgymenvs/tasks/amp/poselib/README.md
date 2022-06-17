@@ -55,7 +55,9 @@ To use the retargeting API, users must provide the following information:
   - rotation: root rotation offset from source to target skeleton (for transforming across different orientation axes), represented as a quaternion in XYZW order.
   - scale: scale offset from source to target skeleton
 
-We provide an example script `retarget_motion.py` to demonstrate usage of the retargeting API. Note that the retargeting data for this script is stored in `data/configs/retarget_cmu_to_amp.json`.
+We provide an example script `retarget_motion.py` to demonstrate usage of the retargeting API for the CMU Motion Capture Database. Note that the retargeting data for this script is stored in `data/configs/retarget_cmu_to_amp.json`.
+
+Additionally, a SkeletonState T-Pose file and retargeting config file are also provided for the SFU Motion Capture Database. These can be found at `data/sfu_tpose.npy` and `data/configs/retarget_sfu_to_amp.json`.
 
 ### Documentation
 We provide a description of the functions and classes available in poselib in the comments of the APIs. Please check them out for more details.
