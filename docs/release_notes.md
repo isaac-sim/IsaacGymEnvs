@@ -9,6 +9,10 @@ Release Notes
 configurations with `value_bootstrap: True`. This fix results in slightly faster training on Ant & Humanoid locomotion tasks.
 * Added retargeting data for SFU Motion Capture Database.
 
+Deprecated `horovod` in favor of `torch.distributed` for better performance in  multi-GPU settings.
+
+Added an environment creation API `isaacgymenvs.make(task_name)` which creates a vectorized environment compatible with 3rd party RL libraries. 
+
 1.2.0
 -----
 
