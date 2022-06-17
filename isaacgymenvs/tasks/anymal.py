@@ -348,7 +348,7 @@ def compute_anymal_reward(
     # reset agents
     reset = torch.norm(contact_forces[:, base_index, :], dim=1) > 1.
     reset = reset | torch.any(torch.norm(contact_forces[:, knee_indices, :], dim=2) > 1., dim=1)
-    time_out = episode_lengths > max_episode_length  # no terminal reward for time-outs
+    time_out = episode_lengths >= max_episode_length - 1  # no terminal reward for time-outs
     reset = reset | time_out
 
     return total_reward.detach(), reset
