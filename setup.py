@@ -19,7 +19,8 @@ INSTALL_REQUIRES = [
     "omegaconf",
     "termcolor",
     "hydra-core>=1.1",
-    'rl-games @ git+https://github.com/Denys88/rl_games'
+    'rl-games @ git+https://github.com/Denys88/rl_games',
+    "pyvirtualdisplay",
 ]
 
 

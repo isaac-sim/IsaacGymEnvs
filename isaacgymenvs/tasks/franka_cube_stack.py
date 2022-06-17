@@ -54,7 +54,7 @@ def axisangle2quat(vec, eps=1e-6):
 
 class FrankaCubeStack(VecTask):
 
-    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
 
         self.max_episode_length = self.cfg["env"]["episodeLength"]
@@ -122,7 +122,7 @@ class FrankaCubeStack(VecTask):
         self.up_axis = "z"
         self.up_axis_idx = 2
 
-        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless, virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         # Franka defaults
         self.franka_default_dof_pos = to_torch(

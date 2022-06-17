@@ -24,6 +24,33 @@ Once Isaac Gym is installed and samples work within your current python environm
 pip install -e .
 ```
 
+
+### Creating an environment
+
+We offer an easy-to-use API for creating preset vectorized environments. For more info on what an vectorized environment is and its usage, please refer to the Gym's [documentation](https://www.gymlibrary.ml/content/vector_api/).
+
+```python
+import isaacgym
+import isaacgymenvs
+import torch
+
+envs = isaacgymenvs.make(
+	seed=0, 
+	task="Ant", 
+	num_envs=2000, 
+	sim_device="cuda:0",
+	rl_device="cuda:0",
+)
+print("Observation space is", envs.observation_space)
+print("Action space is", envs.action_space)
+obs = envs.reset()
+for _ in range(20):
+	obs, reward, done, info = envs.step(
+		torch.rand((2000,)+envs.action_space.shape, device="cuda:0")
+	)
+```
+
+
 ### Running the benchmarks
 
 To train your first policy, run this line:
@@ -146,6 +173,59 @@ Where the `--nproc_per_node=` flag specifies how many processes to run and note 
 ## WandB support
 
 You can run (WandB)[https://wandb.ai/] with Isaac Gym Envs by setting `wandb_activate=True` flag from the command line. You can set the group, name, entity, and project for the run by setting the `wandb_group`, `wandb_name`, `wandb_entity` and `wandb_project` set. Make sure you have WandB installed with `pip install wandb` before activating.
+
+
+## Capture videos
+
+
+We implement the standard `env.render(mode='rgb_rray')` `gym` API to provide an image of the simulator viewer. Additionally, we can leverage `gym.wrappers.RecordVideo` to help record videos that shows agent's gameplay. Consider running the following file which should produce a video in the `videos` folder.
+
+```python
+import gym
+import isaacgym
+import isaacgymenvs
+import torch
+
+envs = isaacgymenvs.make(
+	seed=0, 
+	task="Ant", 
+	num_envs=20, 
+	sim_device="cuda:0",
+	rl_device="cuda:0",
+	graphics_device_id=0,
+	headless=False,
+	multi_gpu=False,
+	virtual_screen_capture=True,
+	force_render=False,
+)
+envs.is_vector_env = True
+envs = gym.wrappers.RecordVideo(
+	envs,
+	"./videos",
+	step_trigger=lambda step: step % 10000 == 0, # record the videos every 10000 steps
+	video_length=100  # for each video record up to 100 steps
+)
+envs.reset()
+print("the image of Isaac Gym viewer is an array of shape", envs.render(mode="rgb_array").shape)
+for _ in range(100):
+	envs.step(
+		torch.rand((20,)+envs.action_space.shape, device="cuda:0")
+	)
+```
+
+## Capture videos during training
+
+You can automatically capture the videos of the agents gameplay by toggling the `capture_video=True` flag and tune the capture frequency `capture_video_freq=1500` and video length via `capture_video_len=100`. You can set `force_render=False` to disable rendering when the videos are not captured.
+
+```
+python train.py capture_video=True capture_video_freq=1500 capture_video_len=100 force_render=False
+```
+
+You can also automatically upload the videos to Weights and Biases:
+
+```
+python train.py task=Ant wandb_activate=True wandb_entity=nvidia wandb_project=rl_games capture_video=True force_render=False
+```
 
 ## Troubleshooting
 

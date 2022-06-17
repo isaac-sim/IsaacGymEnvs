@@ -40,7 +40,7 @@ from isaacgymenvs.tasks.base.vec_task import VecTask
 
 class Humanoid(VecTask):
 
-    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
         
         self.randomization_params = self.cfg["task"]["randomization_params"]
@@ -67,7 +67,7 @@ class Humanoid(VecTask):
         self.cfg["env"]["numObservations"] = 108
         self.cfg["env"]["numActions"] = 21
 
-        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless, virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         if self.viewer != None:
             cam_pos = gymapi.Vec3(50.0, 25.0, 2.4)

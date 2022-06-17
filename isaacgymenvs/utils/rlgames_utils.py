@@ -49,6 +49,8 @@ def get_rlgames_env_creator(
         # Used to handle multi-gpu case
         multi_gpu: bool = False,
         post_create_hook: Callable = None,
+        virtual_screen_capture: bool = False,
+        force_render: bool = False,
 ):
     """Parses the configuration parameters for the environment task and creates a VecTask
 
@@ -62,6 +64,8 @@ def get_rlgames_env_creator(
         multi_gpu: Whether to use multi gpu
         post_create_hook: Hooks to be called after environment creation.
             [Needed to setup WandB only for one of the RL Games instances when doing multiple GPUs]
+        virtual_screen_capture: Set to True to allow the users get captured screen in RGB array via `env.render(mode='rgb_array')`. 
+        force_render: Set to True to always force rendering in the steps (if the `control_freq_inv` is greater than 1 we suggest stting this arg to True)
     Returns:
         A VecTaskPython object.
     """
@@ -76,7 +80,9 @@ def get_rlgames_env_creator(
             rl_device=rl_device,
             sim_device=sim_device,
             graphics_device_id=graphics_device_id,
-            headless=headless
+            headless=headless,
+            virtual_screen_capture=virtual_screen_capture,
+            force_render=force_render,
         )
 
         if post_create_hook is not None:

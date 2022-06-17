@@ -35,7 +35,7 @@ from .base.vec_task import VecTask
 
 class Cartpole(VecTask):
 
-    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
 
         self.reset_dist = self.cfg["env"]["resetDist"]
@@ -46,7 +46,7 @@ class Cartpole(VecTask):
         self.cfg["env"]["numObservations"] = 4
         self.cfg["env"]["numActions"] = 1
 
-        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless, virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
         self.dof_state = gymtorch.wrap_tensor(dof_state_tensor)

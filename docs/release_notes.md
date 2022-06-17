@@ -13,6 +13,8 @@ Deprecated `horovod` in favor of `torch.distributed` for better performance in  
 
 Added an environment creation API `isaacgymenvs.make(task_name)` which creates a vectorized environment compatible with 3rd party RL libraries. 
 
+Added a utility to help capture the videos of the agent's gameplay via `python train.py capture_video=True` which creates a `videos` folder.
+
 1.2.0
 -----
 

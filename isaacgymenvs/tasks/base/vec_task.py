@@ -39,13 +39,13 @@ import torch
 import numpy as np
 import operator, random
 from copy import deepcopy
-
 import sys
 
 import abc
 from abc import ABC
 
 EXISTING_SIM = None
+SCREEN_CAPTURE_RESOLUTION = (1027, 768)
 
 def _create_sim_once(gym, *args, **kwargs):
     global EXISTING_SIM
@@ -163,7 +163,9 @@ class Env(ABC):
 
 class VecTask(Env):
 
-    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless):
+    metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 24}
+
+    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture: bool = False, force_render: bool = False):
         """Initialise the `VecTask`.
 
         Args:
@@ -171,8 +173,17 @@ class VecTask(Env):
             sim_device: the device to simulate physics on. eg. 'cuda:0' or 'cpu'
             graphics_device_id: the device ID to render with.
             headless: Set to False to disable viewer rendering.
+            virtual_screen_capture: Set to True to allow the users get captured screen in RGB array via `env.render(mode='rgb_array')`. 
+            force_render: Set to True to always force rendering in the steps (if the `control_freq_inv` is greater than 1 we suggest stting this arg to True)
         """
         super().__init__(config, rl_device, sim_device, graphics_device_id, headless)
+        self.virtual_screen_capture = virtual_screen_capture
+        self.virtual_display = None
+        if self.virtual_screen_capture:
+            from pyvirtualdisplay.smartdisplay import SmartDisplay
+            self.virtual_display = SmartDisplay(size=SCREEN_CAPTURE_RESOLUTION)
+            self.virtual_display.start()
+        self.force_render = force_render
 
         self.sim_params = self.__parse_sim_params(self.cfg["physics_engine"], self.cfg["sim"])
         if self.cfg["physics_engine"] == "physx":
@@ -318,7 +329,8 @@ class VecTask(Env):
 
         # step physics and render each frame
         for i in range(self.control_freq_inv):
-            self.render()
+            if self.force_render:
+                self.render()
             self.gym.simulate(self.sim)
 
         # to fix!
@@ -392,7 +404,7 @@ class VecTask(Env):
 
         return self.obs_dict, done_env_ids
 
-    def render(self):
+    def render(self, mode="rgb_array"):
         """Draw the frame to the viewer, and check for keyboard events."""
         if self.viewer:
             # check for window closed
@@ -421,6 +433,10 @@ class VecTask(Env):
 
             else:
                 self.gym.poll_viewer_events(self.viewer)
+
+            if self.virtual_display and mode == "rgb_array":
+                img = self.virtual_display.grab()
+                return np.array(img)
 
     def __parse_sim_params(self, physics_engine: str, config_sim: Dict[str, Any]) -> gymapi.SimParams:
         """Parse the config dictionary for physics stepping settings.

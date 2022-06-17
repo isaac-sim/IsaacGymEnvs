@@ -37,6 +37,7 @@ import hydra
 import yaml
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import to_absolute_path
+import gym
 
 from isaacgymenvs.utils.reformat import omegaconf_to_dict, print_dict
 
@@ -55,6 +56,7 @@ def launch_rlg_hydra(cfg: DictConfig):
     from isaacgymenvs.learning import amp_players
     from isaacgymenvs.learning import amp_models
     from isaacgymenvs.learning import amp_network_builder
+    import isaacgymenvs
 
     time_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     run_name = f"{cfg.wandb_name}_{time_str}"
@@ -69,20 +71,15 @@ def launch_rlg_hydra(cfg: DictConfig):
     # set numpy formatting for printing only
     set_np_formatting()
 
+    rank = int(os.getenv("LOCAL_RANK", "0"))
     if cfg.multi_gpu:
         # torchrun --standalone --nnodes=1 --nproc_per_node=2 train.py
-        rank = int(os.getenv("LOCAL_RANK", "0"))
-
         cfg.sim_device = f'cuda:{rank}'
         cfg.rl_device = f'cuda:{rank}'
-    else:
-        rank = 0
 
     # sets seed. if seed is -1 will pick a random one
-    cfg.seed = set_seed(cfg.seed, torch_deterministic=cfg.torch_deterministic, rank=rank)
-
-    rank = int(os.getenv("LOCAL_RANK", "0"))
     cfg.seed += rank
+    cfg.seed = set_seed(cfg.seed, torch_deterministic=cfg.torch_deterministic, rank=rank)
 
     if cfg.wandb_activate and rank == 0:
         # Make sure to install WandB if you actually use this.
@@ -98,26 +95,36 @@ def launch_rlg_hydra(cfg: DictConfig):
             resume="allow",
         )
 
-
-    # `create_rlgpu_env` is environment construction function which is passed to RL Games and called internally.
-    # We use the helper function here to specify the environment config.
-    create_rlgpu_env = get_rlgames_env_creator(
-        cfg.seed,
-        omegaconf_to_dict(cfg.task),
-        cfg.task_name,
-        cfg.sim_device,
-        cfg.rl_device,
-        cfg.graphics_device_id,
-        cfg.headless,
-        multi_gpu=cfg.multi_gpu,
-    )
+    def create_env_thunk(**kwargs):
+        envs = isaacgymenvs.make(
+            cfg.seed, 
+            cfg.task_name, 
+            cfg.task.env.numEnvs, 
+            cfg.sim_device,
+            cfg.rl_device,
+            cfg.graphics_device_id,
+            cfg.headless,
+            cfg.multi_gpu,
+            cfg.capture_video,
+            cfg.force_render,
+            **kwargs,
+        )
+        if cfg.capture_video:
+            envs.is_vector_env = True
+            envs = gym.wrappers.RecordVideo(
+                envs,
+                f"videos/{run_name}",
+                step_trigger=lambda step: step % cfg.capture_video_freq == 0,
+                video_length=cfg.capture_video_len,
+            )
+        return envs
 
     # register the rl-games adapter to use inside the runner
     vecenv.register('RLGPU',
                     lambda config_name, num_actors, **kwargs: RLGPUEnv(config_name, num_actors, **kwargs))
     env_configurations.register('rlgpu', {
         'vecenv_type': 'RLGPU',
-        'env_creator': lambda **kwargs: create_rlgpu_env(**kwargs),
+        'env_creator': create_env_thunk,
     })
 
     # register new AMP network builder and agent
@@ -143,6 +150,28 @@ def launch_rlg_hydra(cfg: DictConfig):
     os.makedirs(experiment_dir, exist_ok=True)
     with open(os.path.join(experiment_dir, 'config.yaml'), 'w') as f:
         f.write(OmegaConf.to_yaml(cfg))
+
+    if cfg.multi_gpu:
+        import horovod.torch as hvd
+
+        rank = hvd.rank()
+    else:
+        rank = 0
+
+    if cfg.wandb_activate and rank == 0:
+        # Make sure to install WandB if you actually use this.
+        import wandb
+
+        wandb.init(
+            project=cfg.wandb_project,
+            group=cfg.wandb_group,
+            entity=cfg.wandb_entity,
+            config=cfg_dict,
+            sync_tensorboard=True,
+            id=run_name,
+            resume="allow",
+            monitor_gym=True,
+        )
 
     runner.run({
         'train': not cfg.test,

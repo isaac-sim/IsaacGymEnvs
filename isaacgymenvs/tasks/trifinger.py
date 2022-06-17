@@ -321,7 +321,7 @@ class Trifinger(VecTask):
     }
     action_dim = _dims.JointTorqueDim.value
 
-    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless):
+    def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
 
         self.obs_spec = {
@@ -374,7 +374,7 @@ class Trifinger(VecTask):
                                 f'finger_middle_to_lower_joint_{finger_pos}']
         self._robot_dof_indices = OrderedDict.fromkeys(robot_dof_names, None)
 
-        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless)
+        super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless, virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         if self.viewer != None:
             cam_pos = gymapi.Vec3(0.7, 0.0, 0.7)

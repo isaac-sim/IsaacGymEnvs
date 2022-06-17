@@ -1,4 +1,6 @@
+import hydra
 from hydra import compose, initialize
+from hydra.core.hydra_config import HydraConfig
 from omegaconf import OmegaConf
 from isaacgymenvs.utils.reformat import omegaconf_to_dict
 
@@ -9,20 +11,39 @@ OmegaConf.register_new_resolver('if', lambda pred, a, b: a if pred else b)
 OmegaConf.register_new_resolver('resolve_default', lambda default, arg: default if arg=='' else arg)
 
 
-def make(task: str, num_envs: int):
+def make(
+    seed: int, 
+    task: str, 
+    num_envs: int, 
+    sim_device: str,
+    rl_device: str,
+    graphics_device_id: int = -1,
+    headless: bool = False,
+    multi_gpu: bool = False,
+    virtual_screen_capture: bool = False,
+    force_render: bool = True,
+): 
     from isaacgymenvs.utils.rlgames_utils import get_rlgames_env_creator
-    initialize(config_path="./cfg")
-    cfg = compose(config_name="config", overrides=[f"task={task}"])
-    cfg_dict = omegaconf_to_dict(cfg.task)
-    cfg_dict['env']['numEnvs'] = num_envs
+    # hacky bit with hydra: read the command line `task` string 
+    if HydraConfig.initialized():
+        task = HydraConfig.get().runtime.choices['task']
+        hydra.core.global_hydra.GlobalHydra.instance().clear()
+
+    with initialize(config_path="./cfg"):
+        cfg = compose(config_name="config", overrides=[f"task={task}"])
+        cfg_dict = omegaconf_to_dict(cfg.task)
+        cfg_dict['env']['numEnvs'] = num_envs
 
     create_rlgpu_env = get_rlgames_env_creator(
-        cfg_dict,
-        task,
-        sim_device="cuda:0",
-        rl_device="cuda:0",
-        graphics_device_id=0,
-        headless=False,
-        multi_gpu=False,
+        seed=seed,
+        task_config=cfg_dict,
+        task_name=cfg_dict["name"],
+        sim_device=sim_device,
+        rl_device=rl_device,
+        graphics_device_id=graphics_device_id,
+        headless=headless,
+        multi_gpu=multi_gpu,
+        virtual_screen_capture=virtual_screen_capture,
+        force_render=force_render,
     )
     return create_rlgpu_env()
