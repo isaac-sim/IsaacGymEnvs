@@ -168,7 +168,7 @@ class AnymalTerrain(VecTask):
             self._create_trimesh()
             self.custom_origins = True
         self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
-    
+
     def _get_noise_scale_vec(self, cfg):
         noise_vec = torch.zeros_like(self.obs_buf[0])
         self.add_noise = self.cfg["env"]["learn"]["addNoise"]
@@ -234,7 +234,7 @@ class AnymalTerrain(VecTask):
         rigid_shape_prop = self.gym.get_asset_rigid_shape_properties(anymal_asset)
         friction_range = self.cfg["env"]["learn"]["frictionRange"]
         num_buckets = 100
-        friction_buckets = torch_rand_float(friction_range[0], friction_range[1], (num_buckets,1), device='cpu')
+        friction_buckets = torch_rand_float(friction_range[0], friction_range[1], (num_buckets,1), device=self.device)
 
         self.base_init_state = to_torch(self.base_init_state, device=self.device, requires_grad=False)
         start_pose = gymapi.Transform()
@@ -251,7 +251,7 @@ class AnymalTerrain(VecTask):
         self.base_index = 0
 
         dof_props = self.gym.get_asset_dof_properties(anymal_asset)
-        
+
         # env origins
         self.env_origins = torch.zeros(self.num_envs, 3, device=self.device, requires_grad=False)
         if not self.curriculum: self.cfg["env"]["terrain"]["maxInitMapLevel"] = self.cfg["env"]["terrain"]["numLevels"] - 1
@@ -271,9 +271,9 @@ class AnymalTerrain(VecTask):
             if self.custom_origins:
                 self.env_origins[i] = self.terrain_origins[self.terrain_levels[i], self.terrain_types[i]]
                 pos = self.env_origins[i].clone()
-                pos[:2] += torch_rand_float(-1., 1., (2,1), device=self.device).squeeze(1)
+                pos[:2] += torch_rand_float(-1., 1., (2, 1), device=self.device).squeeze(1)
                 start_pose.p = gymapi.Vec3(*pos)
-            
+
             for s in range(len(rigid_shape_prop)):
                 rigid_shape_prop[s].friction = friction_buckets[i % num_buckets]
             self.gym.set_asset_rigid_shape_properties(anymal_asset, rigid_shape_prop)
@@ -296,7 +296,7 @@ class AnymalTerrain(VecTask):
             self.reset_buf |= torch.any(knee_contact, dim=1)
 
         self.reset_buf = torch.where(self.progress_buf >= self.max_episode_length - 1, torch.ones_like(self.reset_buf), self.reset_buf)
-    
+
     def compute_observations(self):
         self.measured_heights = self.get_heights()
         heights = torch.clip(self.root_states[:, 2].unsqueeze(1) - 0.5 - self.measured_heights, -1, 1.) * self.height_meas_scale
@@ -308,7 +308,7 @@ class AnymalTerrain(VecTask):
                                     self.dof_vel * self.dof_vel_scale,
                                     heights,
                                     self.actions
-                                    ),dim=-1)
+                                    ), dim=-1)
 
     def compute_reward(self):
         # velocity tracking reward
@@ -378,7 +378,7 @@ class AnymalTerrain(VecTask):
         self.episode_sums["air_time"] += rew_airTime
         self.episode_sums["base_height"] += rew_base_height
         self.episode_sums["hip"] += rew_hip
-                                                
+
     def reset_idx(self, env_ids):
         positions_offset = torch_rand_float(0.5, 1.5, (len(env_ids), self.num_dof), device=self.device)
         velocities = torch_rand_float(-0.1, 0.1, (len(env_ids), self.num_dof), device=self.device)
