@@ -1,7 +1,7 @@
 import hydra
 from hydra import compose, initialize
 from hydra.core.hydra_config import HydraConfig
-from omegaconf import OmegaConf
+from omegaconf import DictConfig, OmegaConf
 from isaacgymenvs.utils.reformat import omegaconf_to_dict
 
 
@@ -22,17 +22,23 @@ def make(
     multi_gpu: bool = False,
     virtual_screen_capture: bool = False,
     force_render: bool = True,
+    cfg: DictConfig = None
 ): 
     from isaacgymenvs.utils.rlgames_utils import get_rlgames_env_creator
-    # hacky bit with hydra: read the command line `task` string 
-    if HydraConfig.initialized():
-        task = HydraConfig.get().runtime.choices['task']
-        hydra.core.global_hydra.GlobalHydra.instance().clear()
+    # create hydra config if no config passed in
+    if cfg is None:
+        # reset current hydra config if already parsed (but not passed in here)
+        if HydraConfig.initialized():
+            task = HydraConfig.get().runtime.choices['task']
+            hydra.core.global_hydra.GlobalHydra.instance().clear()
 
-    with initialize(config_path="./cfg"):
-        cfg = compose(config_name="config", overrides=[f"task={task}"])
+        with initialize(config_path="./cfg"):
+            cfg = compose(config_name="config", overrides=[f"task={task}"])
+            cfg_dict = omegaconf_to_dict(cfg.task)
+            cfg_dict['env']['numEnvs'] = num_envs
+    # reuse existing config
+    else:
         cfg_dict = omegaconf_to_dict(cfg.task)
-        cfg_dict['env']['numEnvs'] = num_envs
 
     create_rlgpu_env = get_rlgames_env_creator(
         seed=seed,
