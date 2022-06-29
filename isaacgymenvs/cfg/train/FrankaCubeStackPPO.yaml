@@ -50,6 +50,7 @@ params:
     tau: 0.95
     learning_rate: 5e-4
     lr_schedule: adaptive
+    schedule_type: standard
     kl_threshold: 0.008
     score_to_win: 10000
     max_epochs: ${resolve_default:10000,${....max_iterations}}

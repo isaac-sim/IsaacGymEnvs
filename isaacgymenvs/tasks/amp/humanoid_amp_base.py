@@ -48,7 +48,7 @@ KEY_BODY_NAMES = ["right_hand", "left_hand", "right_foot", "left_foot"]
 
 class HumanoidAMPBase(VecTask):
 
-    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless):
+    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = config
 
         self._pd_control = self.cfg["env"]["pdControl"]
