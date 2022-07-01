@@ -10,12 +10,12 @@ This repository contains example RL environments for the NVIDIA Isaac Gym high p
 
 ### Installation
 
-Download the Isaac Gym Preview 3 release from the [website](https://developer.nvidia.com/isaac-gym), then
+Download the Isaac Gym Preview 4 release from the [website](https://developer.nvidia.com/isaac-gym), then
 follow the installation instructions in the documentation. We highly recommend using a conda environment 
 to simplify set up.
 
 Ensure that Isaac Gym works on your system by running one of the examples from the `python/examples` 
-directory, like `joint_monkey.py`. Follow troubleshooting steps described in the Isaac Gym Preview 3 
+directory, like `joint_monkey.py`. Follow troubleshooting steps described in the Isaac Gym Preview 4
 install instructions if you have any trouble running the samples.
 
 Once Isaac Gym is installed and samples work within your current python environment, install this repo:
@@ -172,7 +172,7 @@ Where the `--nproc_per_node=` flag specifies how many processes to run and note 
 
 ## WandB support
 
-You can run (WandB)[https://wandb.ai/] with Isaac Gym Envs by setting `wandb_activate=True` flag from the command line. You can set the group, name, entity, and project for the run by setting the `wandb_group`, `wandb_name`, `wandb_entity` and `wandb_project` set. Make sure you have WandB installed with `pip install wandb` before activating.
+You can run [WandB](https://wandb.ai/) with Isaac Gym Envs by setting `wandb_activate=True` flag from the command line. You can set the group, name, entity, and project for the run by setting the `wandb_group`, `wandb_name`, `wandb_entity` and `wandb_project` set. Make sure you have WandB installed with `pip install wandb` before activating.
 
 
 ## Capture videos
