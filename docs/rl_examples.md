@@ -366,3 +366,34 @@ Use the following command lines for training the currently included AMP motions:
 
 Images below are from SFU SpinKick training.
 ![image](images/amp_spinkick.png)
+
+### Factory: Fast Contact for Robotic Assembly
+There are 5 Factory example tasks: FactoryTaskNutBoltPick, FactoryTaskNutBoltPlace, FactoryTaskNutBoltScrew, FactoryTaskNutBoltInsertion, and FactoryTaskNutBoltGears. Like the other tasks, they can be executed with 
+`python train.py task=<task_name>`. The first time you run these examples, it may take some time for Gym to generate SDFs for the assets. However, these SDFs will then be cached.
+
+FactoryTaskNutBoltPick, FactoryTaskNutBoltPlace, and FactoryTaskNutBoltScrew train policies for the Pick, Place, and Screw tasks. They are simplified versions of the corresponding tasks in the Factory paper (e.g., smaller randomization ranges, simpler reward formulations, etc.) The Pick and Place subpolicies may take ~1 hour to achieve high success rates on a modern GPU, and the Screw subpolicy, which does not include initial state randomization, should achieve high success rates almost immediately.
+
+FactoryTaskNutBoltInsertion and FactoryTaskNutBoltGears do not train RL policies by default, as successfully training these policies is an open area of research. Their associated scripts ([factory_task_insertion.py](../isaacgymenvs/tasks/factory/factory_task_insertion.py) and [factory_task_gears.py](../isaacgymenvs/tasks/factory/factory_task_gears.py)) provide templates for users to write their own RL code. For an example of a filled-out template, see the script for FactoryTaskNutBoltPick ([factory_task_nut_bolt_pick.py](../isaacgymenvs/tasks/factory/factory_task_nut_bolt_pick.py)).
+
+The basic configuration files for the above tasks are [FactoryTaskNutBoltPick.yaml](../isaacgymenvs/cfg/task/FactoryTaskNutBoltPick.yaml), [FactoryTaskNutBoltPlace.yaml](../isaacgymenvs/cfg/task/FactoryTaskNutBoltPlace.yaml), [FactoryTaskNutBoltScrew.yaml](../isaacgymenvs/cfg/task/FactoryTaskNutBoltScrew.yaml), [FactoryTaskInsertion.yaml](../isaacgymenvs/cfg/task/FactoryTaskInsertion.yaml), and [FactoryTaskGears.yaml](../isaacgymenvs/cfg/task/FactoryTaskGears.yaml). Note that you can select low-level controller types (e.g., joint-space IK, task-space impedance) within these configuration files.
+
+The training configuration files for the above tasks are [FactoryTaskNutBoltPickPPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskNutBoltPickPPO.yaml), [FactoryTaskNutBoltPlacePPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskNutBoltPlacePPO.yaml), [FactoryTaskNutBoltScrewPPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskNutBoltScrewPPO.yaml), [FactoryTaskInsertionPPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskInsertionPPO.yaml), and [FactoryTaskGearsPPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskGearsPPO.yaml). We use the [rl-games](https://github.com/Denys88/rl_games) library to train our RL agents via PPO, and these configuration files define the PPO parameters.
+
+We highly recommend reading the [additional documentation](factory.md) for Factory, which will be regularly updated and extended. This documentation includes details on SDF collisions, which all the Factory examples leverage. You can use SDF collisions for your own assets and environments.
+
+If you use the Factory simulation methods (e.g., SDF collisions, contact reduction) or Factory learning tools (e.g., assets, environments, or controllers) in your work, please cite the following paper:
+```
+@inproceedings{
+	narang2022factory,
+	author = {Yashraj Narang and Kier Storey and Iretiayo Akinola and Miles Macklin and Philipp Reist and Lukasz Wawrzyniak and Yunrong Guo and Adam Moravanszky and Gavriel State and Michelle Lu and Ankur Handa and Dieter Fox},
+	title = {Factory: Fast contact for robotic assembly},
+	booktitle = {Robotics: Science and Systems},
+	year = {2022}
+} 
+```
+
+Also note that our original formulations of SDF collisions and contact reduction were developed by [Macklin, et al.](https://dl.acm.org/doi/abs/10.1145/3384538) and [Moravanszky and Terdiman](https://scholar.google.com/scholar?q=Game+Programming+Gems+4%2C+chapter+Fast+Contact+Reduction+for+Dynamics+Simulation), respectively.
+
+![Nut_picking](https://user-images.githubusercontent.com/7465068/176542463-dd2d3980-c9d1-4b90-8fd2-7e23161905e9.gif)
+![Nut_placing](https://user-images.githubusercontent.com/7465068/176544020-ff6a56b6-7359-4580-b789-f9ba43e78459.gif)
+![Nut_screwing](https://user-images.githubusercontent.com/7465068/176528998-8a3dd41d-1a8f-4c1c-a6cd-f6eeb91ea87a.gif)

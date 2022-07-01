@@ -291,3 +291,14 @@ If you use the AMP: Adversarial Motion Priors environment in your work, please e
 	keywords = {motion control, physics-based character animation, reinforcement learning},
 } 
 ```
+
+If you use the Factory simulation methods (e.g., SDF collisions, contact reduction) or Factory learning tools (e.g., assets, environments, or controllers) in your work, please cite the following paper:
+```
+@inproceedings{
+	narang2022factory,
+	author = {Yashraj Narang and Kier Storey and Iretiayo Akinola and Miles Macklin and Philipp Reist and Lukasz Wawrzyniak and Yunrong Guo and Adam Moravanszky and Gavriel State and Michelle Lu and Ankur Handa and Dieter Fox},
+	title = {Factory: Fast contact for robotic assembly},
+	booktitle = {Robotics: Science and Systems},
+	year = {2022}
+} 
+```

@@ -1,0 +1,24 @@
+# See schema in factory_schema_config_base.py for descriptions of parameters.
+
+defaults:
+    - _self_
+    - /factory_schema_config_base
+
+mode:
+    export_scene: False
+    export_states: False
+
+sim:
+    dt: 0.016667
+    num_substeps: 2
+    num_pos_iters: 16
+    num_vel_iters: 0
+    gravity_mag: 9.81
+    add_damping: True
+    
+env:
+    env_spacing: 0.5
+    franka_depth: 0.5
+    table_height: 0.4
+    franka_friction: 1.0
+    table_friction: 0.3

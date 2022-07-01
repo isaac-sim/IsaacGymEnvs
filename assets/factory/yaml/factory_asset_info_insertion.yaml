@@ -1,0 +1,189 @@
+round_peg_hole_4mm_tight:
+    round_peg_4mm_tight:
+        urdf_path: 'factory_round_peg_4mm_tight'
+        density: 8000.0
+        friction: 0.5
+    round_hole_4mm:
+        urdf_path: 'factory_round_hole_4mm'
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_4mm_loose:
+    round_peg_4mm_loose:
+        urdf_path: 'factory_round_peg_4mm_loose'
+        density: 8000.0 
+        friction: 0.5
+    round_hole_4mm:
+        urdf_path: 'factory_round_hole_4mm'
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_8mm_tight:
+    round_peg_8mm_Tight:
+        urdf_path: 'factory_round_peg_8mm_tight'
+        density: 8000.0
+        friction: 0.5
+    round_hole_8mm:
+        urdf_path: 'factory_round_hole_8mm'
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_8mm_loose:
+    round_peg_8mm_loose:
+        urdf_path: 'factory_round_peg_8mm_loose'
+        density: 8000.0
+        friction: 0.5
+    round_hole_8mm:
+        urdf_path: 'factory_round_hole_8mm'
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_12mm_tight:
+    round_peg_12mm_Tight:
+        urdf_path: 'factory_round_peg_12mm_tight'
+        density: 8000.0
+        friction: 0.5
+    round_hole_12mm:
+        urdf_path: 'factory_round_hole_12mm'
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_12mm_loose:
+    round_peg_12mm_loose:
+        urdf_path: 'factory_round_peg_12mm_loose'
+        density: 8000.0
+        friction: 0.5
+    round_hole_12mm:
+        urdf_path: 'factory_round_hole_12mm'
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_16mm_tight:
+    round_peg_16mm_Tight:
+        urdf_path: 'factory_round_peg_16mm_tight'
+        density: 8000.0
+        friction: 0.5
+    round_hole_16mm:
+        urdf_path: 'factory_round_hole_16mm'
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_16mm_loose:
+    round_peg_16mm_loose:
+        urdf_path: 'factory_round_peg_16mm_loose'
+        density: 8000.0
+        friction: 0.5
+    round_hole_16mm:
+        urdf_path: 'factory_round_hole_16mm'
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_4mm_tight:
+    rectangular_peg_4mm_tight:
+        urdf_path: 'factory_rectangular_peg_4mm_tight'
+        density: 8000.0
+        friction: 0.5
+    rectangular_hole_4mm:
+        urdf_path: 'factory_rectangular_hole_4mm'
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_4mm_loose:
+    rectangular_peg_4mm_loose:
+        urdf_path: 'factory_rectangular_peg_4mm_loose'
+        density: 8000.0
+        friction: 0.5
+    rectangular_hole_4mm:
+        urdf_path: 'factory_rectangular_hole_4mm'
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_8mm_tight:
+    rectangular_peg_8mm_tight:
+        urdf_path: 'factory_rectangular_peg_8mm_tight'
+        density: 8000.0
+        friction: 0.5
+    rectangular_hole_8mm:
+        urdf_path: 'factory_rectangular_hole_8mm'
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_8mm_loose:
+    rectangular_peg_8mm_loose:
+        urdf_path: 'factory_rectangular_peg_8mm_loose'
+        density: 8000.0
+        friction: 0.5
+    rectangular_hole_8mm:
+        urdf_path: 'factory_rectangular_hole_8mm'
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_12mm_tight:
+    rectangular_peg_12mm_tight:
+        urdf_path: 'factory_rectangular_peg_12mm_tight'
+        density: 8000.0
+        friction: 0.5
+    rectangular_hole_12mm:
+        urdf_path: 'factory_rectangular_hole_12mm'
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_12mm_loose:
+    rectangular_peg_12mm_loose:
+        urdf_path: 'factory_rectangular_peg_12mm_loose'
+        density: 8000.0
+        friction: 0.5
+    rectangular_hole_12mm:
+        urdf_path: 'factory_rectangular_hole_12mm'
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_16mm_tight:
+    rectangular_peg_16mm_tight:
+        urdf_path: 'factory_rectangular_peg_16mm_tight'
+        density: 8000.0
+        friction: 0.5
+    rectangular_hole_16mm:
+        urdf_path: 'factory_rectangular_hole_16mm'
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_16mm_loose:
+    rectangular_peg_16mm_loose:
+        urdf_path: 'factory_rectangular_peg_16mm_loose'
+        density: 8000.0
+        friction: 0.5
+    rectangular_hole_16mm:
+        urdf_path: 'factory_rectangular_hole_16mm'
+        density: 8000.0
+        friction: 0.5
+
+bnc:
+    bnc_plug:
+        urdf_path: 'factory_bnc_plug'
+        density: 8700.0
+        friction: 0.5
+    bnc_socket:
+        urdf_path: 'factory_bnc_socket'
+        density: 7100.0
+        friction: 0.5
+
+dsub:
+    dsub_plug:
+        urdf_path: 'factory_dsub_plug'
+        density: 8000.0
+        friction: 0.5
+    dsub_socket:
+        urdf_path: 'factory_dsub_socket'
+        density: 8000.0
+        friction: 0.5
+
+usb:
+    usb_plug:
+        urdf_path: 'factory_usb_plug'
+        density: 8000.0
+        friction: 0.5
+    usb_socket:
+        urdf_path: 'factory_usb_socket'
+        density: 8000.0
+        friction: 0.5
