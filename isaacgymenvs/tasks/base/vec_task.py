@@ -33,7 +33,7 @@ from gym import spaces
 
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import to_torch
-from isaacgym.gymutil import get_property_setter_map, get_property_getter_map, get_default_setter_args, apply_random_samples, check_buckets, generate_random_samples
+from isaacgymenvs.dr_utils import get_property_setter_map, get_property_getter_map, get_default_setter_args, apply_random_samples, check_buckets, generate_random_samples
 
 import torch
 import numpy as np
