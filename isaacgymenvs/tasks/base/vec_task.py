@@ -33,7 +33,8 @@ from gym import spaces
 
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import to_torch
-from isaacgym.gymutil import get_property_setter_map, get_property_getter_map, get_default_setter_args, apply_random_samples, check_buckets, generate_random_samples
+from isaacgymenvs.utils.dr_utils import get_property_setter_map, get_property_getter_map, \
+    get_default_setter_args, apply_random_samples, check_buckets, generate_random_samples
 
 import torch
 import numpy as np
@@ -670,12 +671,26 @@ class VecTask(Env):
                     self.actor_params_generator.sample()
                 extern_offsets[env_id] = 0
 
+        # randomise all attributes of each actor (hand, cube etc..)
+        # actor_properties are (stiffness, damping etc..)
+
+        # Loop over actors, then loop over envs, then loop over their props 
+        # and lastly loop over the ranges of the params 
+
         for actor, actor_properties in dr_params["actor_params"].items():
+
+            # Loop over all envs as this part is not tensorised yet 
             for env_id in env_ids:
                 env = self.envs[env_id]
                 handle = self.gym.find_actor_handle(env, actor)
                 extern_sample = self.extern_actor_params[env_id]
 
+                # randomise dof_props, rigid_body, rigid_shape properties 
+                # all obtained from the YAML file
+                # EXAMPLE: prop name: dof_properties, rigid_body_properties, rigid_shape properties  
+                #          prop_attrs: 
+                #               {'damping': {'range': [0.3, 3.0], 'operation': 'scaling', 'distribution': 'loguniform'}
+                #               {'stiffness': {'range': [0.75, 1.5], 'operation': 'scaling', 'distribution': 'loguniform'}
                 for prop_name, prop_attrs in actor_properties.items():
                     if prop_name == 'color':
                         num_bodies = self.gym.get_actor_rigid_body_count(
@@ -684,6 +699,7 @@ class VecTask(Env):
                             self.gym.set_rigid_body_color(env, handle, n, gymapi.MESH_VISUAL,
                                                           gymapi.Vec3(random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)))
                         continue
+
                     if prop_name == 'scale':
                         setup_only = prop_attrs.get('setup_only', False)
                         if (setup_only and not self.sim_initialized) or not setup_only:
@@ -700,6 +716,7 @@ class VecTask(Env):
 
                     prop = param_getters_map[prop_name](env, handle)
                     set_random_properties = True
+
                     if isinstance(prop, list):
                         if self.first_randomization:
                             self.original_props[prop_name] = [

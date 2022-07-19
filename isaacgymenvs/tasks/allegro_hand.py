@@ -662,6 +662,7 @@ class AllegroHand(VecTask):
 
     def post_physics_step(self):
         self.progress_buf += 1
+        self.randomize_buf += 1
 
         self.compute_observations()
         self.compute_reward(self.actions)
