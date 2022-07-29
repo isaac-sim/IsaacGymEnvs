@@ -12,6 +12,22 @@ training progress.
 List of Examples
 ----------------
 
+* [Ant](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#ant-antpy)
+* [Humanoid](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#humanoid-humanoidpy)
+* [Shadow Hand](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#shadow-hand-object-manipulation-shadow_handpy)
+* [Allegro Hand](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#allegro-hand-allegro_handpy)
+* [ANYmal](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#anymal-anymalpy)
+* [ANYmal Rough Terrain](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#anymal-rough-terrain-anymal_terrainpy)
+* [TriFinger](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#trifinger-trifingerpy)
+* [NASA Ingenuity Helicopter](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#nasa-ingenuity-helicopter-ingenuitypy)
+* [Cartpole](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#cartpole-cartpolepy)
+* [Ball Balance](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#ball-balance-ball_balancepy)
+* [Franka Cabinet](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#franka-cabinet-franka_cabinetpy)
+* [Franka Cube Stack](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#franka-cube-stack-franka_cube_stackpy)
+* [Quadcopter](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#quadcopter-quadcopterpy)
+* [Adversarial Motion Priors](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#amp-adversarial-motion-priors-humanoidamppy)
+* [Factory](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#factory-fast-contact-for-robotic-assembly)
+
 ### Ant [ant.py](../isaacgymenvs/tasks/ant.py)
 
 An example of a simple locomotion task, the goal is to train quadruped
@@ -368,18 +384,17 @@ Images below are from SFU SpinKick training.
 ![image](images/amp_spinkick.png)
 
 ### Factory: Fast Contact for Robotic Assembly
-There are 5 Factory example tasks: FactoryTaskNutBoltPick, FactoryTaskNutBoltPlace, FactoryTaskNutBoltScrew, FactoryTaskNutBoltInsertion, and FactoryTaskNutBoltGears. Like the other tasks, they can be executed with 
-`python train.py task=<task_name>`. The first time you run these examples, it may take some time for Gym to generate SDFs for the assets. However, these SDFs will then be cached.
+There are 5 Factory example tasks: **FactoryTaskNutBoltPick**, **FactoryTaskNutBoltPlace**, **FactoryTaskNutBoltScrew**, **FactoryTaskNutBoltInsertion**, and **FactoryTaskNutBoltGears**. Like the other tasks, they can be executed with `python train.py task=<task_name>`. The first time you run these examples, it may take some time for Gym to generate SDFs for the assets. However, these SDFs will then be cached.
 
-FactoryTaskNutBoltPick, FactoryTaskNutBoltPlace, and FactoryTaskNutBoltScrew train policies for the Pick, Place, and Screw tasks. They are simplified versions of the corresponding tasks in the Factory paper (e.g., smaller randomization ranges, simpler reward formulations, etc.) The Pick and Place subpolicies may take ~1 hour to achieve high success rates on a modern GPU, and the Screw subpolicy, which does not include initial state randomization, should achieve high success rates almost immediately.
+**FactoryTaskNutBoltPick**, **FactoryTaskNutBoltPlace**, and **FactoryTaskNutBoltScrew** train policies for the Pick, Place, and Screw tasks. They are simplified versions of the corresponding tasks in the Factory paper (e.g., smaller randomization ranges, simpler reward formulations, etc.) The Pick and Place subpolicies may take ~1 hour to achieve high success rates on a modern GPU, and the Screw subpolicy, which does not include initial state randomization, should achieve high success rates almost immediately.
 
-FactoryTaskNutBoltInsertion and FactoryTaskNutBoltGears do not train RL policies by default, as successfully training these policies is an open area of research. Their associated scripts ([factory_task_insertion.py](../isaacgymenvs/tasks/factory/factory_task_insertion.py) and [factory_task_gears.py](../isaacgymenvs/tasks/factory/factory_task_gears.py)) provide templates for users to write their own RL code. For an example of a filled-out template, see the script for FactoryTaskNutBoltPick ([factory_task_nut_bolt_pick.py](../isaacgymenvs/tasks/factory/factory_task_nut_bolt_pick.py)).
+**FactoryTaskNutBoltInsertion** and **FactoryTaskNutBoltGears** do not train RL policies by default, as successfully training these policies is an open area of research. Their associated scripts ([factory_task_insertion.py](../isaacgymenvs/tasks/factory/factory_task_insertion.py) and [factory_task_gears.py](../isaacgymenvs/tasks/factory/factory_task_gears.py)) provide templates for users to write their own RL code. For an example of a filled-out template, see the script for **FactoryTaskNutBoltPick** ([factory_task_nut_bolt_pick.py](../isaacgymenvs/tasks/factory/factory_task_nut_bolt_pick.py)).
 
-The basic configuration files for the above tasks are [FactoryTaskNutBoltPick.yaml](../isaacgymenvs/cfg/task/FactoryTaskNutBoltPick.yaml), [FactoryTaskNutBoltPlace.yaml](../isaacgymenvs/cfg/task/FactoryTaskNutBoltPlace.yaml), [FactoryTaskNutBoltScrew.yaml](../isaacgymenvs/cfg/task/FactoryTaskNutBoltScrew.yaml), [FactoryTaskInsertion.yaml](../isaacgymenvs/cfg/task/FactoryTaskInsertion.yaml), and [FactoryTaskGears.yaml](../isaacgymenvs/cfg/task/FactoryTaskGears.yaml). Note that you can select low-level controller types (e.g., joint-space IK, task-space impedance) within these configuration files.
+The general configuration files for the above tasks are [FactoryTaskNutBoltPick.yaml](../isaacgymenvs/cfg/task/FactoryTaskNutBoltPick.yaml), [FactoryTaskNutBoltPlace.yaml](../isaacgymenvs/cfg/task/FactoryTaskNutBoltPlace.yaml), [FactoryTaskNutBoltScrew.yaml](../isaacgymenvs/cfg/task/FactoryTaskNutBoltScrew.yaml), [FactoryTaskInsertion.yaml](../isaacgymenvs/cfg/task/FactoryTaskInsertion.yaml), and [FactoryTaskGears.yaml](../isaacgymenvs/cfg/task/FactoryTaskGears.yaml). Note that you can select low-level controller types (e.g., joint-space IK, task-space impedance) within these configuration files.
 
 The training configuration files for the above tasks are [FactoryTaskNutBoltPickPPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskNutBoltPickPPO.yaml), [FactoryTaskNutBoltPlacePPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskNutBoltPlacePPO.yaml), [FactoryTaskNutBoltScrewPPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskNutBoltScrewPPO.yaml), [FactoryTaskInsertionPPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskInsertionPPO.yaml), and [FactoryTaskGearsPPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskGearsPPO.yaml). We use the [rl-games](https://github.com/Denys88/rl_games) library to train our RL agents via PPO, and these configuration files define the PPO parameters.
 
-We highly recommend reading the [additional documentation](factory.md) for Factory, which will be regularly updated and extended. This documentation includes details on SDF collisions, which all the Factory examples leverage. You can use SDF collisions for your own assets and environments.
+We highly recommend reading the [extended documentation](factory.md) for Factory, which will be regularly updated. This documentation includes details on SDF collisions, which all the Factory examples leverage. You can use SDF collisions for your own assets and environments.
 
 If you use the Factory simulation methods (e.g., SDF collisions, contact reduction) or Factory learning tools (e.g., assets, environments, or controllers) in your work, please cite the following paper:
 ```

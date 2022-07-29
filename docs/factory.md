@@ -1,9 +1,18 @@
 Factory
 =======
 
-Here we provide additional documentation on the Factory assets, environments, controllers, and simulation methods. This documentation will be regularly updated and extended.
+Here we provide extended documentation on the Factory assets, environments, controllers, and simulation methods. This documentation will be regularly updated.
 
 Before starting to use Factory, we would **highly** recommend familiarizing yourself with Isaac Gym, including the simpler RL examples.
+
+Overview
+--------
+
+There are 5 Factory example tasks: **FactoryTaskNutBoltPick**, **FactoryTaskNutBoltPlace**, **FactoryTaskNutBoltScrew**, **FactoryTaskNutBoltInsertion**, and **FactoryTaskNutBoltGears**. Like the other tasks, they can be executed with `python train.py task=<task_name>`. The first time you run these examples, it may take some time for Gym to generate SDFs for the assets. However, these SDFs will then be cached.
+
+**FactoryTaskNutBoltPick**, **FactoryTaskNutBoltPlace**, and **FactoryTaskNutBoltScrew** train policies for the Pick, Place, and Screw tasks. They are simplified versions of the corresponding tasks in the Factory paper (e.g., smaller randomization ranges, simpler reward formulations, etc.) The Pick and Place subpolicies may take ~1 hour to achieve high success rates on a modern GPU, and the Screw subpolicy, which does not include initial state randomization, should achieve high success rates almost immediately.
+
+**FactoryTaskNutBoltInsertion** and **FactoryTaskNutBoltGears** do not train RL policies by default, as successfully training these policies is an open area of research. Their associated scripts ([factory_task_insertion.py](../isaacgymenvs/tasks/factory/factory_task_insertion.py) and [factory_task_gears.py](../isaacgymenvs/tasks/factory/factory_task_gears.py)) provide templates for users to write their own RL code. For an example of a filled-out template, see the script for **FactoryTaskNutBoltPick** ([factory_task_nut_bolt_pick.py](../isaacgymenvs/tasks/factory/factory_task_nut_bolt_pick.py)).
 
 Assets
 ------
@@ -42,14 +51,22 @@ Finally, there are abstract base classes that define the necessary methods for b
 Configuration Files and Schema
 ------------------------------
 
-In addition to the task-level configuration files described in the primary readme, there is also a base-level configuration file ([FactoryBase.yaml](../isaacgymenvs/cfg/task/FactoryBase.yaml)) and environment-level configuration files ([FactoryEnvNutBolt.yaml](../isaacgymenvs/cfg/task/FactoryEnvNutBolt.yaml), [FactoryEnvInsertion.yaml](../isaacgymenvs/cfg/task/FactoryEnvInsertion.yaml), and [FactoryEnvGears.yaml](../isaacgymenvs/cfg/task/FactoryEnvGears.yaml)).
+There are 4 types of configuration files: base-level configuration files, environment-level configuration files, task-level configuration files, and training configuration files.
 
-There are schema for these configuration files ([factory_schema_config_base.py](../isaacgymenvs/tasks/factory/factory_schema_config_base.py), [factory_schema_config_env.py](../isaacgymenvs/tasks/factory/factory_schema_config_env.py), and [factory_schema_config_task.py](../isaacgymenvs/tasks/factory/factory_schema_config_tasks.py)). These schema are enforced for the base and environment configuration files, but not enforced for the task configuration files. These are useful to review in order to better understand the structure of the configuration files and see descriptions of common parameters, but you will probably not need to modify them.
+The base-level configuration file is [FactoryBase.yaml](../isaacgymenvs/cfg/task/FactoryBase.yaml).
+
+The environment-level configuration files are [FactoryEnvNutBolt.yaml](../isaacgymenvs/cfg/task/FactoryEnvNutBolt.yaml), [FactoryEnvInsertion.yaml](../isaacgymenvs/cfg/task/FactoryEnvInsertion.yaml), and [FactoryEnvGears.yaml](../isaacgymenvs/cfg/task/FactoryEnvGears.yaml).
+
+The task-level configuration files are [FactoryTaskNutBoltPick.yaml](../isaacgymenvs/cfg/task/FactoryTaskNutBoltPick.yaml), [FactoryTaskNutBoltPlace.yaml](../isaacgymenvs/cfg/task/FactoryTaskNutBoltPlace.yaml), [FactoryTaskNutBoltScrew.yaml](../isaacgymenvs/cfg/task/FactoryTaskNutBoltScrew.yaml), [FactoryTaskInsertion.yaml](../isaacgymenvs/cfg/task/FactoryTaskInsertion.yaml), and [FactoryTaskGears.yaml](../isaacgymenvs/cfg/task/FactoryTaskGears.yaml). Note that you can select low-level controller types (e.g., joint-space IK, task-space impedance) within these configuration files.
+
+The training configuration files are [FactoryTaskNutBoltPickPPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskNutBoltPickPPO.yaml), [FactoryTaskNutBoltPlacePPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskNutBoltPlacePPO.yaml), [FactoryTaskNutBoltScrewPPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskNutBoltScrewPPO.yaml), [FactoryTaskInsertionPPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskInsertionPPO.yaml), and [FactoryTaskGearsPPO.yaml](../isaacgymenvs/cfg/train/FactoryTaskGearsPPO.yaml). We use the [rl-games](https://github.com/Denys88/rl_games) library to train our RL agents via PPO, and these configuration files define the PPO parameters for each task.
+
+There are schema for the base-level, environment-level, and task-level configuration files ([factory_schema_config_base.py](../isaacgymenvs/tasks/factory/factory_schema_config_base.py), [factory_schema_config_env.py](../isaacgymenvs/tasks/factory/factory_schema_config_env.py), and [factory_schema_config_task.py](../isaacgymenvs/tasks/factory/factory_schema_config_tasks.py)). These schema are enforced for the base-level and environment-level configuration files, but not for the task-level configuration files. These are useful to review in order to better understand the structure of the configuration files and see descriptions of common parameters, but you will probably not need to modify them.
 
 Controllers
 -----------
 
-Controller types and gains can be specified in the task-level configuration files. In addition to the 7 controllers described in the Factory paper, there is also the option of using Gym's built-in joint-space PD controller. This controller is generally quite stable, but uses a symplectic integrator that may introduce some artifical damping.
+Controller types and gains can be specified in the task-level configuration files. In addition to the 7 controllers described in the Factory paper, there is also the option of using Gym's built-in joint-space PD controller. This controller is generally quite stable, but uses a symplectic integrator that may introduce some artificial damping.
 
 The controllers are implemented as follows:
 * When launching a task, the higher-level controller type is parsed into lower-level controller options (e.g., joint space or task space, inertial compensation or no inertial compensation)
@@ -126,3 +143,24 @@ If you are experiencing any **stability issues** (e.g., jitter), try the followi
 * Increase the coefficient of friction and/or decrease the coefficient of restitution between the actors in the scene. However, be careful not to violate physically-reasonable ranges (e.g., friction values in excess of 2.0).
 
 * Tune the gains of your controllers. Instability during robot-object contact may also be a result of poorly-tuned controllers, rather than underlying physics simulation issues. As in the real world, some controllers can be notoriously hard to tune.
+
+Known Issues
+------------
+
+* If Isaac Gym is terminated during the SDF generation process, the SDF cache may become corrupted. You can resolve this by clearing the SDF cache and restarting Gym. For more details, see [this resolution](https://github.com/NVIDIA-Omniverse/IsaacGymEnvs/issues/53).
+
+Citing Factory
+--------------
+
+If you use the Factory simulation methods (e.g., SDF collisions, contact reduction) or Factory learning tools (e.g., assets, environments, or controllers) in your work, please cite the following paper:
+```
+@inproceedings{
+	narang2022factory,
+	author = {Yashraj Narang and Kier Storey and Iretiayo Akinola and Miles Macklin and Philipp Reist and Lukasz Wawrzyniak and Yunrong Guo and Adam Moravanszky and Gavriel State and Michelle Lu and Ankur Handa and Dieter Fox},
+	title = {Factory: Fast contact for robotic assembly},
+	booktitle = {Robotics: Science and Systems},
+	year = {2022}
+} 
+```
+
+Also note that our original formulations of SDF collisions and contact reduction were developed by [Macklin, et al.](https://dl.acm.org/doi/abs/10.1145/3384538) and [Moravanszky and Terdiman](https://scholar.google.com/scholar?q=Game+Programming+Gems+4%2C+chapter+Fast+Contact+Reduction+for+Dynamics+Simulation), respectively.

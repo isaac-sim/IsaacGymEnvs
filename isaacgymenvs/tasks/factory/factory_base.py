@@ -41,6 +41,7 @@ import os
 import sys
 import torch
 
+from gym import logger
 from isaacgym import gymapi, gymtorch, torch_utils
 from isaacgymenvs.tasks.base.vec_task import VecTask
 import isaacgymenvs.tasks.factory.factory_control as fc
@@ -500,6 +501,11 @@ class FactoryBase(VecTask, FactoryABCBase):
                                                         gymtorch.unwrap_tensor(self.dof_torque),
                                                         gymtorch.unwrap_tensor(self.franka_actor_ids_sim),
                                                         len(self.franka_actor_ids_sim))
+
+    def print_sdf_warning(self):
+        """Generate SDF warning message."""
+
+        logger.warn('Please be patient: SDFs may be generating, which may take a few minutes. Terminating prematurely may result in a corrupted SDF cache.')
 
     def enable_gravity(self, gravity_mag):
         """Enable gravity."""

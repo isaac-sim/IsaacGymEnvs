@@ -80,6 +80,7 @@ class FactoryEnvNutBolt(FactoryBase, FactoryABCEnv):
         upper = gymapi.Vec3(self.cfg_base.env.env_spacing, self.cfg_base.env.env_spacing, self.cfg_base.env.env_spacing)
         num_per_row = int(np.sqrt(self.num_envs))
 
+        self.print_sdf_warning()
         franka_asset, table_asset = self.import_franka_assets()
         nut_asset, bolt_asset = self._import_env_assets()
         self._create_actors(lower, upper, num_per_row, franka_asset, nut_asset, bolt_asset, table_asset)

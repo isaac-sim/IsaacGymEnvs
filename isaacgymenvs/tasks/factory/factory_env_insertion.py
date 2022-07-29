@@ -80,6 +80,7 @@ class FactoryEnvInsertion(FactoryBase, FactoryABCEnv):
         upper = gymapi.Vec3(self.cfg_base.env.env_spacing, self.cfg_base.env.env_spacing, self.cfg_base.env.env_spacing)
         num_per_row = int(np.sqrt(self.num_envs))
 
+        self.print_sdf_warning()
         franka_asset, table_asset = self.import_franka_assets()
         plug_assets, socket_assets = self._import_env_assets()
         self._create_actors(lower, upper, num_per_row, franka_asset, plug_assets, socket_assets, table_asset)
