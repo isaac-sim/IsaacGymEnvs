@@ -93,6 +93,7 @@ def launch_rlg_hydra(cfg: DictConfig):
             sync_tensorboard=True,
             name=run_name,
             resume="allow",
+            monitor_gym=True,
         )
 
     def create_env_thunk(**kwargs):
@@ -151,28 +152,6 @@ def launch_rlg_hydra(cfg: DictConfig):
     os.makedirs(experiment_dir, exist_ok=True)
     with open(os.path.join(experiment_dir, 'config.yaml'), 'w') as f:
         f.write(OmegaConf.to_yaml(cfg))
-
-    if cfg.multi_gpu:
-        import horovod.torch as hvd
-
-        rank = hvd.rank()
-    else:
-        rank = 0
-
-    if cfg.wandb_activate and rank == 0:
-        # Make sure to install WandB if you actually use this.
-        import wandb
-
-        wandb.init(
-            project=cfg.wandb_project,
-            group=cfg.wandb_group,
-            entity=cfg.wandb_entity,
-            config=cfg_dict,
-            sync_tensorboard=True,
-            id=run_name,
-            resume="allow",
-            monitor_gym=True,
-        )
 
     runner.run({
         'train': not cfg.test,
