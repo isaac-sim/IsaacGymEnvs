@@ -73,12 +73,11 @@ class FactoryTaskNutBoltPlace(FactoryEnvNutBolt, FactoryABCTask):
         self.cfg_task = omegaconf.OmegaConf.create(self.cfg)
         self.max_episode_length = self.cfg_task.rl.max_episode_length  # required instance var for VecTask
 
-        asset_info_path = os.path.join('..', '..', 'assets', 'factory', 'yaml',
-                                       'factory_asset_info_nut_bolt.yaml')  # relative to Gym's Hydra search path (cfg dir)
-        self.asset_info_insertion = hydra.compose(config_name=asset_info_path)
-        self.asset_info_insertion = self.asset_info_insertion['']['']['']['']['']['']['assets']['factory']['yaml']  # strip superfluous nesting
+        asset_info_path = '../../assets/factory/yaml/factory_asset_info_nut_bolt.yaml'  # relative to Gym's Hydra search path (cfg dir)
+        self.asset_info_nut_bolt = hydra.compose(config_name=asset_info_path)
+        self.asset_info_nut_bolt = self.asset_info_nut_bolt['']['']['']['']['']['']['assets']['factory']['yaml']  # strip superfluous nesting
 
-        ppo_path = os.path.join('train/FactoryTaskNutBoltPlacePPO.yaml')  # relative to Gym's Hydra search path (cfg dir)
+        ppo_path = 'train/FactoryTaskNutBoltPlacePPO.yaml'  # relative to Gym's Hydra search path (cfg dir)
         self.cfg_ppo = hydra.compose(config_name=ppo_path)
         self.cfg_ppo = self.cfg_ppo['train']  # strip superfluous nesting
 

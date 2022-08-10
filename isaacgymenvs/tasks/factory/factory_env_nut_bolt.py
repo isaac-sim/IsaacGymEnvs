@@ -65,11 +65,11 @@ class FactoryEnvNutBolt(FactoryBase, FactoryABCEnv):
         cs = hydra.core.config_store.ConfigStore.instance()
         cs.store(name='factory_schema_config_env', node=FactorySchemaConfigEnv)
 
-        config_path = os.path.join('task', 'FactoryEnvNutBolt.yaml')  # relative to Hydra search path (cfg dir)
+        config_path = 'task/FactoryEnvNutBolt.yaml'  # relative to Hydra search path (cfg dir)
         self.cfg_env = hydra.compose(config_name=config_path)
         self.cfg_env = self.cfg_env['task']  # strip superfluous nesting
 
-        asset_info_path = os.path.join('..', '..', 'assets', 'factory', 'yaml', f'factory_asset_info_nut_bolt.yaml')
+        asset_info_path = '../../assets/factory/yaml/factory_asset_info_nut_bolt.yaml'
         self.asset_info_nut_bolt = hydra.compose(config_name=asset_info_path)
         self.asset_info_nut_bolt = self.asset_info_nut_bolt['']['']['']['']['']['']['assets']['factory']['yaml']  # strip superfluous nesting
 

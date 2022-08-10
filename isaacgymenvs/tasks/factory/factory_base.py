@@ -70,12 +70,11 @@ class FactoryBase(VecTask, FactoryABCBase):
         cs = hydra.core.config_store.ConfigStore.instance()
         cs.store(name='factory_schema_config_base', node=FactorySchemaConfigBase)
 
-        config_path = os.path.join('task/FactoryBase.yaml')  # relative to Gym's Hydra search path (cfg dir)
+        config_path = 'task/FactoryBase.yaml'  # relative to Gym's Hydra search path (cfg dir)
         self.cfg_base = hydra.compose(config_name=config_path)
         self.cfg_base = self.cfg_base['task']  # strip superfluous nesting
 
-        asset_info_path = os.path.join('..', '..', 'assets', 'factory', 'yaml',
-                                       'factory_asset_info_franka_table.yaml')  # relative to Gym's Hydra search path (cfg dir)
+        asset_info_path = '../../assets/factory/yaml/factory_asset_info_franka_table.yaml'  # relative to Gym's Hydra search path (cfg dir)
         self.asset_info_franka_table = hydra.compose(config_name=asset_info_path)
         self.asset_info_franka_table = self.asset_info_franka_table['']['']['']['']['']['']['assets']['factory']['yaml']  # strip superfluous nesting
 
