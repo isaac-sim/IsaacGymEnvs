@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+1.3.1
+-----
+
+* Moved domain randomization utility code into IsaacGymEnvs
+* Tweaks and additional documentation for Factory examples and SDF collisions
+
 1.3.0
 -----
 
