@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+1.3.2
+-----
+* Fix shadow hand and allegro hand random joint position sampling on reset
+
 1.3.1
 -----
 
