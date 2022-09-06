@@ -4,8 +4,7 @@ name: Ant
 physics_engine: ${..physics_engine}
 
 # if given, will override the device setting in gym.
-env: 
-#  numEnvs: ${...num_envs}
+env:
   numEnvs: ${resolve_default:4096,${...num_envs}}
   envSpacing: 5
   episodeLength: 1000

@@ -50,10 +50,15 @@ APIs for setting select ants into a valid starting state.
 
 It can be launched with command line argument `task=Ant`.
 
-Config files used for this task are:
+Config files used for this task to train with PPO are:
 
 -   **Task config**: [Ant.yaml](../isaacgymenvs/cfg/task/Ant.yaml)
 -   **rl_games training config**: [AntPPO.yaml](../isaacgymenvs/cfg/train/AntPPO.yaml)
+
+With SAC:
+
+-   **Task config**: [AntSAC.yaml](../isaacgymenvs/cfg/task/AntSAC.yaml)
+-   **rl_games training config**: [AntSAC.yaml](../isaacgymenvs/cfg/train/AntSAC.yaml)
 
 ![Ant_running](https://user-images.githubusercontent.com/463063/125260924-a5969800-e2b5-11eb-931c-116cc90d4bbe.gif) 
 
@@ -68,10 +73,15 @@ contacts with the ground plane on the humanoids' feet.
 
 It can be launched with command line argument `task=Humanoid`.
 
-Config files used for this task are:
+Config files used for this task to train with PPO are:
 
 -   **Task config**: [Humanoid.yaml](../isaacgymenvs/cfg/task/Humanoid.yaml)
 -   **rl_games training config**: [HumanoidPPO.yaml](../isaacgymenvs/cfg/train/HumanoidPPO.yaml)
+
+With SAC:
+
+-   **Task config**: [HumanoidSAC.yaml](../isaacgymenvs/cfg/task/HumanoidSAC.yaml)
+-   **rl_games training config**: [HumanoidSAC.yaml](../isaacgymenvs/cfg/train/HumanoidSAC.yaml)
 
 ![Humanoid_running](https://user-images.githubusercontent.com/463063/125266095-4edf8d00-e2ba-11eb-9c1a-4dc1524adf71.gif)
 

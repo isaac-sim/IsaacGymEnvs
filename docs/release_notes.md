@@ -3,13 +3,15 @@ Release Notes
 
 1.3.2
 -----
-* Fix shadow hand and allegro hand random joint position sampling on reset
+
+* Added SAC training examples for Ant and Humanoid envs. To run: ``python train.py task=AntSAC train=AntSAC`` and ``python train.py task=HumanoidSAC train=HumanoidSAC``
+* Fix shadow hand and allegro hand random joint position sampling on reset.
 
 1.3.1
 -----
 
-* Moved domain randomization utility code into IsaacGymEnvs
-* Tweaks and additional documentation for Factory examples and SDF collisions
+* Moved domain randomization utility code into IsaacGymEnvs.
+* Tweaks and additional documentation for Factory examples and SDF collisions.
 
 1.3.0
 -----
