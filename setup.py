@@ -14,7 +14,7 @@ root_dir = os.path.dirname(os.path.realpath(__file__))
 # Minimum dependencies required prior to installation
 INSTALL_REQUIRES = [
     # RL
-    "gym",
+    "gym==0.24.1",
     "torch",
     "omegaconf",
     "termcolor",
