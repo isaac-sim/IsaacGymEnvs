@@ -1,20 +1,15 @@
 # See schema in factory_schema_config_task.py for descriptions of common parameters.
 
 defaults:
+    - FactoryBase
     - _self_
     # - /factory_schema_config_task
 
 name: FactoryTaskGears
 physics_engine: ${..physics_engine}
 
-sim:
-    use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
-    up_axis: "z"
-    dt: 0.016667  # required, but overridden in FactoryBase.yaml
-    gravity: [0.0, 0.0, -9.81]  # required, but overridden in FactoryBase.yaml
-
 env:
-    numEnvs: 128
+    numEnvs: ${resolve_default:128,${...num_envs}}
     numObservations: 32
     numActions: 12
 

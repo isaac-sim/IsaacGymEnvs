@@ -17,13 +17,28 @@ There are 5 Factory example tasks: **FactoryTaskNutBoltPick**, **FactoryTaskNutB
 Assets
 ------
 
-Meshes for our assets are located in the [mesh subdirectory](../../assets/factory/mesh). The meshes for the electrical connectors are currently unavailable, as the raw designs were originally sourced from manufacturers and are undergoing approval for release.
+CAD models for our assets are as follows:
+* [Nuts and bolts](https://cad.onshape.com/documents/c2ee3c5f2459d77465e93656/w/5e4c870b98f1d9a9b1990894/e/7b2e74610b9a1d6d9efa0372)
+* [Pegs and holes](https://cad.onshape.com/documents/191ab8c549716821b170f501/w/639301b3a514d7484ebb7534/e/08f6dfb9e7d8782b502aea7b)
+* [Gears](https://cad.onshape.com/documents/a0587101f8bbd02384e2db0c/w/06e85c5fe55bdf224720e2bb/e/946907a4305ef6b82d7d287b)
+
+For the 3 electrical connectors described in the paper (i.e., BNC, D-sub, and USB), as well as 2 other connectors on the NIST Task Board (i.e., RJ45 and Waterproof), we sourced high-quality CAD models from online part repositories or manufacturer websites. We then modified them manually in CAD software to simplify external features (e.g., remove long cables), occasionally simplify internal features (e.g., remove internal elements that require deformable-body simulation, which Gym does not currently expose from PhysX 5.1), and exactly preserve most contact geometry. Due to licensing issues, we cannot currently release these CAD files. However, to prevent further delays, we provide links below to the websites that host the original high-quality CAD models that we subsequently modified:
+* [BNC plug](https://www.digikey.com/en/products/detail/amphenol-rf/112420/1989856)
+* [BNC socket](https://www.digikey.com/en/products/detail/molex/0731010120/1465130)
+* [D-sub plug](https://www.digikey.com/en/products/detail/assmann-wsw-components/A-DSF-25LPIII-Z/924268)
+* [D-sub socket](https://www.digikey.com/en/products/detail/assmann-wsw-components/A-DFF-25LPIII-Z/924259)
+* [RJ45 plug](https://www.digikey.com/en/products/detail/harting/09454521509/3974500)
+* [RJ45 socket](https://www.digikey.com/en/products/detail/amphenol-icc-fci/54602-908LF/1001360)
+* [USB plug](https://www.digikey.com/en/products/detail/bulgin/PX0441-2M00/1625994)
+* [USB socket](https://www.digikey.com/en/products/detail/amphenol-icc-fci/87520-0010BLF/1001359)
+* [Waterproof plug](https://b2b.harting.com/ebusiness/en_us/Han-High-Temp-10E-c-Male/09338102604)
+* [Waterproof socket](https://b2b.harting.com/ebusiness/en_us/Han-High-Temp-10E-c-Female/09338102704)
+
+Meshes for our assets are located in the [mesh subdirectory](../../assets/factory/mesh). Again, the meshes for the electrical connectors are currently unavailable.
 
 URDF files for our assets are located in the [urdf subdirectory](../../assets/factory/urdf/).
 
 There are also YAML files located in the [yaml subdirectory](../../assets/factory/yaml/). These files contain asset-related constants that are used by the Factory RL examples.
-
-Onshape CAD files for all the assets will also be made available shortly.
 
 Classes, Modules, and Abstract Base Classes
 -------------------------------------------

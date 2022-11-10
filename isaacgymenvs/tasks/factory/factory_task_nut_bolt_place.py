@@ -211,7 +211,7 @@ class FactoryTaskNutBoltPlace(FactoryEnvNutBolt, FactoryABCTask):
                                                 do_scale=False)
             self.gym.simulate(self.sim)
             self.render()
-        self.enable_gravity(gravity_mag=self.cfg_base.sim.gravity_mag)
+        self.enable_gravity(gravity_mag=abs(self.cfg_base.sim.gravity[2]))
 
         self._randomize_gripper_pose(env_ids, sim_steps=self.cfg_task.env.num_gripper_move_sim_steps)
 

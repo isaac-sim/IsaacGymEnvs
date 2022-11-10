@@ -1,6 +1,7 @@
 # See schema in factory_schema_config_env.py for descriptions of common parameters.
 
 defaults:
+    - FactoryBase
     - _self_
     - /factory_schema_config_env
 

@@ -41,13 +41,33 @@ class Mode:
 
 
 @dataclass
+class PhysX:
+    solver_type: int  # default = 1 (Temporal Gauss-Seidel)
+    num_threads: int
+    num_subscenes: int
+    use_gpu: bool
+    num_position_iterations: int  # number of position iterations for solver (default = 4)
+    num_velocity_iterations: int  # number of velocity iterations for solver (default = 1)
+    contact_offset: float  # default = 0.02
+    rest_offset: float  # default = 0.001
+    bounce_threshold_velocity: float  # default = 0.01
+    max_depenetration_velocity: float  # default = 100.0
+    friction_offset_threshold: float  # default = 0.04
+    friction_correlation_distance: float  # default = 0.025
+    max_gpu_contact_pairs: int  # default = 1024 * 1024
+    default_buffer_size_multiplier: float
+    contact_collection: int  # 0: CC_NEVER (do not collect contact info), 1: CC_LAST_SUBSTEP (collect contact info on last substep), 2: CC_ALL_SUBSTEPS (collect contact info at all substeps)
+
+
+@dataclass
 class Sim:
     dt: float  # timestep size (default = 1.0 / 60.0)
     num_substeps: int  # number of substeps (default = 2)
-    num_pos_iters: int  # number of position iterations for PhysX TGS solver (default = 4)
-    num_vel_iters: int  # number of velocity iterations for PhysX TGS solver (default = 1)
-    gravity_mag: float  # magnitude of gravitational acceleration
+    up_axis: str
+    use_gpu_pipeline: bool
+    gravity: list  # gravitational acceleration vector
     add_damping: bool  # add damping to stabilize gripper-object interactions
+    physx: PhysX
 
 
 @dataclass

@@ -337,7 +337,7 @@ class FactoryTaskNutBoltScrew(FactoryEnvNutBolt, FactoryABCTask):
     def _get_curr_successes(self):
         """Get success mask at current timestep."""
 
-        curr_successes = torch.empty((self.num_envs,), dtype=torch.bool, device=self.device)
+        curr_successes = torch.zeros((self.num_envs,), dtype=torch.bool, device=self.device)
 
         # If nut is close enough to target pos
         is_close = torch.where(self.nut_dist_to_target < self.thread_pitches.squeeze(-1) * 2,
