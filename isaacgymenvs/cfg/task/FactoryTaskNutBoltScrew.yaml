@@ -72,7 +72,7 @@ ctrl:
         task_deriv_gains: [8, 8, 8, 8, 8, 8]
     operational_space_motion:
         motion_ctrl_axes: [0, 0, 1, 0, 0, 1]
-        task_prop_gains: [1, 1, 1, 1, 1, 100]
+        task_prop_gains: [1, 1, 1, 1, 1, 200]
         task_deriv_gains: [1, 1, 1, 1, 1, 1]
     open_loop_force:
         force_ctrl_axes: [0, 0, 1, 0, 0, 0]

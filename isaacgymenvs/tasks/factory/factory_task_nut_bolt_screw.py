@@ -155,13 +155,13 @@ class FactoryTaskNutBoltScrew(FactoryEnvNutBolt, FactoryABCTask):
         curr_successes = self._get_curr_successes()
         curr_failures = self._get_curr_failures(curr_successes)
 
-        self._update_reset_buf(curr_failures)
+        self._update_reset_buf(curr_successes, curr_failures)
         self._update_rew_buf(curr_successes)
 
-    def _update_reset_buf(self, curr_failures):
+    def _update_reset_buf(self, curr_successes, curr_failures):
         """Assign environments for reset if successful or failed."""
 
-        self.reset_buf[:] = curr_failures
+        self.reset_buf[:] = torch.logical_or(curr_successes, curr_failures)
 
     def _update_rew_buf(self, curr_successes):
         """Compute reward at current timestep."""
@@ -340,7 +340,7 @@ class FactoryTaskNutBoltScrew(FactoryEnvNutBolt, FactoryABCTask):
         curr_successes = torch.zeros((self.num_envs,), dtype=torch.bool, device=self.device)
 
         # If nut is close enough to target pos
-        is_close = torch.where(self.nut_dist_to_target < self.thread_pitches.squeeze(-1) * 2,
+        is_close = torch.where(self.nut_dist_to_target < self.thread_pitches.squeeze(-1),
                                torch.ones_like(curr_successes),
                                torch.zeros_like(curr_successes))
 
