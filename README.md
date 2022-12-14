@@ -27,7 +27,7 @@ pip install -e .
 
 ### Creating an environment
 
-We offer an easy-to-use API for creating preset vectorized environments. For more info on what an vectorized environment is and its usage, please refer to the Gym's [documentation](https://www.gymlibrary.ml/content/vector_api/).
+We offer an easy-to-use API for creating preset vectorized environments. For more info on what a vectorized environment is and its usage, please refer to the Gym library [documentation](https://www.gymlibrary.dev/content/vectorising/#vectorized-environments).
 
 ```python
 import isaacgym
