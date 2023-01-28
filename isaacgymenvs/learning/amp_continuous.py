@@ -252,6 +252,20 @@ class AMPAgent(common_agent.CommonAgent):
 
         return train_info
 
+    def save(self, fn):
+        state = self.get_full_state_weights()
+        torch_ext.save_checkpoint(fn, state)
+        import wandb 
+        wandb.save(fn + ".pth", policy="now")
+
+    def restore_from_wandb(self, fn):
+        import wandb
+        api = wandb.Api()
+        run = api.run(f"{self.cfg.wandb.entity}/{self.cfg.wandb.project}/{self.cfg.wandb.run_id}")
+        model = run.file(fn)
+        model.download(fn)
+        super().restore(self, fn)
+
     def calc_gradients(self, input_dict):
         self.set_train()
 

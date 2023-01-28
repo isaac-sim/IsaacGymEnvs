@@ -35,7 +35,7 @@ import isaacgym
 import os
 import hydra
 import yaml
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig, OmegaConf, open_dict
 from hydra.utils import to_absolute_path
 import gym
 
@@ -95,6 +95,14 @@ def launch_rlg_hydra(cfg: DictConfig):
             resume="allow",
             monitor_gym=True,
         )
+
+        OmegaConf.set_struct(cfg, True)
+        with open_dict(cfg):
+            cfg.train.params.wandb = {}
+            cfg.train.params.wandb.group = run.group
+            cfg.train.params.wandb.entity = run.entity
+            cfg.train.params.wandb.project = run.project
+            cfg.train.params.wandb.run_id = run.id
 
     def create_env_thunk(**kwargs):
         envs = isaacgymenvs.make(
