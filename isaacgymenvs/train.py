@@ -140,6 +140,7 @@ def launch_rlg_hydra(cfg: DictConfig):
         return runner
 
     rlg_config_dict = omegaconf_to_dict(cfg.train)
+    rlg_config_dict['params']['config']['device']=cfg.rl_device
 
     # convert CLI arguments into dictionory
     # create runner and set the settings
