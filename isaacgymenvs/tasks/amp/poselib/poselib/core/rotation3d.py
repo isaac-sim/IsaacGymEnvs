@@ -416,7 +416,7 @@ def rot_matrix_from_quaternion(q):
 
     R0 = torch.stack([R00, R01, R02], dim=-1)
     R1 = torch.stack([R10, R11, R12], dim=-1)
-    R2 = torch.stack([R10, R21, R22], dim=-1)
+    R2 = torch.stack([R20, R21, R22], dim=-1)
 
     R = torch.stack([R0, R1, R2], dim=-2)
 
