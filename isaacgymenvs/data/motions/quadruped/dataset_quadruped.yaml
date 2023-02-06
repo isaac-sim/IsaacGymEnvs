@@ -1,0 +1,5 @@
+motions:
+  - file: "dog_trot.txt"
+    weight: 0.5
+  - file: "dog_pace.txt"
+    weight: 0.5
