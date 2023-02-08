@@ -7,6 +7,7 @@ Release Notes
 * Switched all environments that use contacts to use CC_LAST_SUBSTEP collection mode to avoid bug with CC_ALL_SUBSTEP mode. The CC_ALL_SUBSTEP mode can produce incorrect contact forces. Only HumanoidAMP and Factory environments are affected by this. 
 * Added SAC training examples for Ant and Humanoid envs. To run: ``python train.py task=AntSAC train=AntSAC`` and ``python train.py task=HumanoidSAC train=HumanoidSAC``
 * Fix shadow hand and allegro hand random joint position sampling on reset.
+* Switched to using IsaacAlgoObserver from rl_games instead of the custom RLGPUAlgoObserver.
 
 1.3.1
 -----

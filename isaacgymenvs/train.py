@@ -48,10 +48,11 @@ from isaacgymenvs.utils.utils import set_np_formatting, set_seed
 # Resolvers used in hydra configs (see https://omegaconf.readthedocs.io/en/2.1_branch/usage.html#resolvers)
 @hydra.main(config_name="config", config_path="./cfg")
 def launch_rlg_hydra(cfg: DictConfig):
-    from isaacgymenvs.utils.rlgames_utils import RLGPUEnv, RLGPUAlgoObserver, get_rlgames_env_creator
+    from isaacgymenvs.utils.rlgames_utils import RLGPUEnv, get_rlgames_env_creator
     from rl_games.common import env_configurations, vecenv
     from rl_games.torch_runner import Runner
     from rl_games.algos_torch import model_builder
+    from rl_games.common.algo_observer import IsaacAlgoObserver
     from isaacgymenvs.learning import amp_continuous
     from isaacgymenvs.learning import amp_players
     from isaacgymenvs.learning import amp_models
@@ -143,7 +144,7 @@ def launch_rlg_hydra(cfg: DictConfig):
 
     # convert CLI arguments into dictionory
     # create runner and set the settings
-    runner = build_runner(RLGPUAlgoObserver())
+    runner = build_runner(IsaacAlgoObserver())
     runner.load(rlg_config_dict)
     runner.reset()
 
