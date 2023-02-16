@@ -21,6 +21,8 @@ INSTALL_REQUIRES = [
     "hydra-core>=1.1",
     "rl-games==1.5.2",
     "pyvirtualdisplay",
+    "wandb",
+    "pybullet"
     ]
 
 
