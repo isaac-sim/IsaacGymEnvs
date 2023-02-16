@@ -23,8 +23,8 @@ import numpy as np
 import yaml
 import torch
 
-from motion_imitation.utilities import pose3d
-from motion_imitation.utilities import motion_util
+from isaacgymenvs.utilities import pose3d
+from isaacgymenvs.utilities import motion_util
 from pybullet_utils import transformations
 
 from isaacgym.torch_utils import to_torch

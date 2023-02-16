@@ -37,7 +37,7 @@ from isaacgym import gymapi
 from isaacgym.torch_utils import *
 
 from isaacgymenvs.tasks.quadruped_amp_base import QuadrupedAMPBase
-from isaacgymenvs.tasks.quadruped_motion_data import MotionLib
+from isaacgymenvs.utilities.quadruped_motion_data import MotionLib
 
 from isaacgym.torch_utils import *
 from isaacgymenvs.utils.torch_jit_utils import *
