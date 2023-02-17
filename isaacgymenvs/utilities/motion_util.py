@@ -23,7 +23,7 @@ os.sys.path.insert(0, parentdir)
 
 import numpy as np
 
-from motion_imitation.utilities import pose3d
+from isaacgymenvs.utilities import pose3d
 from pybullet_utils import transformations
 
 
