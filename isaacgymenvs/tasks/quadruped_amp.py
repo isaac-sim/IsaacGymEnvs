@@ -191,7 +191,7 @@ class QuadrupedAMP(QuadrupedAMPBase):
             or self._state_init == QuadrupedAMP.StateInit.Hybrid):
             motion_times = self._motion_lib.sample_time(motion_ids)
         elif (self._state_init == QuadrupedAMP.StateInit.Start):
-            motion_times = torch.zeros(num_envs, device=self.device)
+            motion_times = np.zeros(num_envs)
         else:
             assert(False), "Unsupported state initialization strategy: {:s}".format(str(self._state_init))
 
