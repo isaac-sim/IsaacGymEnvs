@@ -60,7 +60,7 @@ if __name__ == "__main__":
     end_time = args.end_time_frac * total_time
     n_timesteps = args.num_timesteps
 
-    ts = np.linspace(start_time, total_time, n_timesteps)
+    ts = np.linspace(start_time, end_time, n_timesteps)
     frames = np.zeros((n_timesteps, 19))
     frame_vels = np.zeros((n_timesteps, 18))
 
