@@ -257,8 +257,8 @@ class QuadrupedAMPBase(VecTask):
 
     def compute_reset(self):
         self.reset_buf, self._terminate_buf = compute_humanoid_reset(
+            self.reset_buf,
             self.progress_buf,
-            self._terminate_buf,
             self.root_states, 
             self.contact_forces,
             self.knee_indices,
