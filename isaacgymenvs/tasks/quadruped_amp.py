@@ -57,6 +57,7 @@ class QuadrupedAMP(QuadrupedAMPBase):
         # AMP-specific
         state_init = cfg["env"]["stateInit"]
         self._state_init = QuadrupedAMP.StateInit[state_init]
+        self._enable_ref_state_init_height = cfg["env"]["enableRefStateInitHeight"]
         self._hybrid_init_prob = cfg["env"]["hybridInitProb"]
         self._num_amp_obs_steps = cfg["env"]["numAMPObsSteps"]
         self._num_amp_obs_per_step = 3 + 4 + 3 + 3 + 12 + 12 # root pos, root orn, root lin vel, root ang vel, dof pos, dof vel 
@@ -197,8 +198,12 @@ class QuadrupedAMP(QuadrupedAMPBase):
 
         root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel \
                = self._motion_lib.get_motion_state(motion_ids, motion_times)
-        # Set root pos to begin at same position
-        root_pos[:,:3] = self.initial_root_states[env_ids,:3]
+        if self._enable_ref_state_init_height:
+            # Set root (x,y) pos to begin at same position
+            root_pos[:,:2] = self.initial_root_states[env_ids,:2]
+        else:
+            # Additionally set z-pos to begin at task.env.baseInitState.pos
+            root_pos[:,:3] = self.initial_root_states[env_ids,:3]
 
         self._set_env_state(env_ids=env_ids, 
                             root_pos=root_pos, 
