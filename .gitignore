@@ -1,4 +1,6 @@
 videos
+*.mp4
+
 /isaacgymenvs/logs
 *train_dir*
 *ige_logs*

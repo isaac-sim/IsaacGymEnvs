@@ -35,7 +35,7 @@ import isaacgym
 import os
 import hydra
 import yaml
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig, OmegaConf, open_dict
 from hydra.utils import to_absolute_path
 import gym
 
@@ -95,6 +95,14 @@ def launch_rlg_hydra(cfg: DictConfig):
             resume="allow",
             monitor_gym=True,
         )
+
+        OmegaConf.set_struct(cfg, True)
+        with open_dict(cfg):
+            cfg.train.params.config.wandb = {}
+            cfg.train.params.config.wandb.group = run.group
+            cfg.train.params.config.wandb.entity = run.entity
+            cfg.train.params.config.wandb.project = run.project
+            cfg.train.params.config.wandb.run_id = run.id
 
     def create_env_thunk(**kwargs):
         envs = isaacgymenvs.make(
@@ -161,6 +169,8 @@ def launch_rlg_hydra(cfg: DictConfig):
     })
 
     if cfg.wandb_activate and rank == 0:
+        # Enable wandb saving for all algorithms
+        wandb.save(f'runs/{cfg.task_name}/nn/{cfg.task_name}.pth')
         wandb.finish()
 
 if __name__ == "__main__":
