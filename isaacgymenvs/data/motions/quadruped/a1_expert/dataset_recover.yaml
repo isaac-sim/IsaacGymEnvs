@@ -1,0 +1,11 @@
+motions:
+  - file: "abs_recover_mild.txt"
+    weight: 0.2
+  - file: "back_recover_mild.txt"
+    weight: 0.2
+  - file: "left_recover_mild.txt"
+    weight: 0.2
+  - file: "right_recover_mild.txt"
+    weight: 0.2
+  - file: "abs_nominal_recover_mild.txt"
+    weight: 0.2

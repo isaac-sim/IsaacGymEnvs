@@ -44,6 +44,24 @@ from isaacgymenvs.utils.torch_jit_utils import *
 
 from typing import Tuple, Dict
 
+def random_uniform(n: int, lower: torch.Tensor, upper: torch.Tensor, device):
+    return torch.unsqueeze(upper - lower, 0) * torch.rand((n, ) + upper.shape, device=device)
+
+def random_uniform_quaternion(n: int, device) -> torch.Tensor:
+    """
+    Reference: Top answer to https://stackoverflow.com/questions/31600717/how-to-generate-a-random-quaternion-quickly
+    """
+    two_pi = np.pi * 2
+    u = torch.zeros(n).uniform_(0., 1)
+    v = torch.zeros(n).uniform_(0., 1)
+    w = torch.zeros(n).uniform_(0., 1)
+
+    qx = torch.sqrt(1-u) * torch.sin(two_pi * v)
+    qy = torch.sqrt(1-u) * torch.cos(two_pi * v)
+    qz = torch.sqrt(u) * torch.sin(two_pi * w)
+    qw = torch.sqrt(u) * torch.cos(two_pi * w)
+    q = torch.stack([qx, qy, qz, qw], dim=-1)
+    return q.to(device)
 
 class QuadrupedAMP(QuadrupedAMPBase):
     class StateInit(Enum):
@@ -51,6 +69,7 @@ class QuadrupedAMP(QuadrupedAMPBase):
         Start = 1
         Random = 2
         Hybrid = 3
+        RandomPose = 4
 
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
 
@@ -149,6 +168,8 @@ class QuadrupedAMP(QuadrupedAMPBase):
     def _reset_actors(self, env_ids):
         if (self._state_init == QuadrupedAMP.StateInit.Default):
             self._reset_default(env_ids)
+        elif (self._state_init == QuadrupedAMP.StateInit.RandomPose):
+            self._reset_random_pose(env_ids)
         elif (self._state_init == QuadrupedAMP.StateInit.Start
               or self._state_init == QuadrupedAMP.StateInit.Random):
             self._reset_ref_state_init(env_ids)
@@ -218,6 +239,27 @@ class QuadrupedAMP(QuadrupedAMPBase):
         self._reset_ref_motion_times = motion_times
         return
 
+    def _reset_random_pose(self, env_ids):
+        """ Reset to a random starting pose """
+        # TODO: Undo hardcoding of various constants
+        num_envs = len(env_ids)
+        dof_pos = random_uniform(num_envs, self.dof_limits_lower, self.dof_limits_upper, device=self.device)
+        dof_vel = torch.zeros_like(self.default_dof_vel[env_ids]).uniform_(-0.2, 0.2) # m/s
+        root_pos = self.initial_root_states[env_ids,:3].clone()
+        root_pos[:,2] = torch.zeros_like(self.initial_root_states[env_ids,2]).uniform_(0.6, 1.2) # m
+        root_rot = random_uniform_quaternion(num_envs, device=self.device)
+        root_vel = torch.zeros_like(self.initial_root_states[env_ids,7:10]).uniform_(-0.1, 0.1)
+        root_ang_vel = torch.zeros_like(self.initial_root_states[env_ids,10:13]).uniform_(-0.1, 0.1)
+
+        self._set_env_state(env_ids=env_ids, 
+                            root_pos=root_pos, 
+                            root_rot=root_rot, 
+                            dof_pos=dof_pos, 
+                            root_vel=root_vel, 
+                            root_ang_vel=root_ang_vel, 
+                            dof_vel=dof_vel)
+
+
     def _reset_hybrid_state_init(self, env_ids):
         num_envs = env_ids.shape[0]
         ref_probs = to_torch(np.array([self._hybrid_init_prob] * num_envs), device=self.device)
@@ -227,9 +269,9 @@ class QuadrupedAMP(QuadrupedAMPBase):
         if (len(ref_reset_ids) > 0):
             self._reset_ref_state_init(ref_reset_ids)
 
-        default_reset_ids = env_ids[torch.logical_not(ref_init_mask)]
-        if (len(default_reset_ids) > 0):
-            self._reset_default(default_reset_ids)
+        random_pose_reset_ids = env_ids[torch.logical_not(ref_init_mask)]
+        if (len(random_pose_reset_ids) > 0):
+            self._reset_random_pose(random_pose_reset_ids)
 
         return
 
