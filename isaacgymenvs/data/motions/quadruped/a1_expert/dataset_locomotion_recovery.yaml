@@ -1,0 +1,19 @@
+motions:
+  - file: "trot_0.3mps.txt"
+    weight: 0.125
+  - file: "trot_0.6mps.txt"
+    weight: 0.125
+  - file: "gallop_0.9mps.txt"
+    weight: 0.125
+  - file: "bound_1.2mps.txt"
+    weight: 0.125
+  - file: "abs_recover_mild.txt"
+    weight: 0.1
+  - file: "back_recover_mild.txt"
+    weight: 0.1
+  - file: "left_recover_mild.txt"
+    weight: 0.1
+  - file: "right_recover_mild.txt"
+    weight: 0.1
+  - file: "abs_nominal_recover_mild.txt"
+    weight: 0.1

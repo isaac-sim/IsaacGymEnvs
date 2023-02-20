@@ -1,0 +1,9 @@
+motions:
+  - file: "trot_0.3mps.txt"
+    weight: 0.25
+  - file: "trot_0.6mps.txt"
+    weight: 0.25
+  - file: "gallop_0.9mps.txt"
+    weight: 0.25
+  - file: "bound_1.2mps.txt"
+    weight: 0.25
