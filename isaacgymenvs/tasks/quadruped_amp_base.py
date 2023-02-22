@@ -52,6 +52,7 @@ class QuadrupedAMPBase(VecTask):
         self._pd_control = self.cfg["env"]["pdControl"]
         self.power_scale = self.cfg["env"]["powerScale"]
         self.randomize = self.cfg["task"]["randomize"]
+        self.randomization_params = self.cfg["task"]["randomization_params"]
         
         self.debug_viz = self.cfg["env"]["enableDebugVis"]
         self.camera_follow = self.cfg["env"].get("cameraFollow", False)
