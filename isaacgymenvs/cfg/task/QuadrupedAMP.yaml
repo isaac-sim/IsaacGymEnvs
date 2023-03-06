@@ -21,7 +21,7 @@ env:
 
   localRootObs: True
   terminationHeight: 0.15
-  enableEarlyTermination: True
+  enableEarlyTermination: False
   enableRefStateInitHeight: False
 
   clipObservations: 5.0

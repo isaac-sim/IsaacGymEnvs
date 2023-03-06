@@ -33,6 +33,7 @@ import torch
 from isaacgym import gymtorch
 from isaacgym import gymapi
 from isaacgym.torch_utils import *
+from isaacgymenvs.utils.torch_jit_utils import *
 
 from isaacgymenvs.tasks.base.vec_task import VecTask
 
@@ -73,7 +74,7 @@ class QuadrupedAMPBase(VecTask):
         # default joint positions
         self.named_default_joint_angles = self.cfg["env"]["defaultJointAngles"]
 
-        self.cfg["env"]["numObservations"] = 45
+        self.cfg["env"]["numObservations"] = 1 + 6 + 3 + 3 + 12 + 12
         self.cfg["env"]["numActions"] = 12
 
         # Call super init earlier to initialize sim params
@@ -251,13 +252,13 @@ class QuadrupedAMPBase(VecTask):
             self._update_debug_viz()
 
     def compute_reward(self):
-        self.rew_buf[:] = compute_humanoid_reward(
+        self.rew_buf[:] = compute_dummy_reward(
             # tensors
             self.obs_buf,
         )
 
     def compute_reset(self):
-        self.reset_buf, self._terminate_buf = compute_humanoid_reset(
+        self.reset_buf, self._terminate_buf = compute_quadruped_reset(
             self.reset_buf,
             self.progress_buf,
             self.root_states, 
@@ -277,33 +278,19 @@ class QuadrupedAMPBase(VecTask):
 
         # TODO: Replace default_dof_pos with _pd_action_offset
         if env_ids is None:
-            self.obs_buf[:] = compute_anymal_observations(  # tensors
+            self.obs_buf[:] = compute_quadruped_observations(  # tensors
                                                             self.root_states,
                                                             self.dof_pos,
-                                                            self.default_dof_pos,
-                                                            self.dof_vel,
-                                                            self.gravity_vec,
-                                                            self.actions,
-                                                            # scales
-                                                            self.lin_vel_scale,
-                                                            self.ang_vel_scale,
-                                                            self.dof_pos_scale,
-                                                            self.dof_vel_scale
+                                                            self.dof_vel, 
+                                                            self._local_root_obs
             )
 
-        else: 
-            self.obs_buf[env_ids] = compute_anymal_observations(  # tensors
+        else:
+            self.obs_buf[env_ids] = compute_quadruped_observations(  # tensors
                                                             self.root_states[env_ids],
                                                             self.dof_pos[env_ids],
-                                                            self.default_dof_pos[env_ids],
-                                                            self.dof_vel[env_ids],
-                                                            self.gravity_vec[env_ids],
-                                                            self.actions[env_ids],
-                                                            # scales
-                                                            self.lin_vel_scale,
-                                                            self.ang_vel_scale,
-                                                            self.dof_pos_scale,
-                                                            self.dof_vel_scale
+                                                            self.dof_vel[env_ids], 
+                                                            self._local_root_obs
             )
 
     def reset_idx(self, env_ids):
@@ -410,13 +397,14 @@ class QuadrupedAMPBase(VecTask):
 
 
 @torch.jit.script
-def compute_humanoid_reward(obs_buf):
+def compute_dummy_reward(obs_buf):
+    """ A placeholder reward """
     # type: (Tensor) -> Tensor
-    reward = torch.ones_like(obs_buf[:, 0])
+    reward = torch.zeros_like(obs_buf[:, 0])
     return reward
 
 @torch.jit.script
-def compute_humanoid_reset(
+def compute_quadruped_reset(
     # tensors
     reset_buf, 
     progress_buf, 
@@ -441,31 +429,30 @@ def compute_humanoid_reset(
     return reset, terminated
 
 @torch.jit.script
-def compute_anymal_observations(root_states,
-                                dof_pos,
-                                default_dof_pos,
-                                dof_vel,
-                                gravity_vec,
-                                actions,
-                                lin_vel_scale,
-                                ang_vel_scale,
-                                dof_pos_scale,
-                                dof_vel_scale
-                                ):
+def compute_quadruped_observations(root_states, dof_pos, dof_vel, local_root_obs):
+    # type: (Tensor, Tensor, Tensor, bool) -> Tensor
+    root_pos = root_states[:, 0:3]
+    root_rot = root_states[:, 3:7]
+    root_vel = root_states[:, 7:10]
+    root_ang_vel = root_states[:, 10:13]
 
-    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float, float, float, float) -> Tensor
-    base_quat = root_states[:, 3:7]
-    base_lin_vel = quat_rotate_inverse(base_quat, root_states[:, 7:10]) * lin_vel_scale
-    base_ang_vel = quat_rotate_inverse(base_quat, root_states[:, 10:13]) * ang_vel_scale
-    projected_gravity = quat_rotate(base_quat, gravity_vec)
-    dof_pos_scaled = (dof_pos - default_dof_pos) * dof_pos_scale
+    # Root h in m, 1-dim
+    # root_h = root_pos[:, 2:3]
+    dummy_root_h = torch.zeros_like(root_pos[:, 2:3])
+    heading_rot = calc_heading_quat_inv(root_rot)
 
-    obs = torch.cat((base_lin_vel,
-                     base_ang_vel,
-                     projected_gravity,
-                     dof_pos_scaled,
-                     dof_vel*dof_vel_scale,
-                     actions
-                     ), dim=-1)
+    # Root rot as tangent + normal Vec3, 6-dim
+    if (local_root_obs):
+        root_rot_obs = quat_mul(heading_rot, root_rot)
+    else:
+        root_rot_obs = root_rot
+    root_rot_obs = quat_to_tan_norm(root_rot_obs)
 
+    # Lin vel, 3-dim
+    local_root_vel = my_quat_rotate(heading_rot, root_vel)
+    # Ang vel, 3-dim
+    local_root_ang_vel = my_quat_rotate(heading_rot, root_ang_vel)
+
+    # Dof pos, dof vel, 12-dim each
+    obs = torch.cat((dummy_root_h, root_rot_obs, local_root_vel, local_root_ang_vel, dof_pos, dof_vel), dim=-1)
     return obs
