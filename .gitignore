@@ -1,5 +1,6 @@
 videos
 *.mp4
+isaacgym
 
 /isaacgymenvs/logs
 *train_dir*

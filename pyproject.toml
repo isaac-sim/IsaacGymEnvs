@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "isaacgymenvs"
+version = "0.1.0"
+description = ""
+authors = ["Daniel Tan <dtch1997@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.9"
+isaacgym = {path = "third-party/isaacgym", develop = true}
+hydra = "^2.5"
+gym = "0.23.1"
+termcolor = "^2.2.0"
+rl-games = "1.5.2"
+omegaconf = "^2.3.0"
+hydra-core = "^1.3.2"
+pybullet = "^3.2.5"
+
+[tool.poetry.group.dev.dependencies]
+wandb = "^0.13.10"
+matplotlib = "^3.7.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

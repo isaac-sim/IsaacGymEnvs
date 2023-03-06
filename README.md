@@ -1,4 +1,4 @@
-# Isaac Gym Benchmark Environments 
+# Isaac Gym Benchmark Environments
 
 [Website](https://developer.nvidia.com/isaac-gym) | [Technical Paper](https://arxiv.org/abs/2108.10470) | [Videos](https://sites.google.com/view/isaacgym-nvidia)
 
@@ -8,7 +8,23 @@
 This repository contains example RL environments for the NVIDIA Isaac Gym high performance environments described [in our NeurIPS 2021 Datasets and Benchmarks paper](https://openreview.net/forum?id=fgFBtYgJQX_)
 
 
-### Installation
+### Installation (Poetry)
+
+Download the Isaac Gym Preview 4 release from the [website](https://developer.nvidia.com/isaac-gym) into the `~/Downloads` folder, then run:
+
+```
+cp ~/Downloads/IsaacGym_Preview_4_Package.tar.gz IsaacGym_Preview_4_Package.tar.gz 
+stat IsaacGym_Preview_4_Package.tar.gz
+mkdir temp_isaacgym
+mkdir third-party
+tar -xf IsaacGym_Preview_4_Package.tar.gz -C temp_isaacgym
+mv temp_isaacgym/isaacgym/python/* third-party/isaacgym
+rm -rf temp_isaacgym
+```
+
+This copies the contents of `isaacgym/python` into a `third-party/isaacgym` subdirectory. The `pyproject.toml` is configured to install `isaacgym` from this path. 
+
+### Installation (Conda)
 
 Download the Isaac Gym Preview 4 release from the [website](https://developer.nvidia.com/isaac-gym), then
 follow the installation instructions in the documentation. We highly recommend using a conda environment 
