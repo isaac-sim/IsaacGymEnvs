@@ -42,6 +42,9 @@ class AbstractTask(abc.ABC):
         """ Reset the task """
         pass
 
+    def get_state(self):
+        return None
+
     @staticmethod
     @abc.abstractmethod
     def get_observation_dim():
@@ -59,6 +62,7 @@ class AbstractTask(abc.ABC):
 class TargetVelocity(AbstractTask): 
 
     def after_init(self):
+        self.target_direction_reset_strategy = self.cfg["targetDirection"]["reset_strategy"]
         self.target_speed_lower = self.cfg["targetSpeedRange"]["lower"]
         self.target_speed_upper = self.cfg["targetSpeedRange"]["upper"]
         assert self.target_speed_lower <= self.target_speed_upper
@@ -69,18 +73,36 @@ class TargetVelocity(AbstractTask):
     def get_observation_dim():
         return 3 + 1 # directional unit vector, target speed 
     
+    def get_state(self):
+        return torch.cat([self.target_direction, self.target_speed], dim=-1)
+    
     def reset(self, env_ids):
         """ Reset subset of commands """
+        if self.target_direction_reset_strategy == "random":
+            self.reset_random_direction(env_ids)
+        elif self.target_direction_reset_strategy == "x":
+            self.reset_x_direction(env_ids)  
+        self.reset_random_speed(env_ids)
+
+    def reset_random_direction(self, env_ids):
         # Sample a standard Gaussian
         d = torch.randn_like(self.target_direction[env_ids])
         # Normalize it; the resulting unit vector is uniform on the hypersphere
         d = d / torch.norm(d, dim=-1, keepdim=True)
+        self.target_direction[env_ids] = d
+
+    def reset_x_direction(self, env_ids):
+        """ Set all direction vectors to [1,0,0] """
+        d = torch.zeros_like(self.target_direction[env_ids])
+        d[:, 0] = 1
+        self.target_direction[env_ids] = d
+
+    def reset_random_speed(self, env_ids):
         # Sample a standard uniform 
         v = torch.rand_like(self.target_speed[env_ids])
         # Translate from [0,1] to [l, u]
         l, u = self.target_speed_lower, self.target_speed_upper
         v = (u - l) * v + l
-        self.target_direction[env_ids] = d
         self.target_speed[env_ids] = v
     
     def compute_reward(self, root_states: torch.Tensor):

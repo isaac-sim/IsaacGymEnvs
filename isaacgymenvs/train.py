@@ -52,10 +52,13 @@ def launch_rlg_hydra(cfg: DictConfig):
     from rl_games.common import env_configurations, vecenv
     from rl_games.torch_runner import Runner
     from rl_games.algos_torch import model_builder
-    from isaacgymenvs.learning import amp_continuous
-    from isaacgymenvs.learning import amp_players
-    from isaacgymenvs.learning import amp_models
-    from isaacgymenvs.learning import amp_network_builder
+    from isaacgymenvs.learning import (
+        amp_continuous,
+        amp_players,
+        amp_models,
+        amp_network_builder,
+        quadruped_amp_players
+    )
     import isaacgymenvs
 
     time_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -144,6 +147,10 @@ def launch_rlg_hydra(cfg: DictConfig):
         runner.player_factory.register_builder('amp_continuous', lambda **kwargs : amp_players.AMPPlayerContinuous(**kwargs))
         model_builder.register_model('continuous_amp', lambda network, **kwargs : amp_models.ModelAMPContinuous(network))
         model_builder.register_network('amp', lambda **kwargs : amp_network_builder.AMPBuilder())
+        # runner.algo name is used to initialize both agent and player
+        # therefore we need to register an agent for 'quadruped_amp' in order to use custom player
+        runner.algo_factory.register_builder('quadruped_amp', lambda **kwargs : amp_continuous.AMPAgent(**kwargs))
+        runner.player_factory.register_builder('quadruped_amp', lambda **kwargs : quadruped_amp_players.QuadrupedAMPPlayerContinuous(**kwargs))
 
         return runner
 

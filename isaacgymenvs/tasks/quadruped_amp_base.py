@@ -259,6 +259,13 @@ class QuadrupedAMPBase(VecTask):
         self.compute_reset()
         
         self.extras["terminate"] = self._terminate_buf
+        # Log some additional quantities for debugging
+        self.extras["root_states"] = self.root_states
+        self.extras["dof_pos"] = self.dof_pos 
+        self.extras["dof_vel"] = self.dof_vel
+        self.extras["task_state"] = self.task.get_state()
+        self.extras["obs"] = self.obs_buf 
+        self.extras["prev_action"] = self.actions
 
         # debug viz
         if self.viewer and self.debug_viz:

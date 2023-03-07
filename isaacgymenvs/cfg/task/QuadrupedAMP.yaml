@@ -45,6 +45,8 @@ env:
 
   task:
     name: 'TargetVelocity'
+    targetDirection:
+      reset_strategy: 'x'
     targetSpeedRange:
       lower: 0.0
       upper: 2.0
