@@ -55,7 +55,7 @@ class CommonPlayer(players.PpoPlayerContinuous):
         n_games = self.games_num
         render = self.render_env
         n_game_life = self.n_game_life
-        is_determenistic = self.is_determenistic
+        is_determenistic = self.is_deterministic
         sum_rewards = 0
         sum_steps = 0
         sum_game_res = 0

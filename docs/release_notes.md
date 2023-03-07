@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+1.3.3
+-----
+
+* Fixed player and bug with AMP training environments.
+
 1.3.2
 -----
 

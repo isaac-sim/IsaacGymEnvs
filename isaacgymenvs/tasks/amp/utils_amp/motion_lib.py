@@ -234,7 +234,7 @@ class MotionLib():
         phase = time / len
         phase = np.clip(phase, 0.0, 1.0)
 
-        frame_idx0 = (phase * (num_frames - 1)).astype(np.int)
+        frame_idx0 = (phase * (num_frames - 1)).astype(int)
         frame_idx1 = np.minimum(frame_idx0 + 1, num_frames - 1)
         blend = (time - frame_idx0 * dt) / dt
 
