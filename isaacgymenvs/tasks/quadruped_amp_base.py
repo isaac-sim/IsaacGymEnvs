@@ -311,8 +311,8 @@ class QuadrupedAMPBase(VecTask):
                                                             self.dof_vel[env_ids], 
                                                             self._local_root_obs
             )
-            task_obs = self.task.compute_observation(self.root_states[env_ids])
-            self.obs_buf[env_ids] = torch.hstack([quadruped_obs, task_obs])
+            task_obs = self.task.compute_observation(self.root_states)
+            self.obs_buf[env_ids] = torch.hstack([quadruped_obs, task_obs[env_ids]])
 
     def reset_idx(self, env_ids):
         self._reset_actors(env_ids)
