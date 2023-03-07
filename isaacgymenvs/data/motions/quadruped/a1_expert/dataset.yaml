@@ -1,0 +1,5 @@
+motions:
+- file: turning.txt
+  weight: 0.5
+- file: recovery_trot_bound_gallop.txt
+  weight: 0.5
