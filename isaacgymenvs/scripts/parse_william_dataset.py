@@ -1,16 +1,16 @@
 import argparse
-import isaacgym
-import torch
-from isaacgymenvs.utilities.quadruped_motion_data import MotionLib
+import pathlib
 
 from typing import Dict, Tuple
 import numpy as np 
 import json 
+import yaml
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser("Convert a1_expert_raw to desired format")
-    parser.add_argument("--input-filepath", type=str)
-    parser.add_argument("--output-filepath", type=str)
+    parser.add_argument("-i", "--input-dir", type=str)
+    parser.add_argument("-o", "--output-dir", type=str)
+    parser.add_argument("-n", "--dataset-name", type=str, default="dataset")
     parser.add_argument("-s", "--start-time-frac", type=float, help="Start time as a fraction. E.g. 0.2 = start from 20% of the way in", default = 0.0)
     parser.add_argument("-e", "--end-time-frac", type=float, help="End time as a fraction. E.g. 0.8 = end at 80% of the way in", default = 1.0)
     args = parser.parse_args()
@@ -57,10 +57,44 @@ def write_motion_data(filepath: str, frames: np.ndarray, dt: float, loop_mode: s
     with open(filepath, 'w') as file:
         json.dump(motion_data, file)
 
+def write_dataset(motion_fps: str, dataset_fp: str):
+    dataset = []
+    # Uniformly weight all files
+    weight = round(1 / len(filepaths), 5) 
+    for fp in motion_fps: 
+        dataset.append({
+            'file': fp.name + '.txt',
+            'weight': weight
+        })
+    with open(dataset_fp, 'w') as file:
+        yaml.dump({'motions': dataset}, file)
+
 if __name__ == "__main__":
     args = parse_args()
-    frame_data, dt = parse_mocap_data(args.input_filepath)
-    n_timesteps = frame_data.shape[0]
-    start_time = int(n_timesteps * args.start_time_frac)
-    end_time = int(n_timesteps * args.end_time_frac)
-    write_motion_data(args.output_filepath, frame_data[start_time: end_time], dt, loop_mode='Clamp')
+
+    # Set up directories
+    input_dir = pathlib.Path(args.input_dir)
+    filepaths = []
+    for p in input_dir.rglob("*"):
+        if p.suffix == '.csv':
+            filepaths.append(p.absolute())
+    output_dir = pathlib.Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Parse mo-cap data
+    for fp in filepaths:
+        frame_data, dt = parse_mocap_data(str(fp))
+        n_timesteps = frame_data.shape[0]
+        start_time = int(n_timesteps * args.start_time_frac)
+        end_time = int(n_timesteps * args.end_time_frac)
+        output_fp = output_dir / (fp.name + '.txt')
+        write_motion_data(
+            str(output_fp), 
+            frame_data[start_time: end_time], 
+            dt, loop_mode='Clamp'
+        )
+
+    # Write combined dataset
+    dataset_fp = output_dir / (args.dataset_name + '.yaml')
+    write_dataset(filepaths, dataset_fp)
+        

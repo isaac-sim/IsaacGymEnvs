@@ -36,12 +36,11 @@ from isaacgym.torch_utils import *
 from isaacgymenvs.utils.torch_jit_utils import *
 
 from isaacgymenvs.tasks.base.vec_task import VecTask
-
+from enum import Enum
 from typing import Tuple, Dict
-
+from isaacgymenvs.tasks.quadruped_tasks import get_task_class_by_name
 
 class QuadrupedAMPBase(VecTask):
-
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
 
         self.cfg = cfg
@@ -74,12 +73,23 @@ class QuadrupedAMPBase(VecTask):
         # default joint positions
         self.named_default_joint_angles = self.cfg["env"]["defaultJointAngles"]
 
-        self.cfg["env"]["numObservations"] = 1 + 6 + 3 + 3 + 12 + 12
+        # TODO: Make this configurable from YAML file
+        task_cfg = self.cfg["env"]["task"]
+        task_class = get_task_class_by_name(task_cfg["name"])
+        task_obs_dim = task_class.get_observation_dim()
+        self.cfg["env"]["numObservations"] = 1 + 6 + 3 + 3 + 12 + 12 + task_obs_dim
         self.cfg["env"]["numActions"] = 12
 
         # Call super init earlier to initialize sim params
         super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless, virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
+        self.task = task_class(
+            # TODO: Make this configurable from YAML file
+            cfg = task_cfg, 
+            num_envs = self.num_envs, 
+            dtype = torch.float32, 
+            device = self.device
+        )
         self.dt = self.sim_params.dt
         self.max_episode_length_s = self.cfg["env"]["episodeLength_s"]
         self.max_episode_length = int(self.max_episode_length_s / self.dt + 0.5)
@@ -252,10 +262,7 @@ class QuadrupedAMPBase(VecTask):
             self._update_debug_viz()
 
     def compute_reward(self):
-        self.rew_buf[:] = compute_dummy_reward(
-            # tensors
-            self.obs_buf,
-        )
+        self.rew_buf[:] = self.task.compute_reward(self.root_states)
 
     def compute_reset(self):
         self.reset_buf, self._terminate_buf = compute_quadruped_reset(
@@ -271,30 +278,35 @@ class QuadrupedAMPBase(VecTask):
         )
 
     def compute_observations(self, env_ids = None):
+
         self.gym.refresh_dof_state_tensor(self.sim)  # done in step
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_net_contact_force_tensor(self.sim)
         self.gym.refresh_dof_force_tensor(self.sim)
 
-        # TODO: Replace default_dof_pos with _pd_action_offset
         if env_ids is None:
-            self.obs_buf[:] = compute_quadruped_observations(  # tensors
+            quadruped_obs = compute_quadruped_observations(  # tensors
                                                             self.root_states,
                                                             self.dof_pos,
                                                             self.dof_vel, 
                                                             self._local_root_obs
             )
+            task_obs = self.task.compute_observation(self.root_states)
+            self.obs_buf[:] = torch.hstack([quadruped_obs, task_obs])
 
         else:
-            self.obs_buf[env_ids] = compute_quadruped_observations(  # tensors
+            quadruped_obs = compute_quadruped_observations(  # tensors
                                                             self.root_states[env_ids],
                                                             self.dof_pos[env_ids],
                                                             self.dof_vel[env_ids], 
                                                             self._local_root_obs
             )
+            task_obs = self.task.compute_observation(self.root_states[env_ids])
+            self.obs_buf[env_ids] = torch.hstack([quadruped_obs, task_obs])
 
     def reset_idx(self, env_ids):
         self._reset_actors(env_ids)
+        self.task.reset(env_ids)
         self.compute_observations(env_ids)
         
     def _reset_actors(self, env_ids):

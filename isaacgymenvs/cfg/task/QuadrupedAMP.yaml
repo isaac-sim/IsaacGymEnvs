@@ -43,6 +43,13 @@ env:
     linear_y: [0., 0.]   # min max [m/s]
     yaw: [-0., 0.]          # min max [rad/s]
 
+  task:
+    name: 'TargetVelocity'
+    targetSpeedRange:
+      lower: 0.0
+      upper: 2.0
+    velErrorScale: 1.0
+
   control:
     # PD Drive parameters:
     stiffness: 40.0  # [N*m/rad]
