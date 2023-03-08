@@ -62,7 +62,7 @@ A pre-trained checkpoint `QuadrupedAMP.pth` and sample dataset `dataset.h5` is p
 
 ```
 # From isaacgymenvs directory
-git checkout 8389006de7721a4c5fe7382c2149ca862201e295
+git checkout 68255b45e4cd5b83fd22034540e68eb4ae767c15
 python train.py task=QuadrupedAMP task.env.motionFile=data/motions/quadruped/a1_expert/trot/dataset_trot.yaml num_envs=32 test=True checkpoint=../reports/8_mar/QuadrupedAMP.pth
 ```
 
