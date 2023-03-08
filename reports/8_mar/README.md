@@ -79,9 +79,9 @@ If you found this useful, please consider citing
  @misc{TanDCH2023QuadrupedAMP, 
      title="Quadruped AMP in IsaacGym", 
      author="Tan, Daniel Chee Hian",
-     journal="daniel-ch-tan.github.io}",
+     journal="daniel-ch-tan.github.io",
      year="2023",
      month="Mar",
-     url={https://github.com/dtch1997/IsaacGymEnvs/tree/main/reports/8_mar}, 
+     url="https://github.com/dtch1997/IsaacGymEnvs/tree/main/reports/8_mar", 
 }
 ```
