@@ -48,15 +48,36 @@ if __name__ == "__main__":
 
 
     # Calculate dot-product
-    dot_prod = np.sum(target_vel * average_vel, axis=-1)
+    dot_prod = np.sum(target_vel * average_vel, axis=-1)    
+    norms = np.sum(target_vel ** 2, axis=-1)
+    dot_prod = dot_prod / np.sum(target_vel ** 2, axis=-1)
     # shape (N,)
 
+    fig, ax = plt.subplots(1, 2, figsize=(20, 10))
+    fig.set_tight_layout(True)
+
     # Plot histogram of fits
-    fig, ax = plt.subplots()
-    ax.hist(dot_prod, bins=20)
-    ax.set_title("Histogram of target and actual velocity")
-    ax.set_xlabel("Dot product of (target_vel, actual_vel)")
+    def plot_histogram(ax):
+        ax.hist(dot_prod, bins=20)
+        ax.set_xlim(-4.0, 4.0)
+        ax.set_title("Histogram of velocity-tracking error")
+        ax.set_xlabel("Dot product of (target_vel, actual_vel)")
+
+    # Plot scatterplot of target vs actual x-vel
+    def plot_scatterplot(ax):
+        ax.scatter(target_vel[:,0], average_vel[:,0],  label="x")
+        ax.scatter(target_vel[:,1], average_vel[:,1], label="y")
+        ax.scatter(target_vel[:,2], average_vel[:,2],  label="z")
+        ax.set_title("Scatterplot of target and actual velocity")
+        ax.set_xlabel("Target velocity (m/s)")
+        ax.set_ylabel("Actual velocity (m/s)")
+        ax.legend()
+
+    plot_histogram(ax[0])
+    plot_scatterplot(ax[1])
+    
     fig.show()
+    # Plot scatter-plot in x-dim      
     input("Press any key to exit...")
 
     
