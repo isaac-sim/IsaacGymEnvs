@@ -111,9 +111,8 @@ class TargetVelocity(AbstractTask):
             root_states: [N, 13] tensor of root states in world frame
         """
         root_vel = root_states[:, 7:10]
-        target_vel = self.target_direction * self.target_speed
-        dot_prod = torch.sum(root_vel * target_vel, dim=-1)
-        return exp_neg_sq(dot_prod, alpha=self.cfg["velErrorScale"])
+        dot_prod = torch.sum(root_vel * self.target_direction, dim=-1)
+        return exp_neg_sq((self.target_speed - dot_prod), alpha=self.cfg["velErrorScale"])
 
     def compute_observation(self, root_states: torch.Tensor):
         """
