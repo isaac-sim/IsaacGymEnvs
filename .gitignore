@@ -1,6 +1,7 @@
 videos
 *.mp4
 isaacgym
+*.pth
 
 /isaacgymenvs/logs
 *train_dir*
