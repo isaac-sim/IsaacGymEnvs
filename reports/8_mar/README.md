@@ -76,5 +76,12 @@ python plotting/viz_dataset.py -i ../reports/8_mar/dataset.h5 -o trajectory.png
 
 If you found this useful, please consider citing
 ```
- @misc{tan, title={IsaacGymEnvs/reports/8_mar at main · DTCH1997/isaacgymenvs}, url={https://github.com/dtch1997/IsaacGymEnvs/tree/main/reports/8_mar}, journal={Quadruped AMP in IsaacGym}, author={Tan, Daniel Chee Hian}}
+ @misc{TanDCH2023QuadrupedAMP, 
+     title="Quadruped AMP in IsaacGym", 
+     author="Tan, Daniel Chee Hian",
+     journal="daniel-ch-tan.github.io}",
+     year="2023",
+     month="Mar",
+     url={https://github.com/dtch1997/IsaacGymEnvs/tree/main/reports/8_mar}, 
+}
 ```
