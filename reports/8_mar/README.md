@@ -71,3 +71,10 @@ The plots can be generated as follows:
 python plotting/plot_target_vels.py -i ../reports/8_mar/dataset.h5 -o target_vel.png
 python plotting/viz_dataset.py -i ../reports/8_mar/dataset.h5 -o trajectory.png
 ```
+
+## Citation
+
+If you found this useful, please consider citing
+```
+ @misc{tan, title={IsaacGymEnvs/reports/8_mar at main · DTCH1997/isaacgymenvs}, url={https://github.com/dtch1997/IsaacGymEnvs/tree/main/reports/8_mar}, journal={Quadruped AMP in IsaacGym}, author={Tan, Daniel Chee Hian}}
+```
