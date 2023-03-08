@@ -5,14 +5,15 @@ import matplotlib.pyplot as plt
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser("Visualize expert dataset")
-    parser.add_argument("-f", "--filepath", type=str)
+    parser.add_argument("-i", "--input-filepath", type=str)
+    parser.add_argument('-o', "--output-filepath", type=str, default="")
     args = parser.parse_args()
     return args
 
 if __name__ == "__main__":
 
     args = parse_args()
-    file = h5py.File(args.filepath)
+    file = h5py.File(args.input_filepath)
     for key, value in file.attrs.items():
         print(f"{key}: {value}")
 
@@ -77,6 +78,8 @@ if __name__ == "__main__":
     plot_scatterplot(ax[1])
     
     fig.show()
+    if args.output_filepath != "":
+        fig.savefig(args.output_filepath)
     # Plot scatter-plot in x-dim      
     input("Press any key to exit...")
 
