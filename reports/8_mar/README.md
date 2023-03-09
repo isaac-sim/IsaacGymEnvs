@@ -34,7 +34,7 @@ We implement a simple proof-of-concept for a target-velocity-following task in t
 
 We use a reference [motion dataset](../../isaacgymenvs/data/motions/quadruped/a1_expert/trot/dataset_trot.yaml) of 8 trotting motions between the speeds of $[0.3, 1.2]$ m/s. 
 
-To implement feedback control, we augment the policy observations with a target speed $s^*$ and unit direction vector $d^*$. We train a policy with a combined AMP-derived style reward $r_d$ and a velocity-following task reward. The velocity-following reward is described by the equation: $$r_{g} = \exp(-\alpha(s^* - d^* \cdot v)) $$, where $v$ denotes the measured instantaneous root velocity. Note that $r_g, r_d \in [0,1]$. In our experiments, $\alpha = 1.0$. The overall reward is determined as $$ r = 0.5 r_g + 0.5 r_d $$. 
+To implement feedback control, we augment the policy observations with a target speed $ s^* $ and unit direction vector $d^* $. We train a policy with a combined AMP-derived style reward $r_d $ and a velocity-following task reward. The velocity-following reward is described by the equation: $$r_{g} = \exp(-\alpha(s^* - d^* \cdot v)) $$, where $v$ denotes the measured instantaneous root velocity. Note that $r_g, r_d \in [0,1]$. In our experiments, $\alpha = 1.0$. The overall reward is determined as $$ r = 0.5 r_g + 0.5 r_d $$. 
 
 ## Results
 
