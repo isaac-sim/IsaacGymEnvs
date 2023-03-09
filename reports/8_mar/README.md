@@ -42,9 +42,19 @@ To implement feedback control, we augment the policy observations with a target 
 A sample trajectory of various robot states is provided below. 
 ![](figures/trajectory.png)
 
+A video is available in Google Drive (`trotting_2mps.mp4`): https://drive.google.com/drive/folders/1PDJyRT8ubHQzPsSWIpw_OB3GY4x6A12e?usp=sharing
+
+
 ### Velocity-tracking
 We evaluate velocity tracking over $N=128$ random seeds, with target direction fixed to be $[1, 0, 0]$ and target speed randomized in the range $[0., 2.] m/s$.
 ![](figures/target_vel.png)
+
+### Recovery from random initial pose
+
+Using a separate policy trained on a dataset of fall-recovery and locomotion behaviours, and the same AMP reward, we demonstrate that the policy learns to robustly recover from falls to steady-state locomotion. 
+![](figures/getup_locomotion_viz_traj_0.png)
+
+A video is available in Google Drive (`getup_gallop_2mps.mp4`): https://drive.google.com/drive/folders/1PDJyRT8ubHQzPsSWIpw_OB3GY4x6A12e?usp=sharing
 
 ## Discussion
 
@@ -53,8 +63,6 @@ In half of the reference trajectories used, the motion was recorded while walkin
 
 ### Generalization to OoD speeds
 Despite being trained only on reference motions of speeds between 0.3 and 1.2 m/s, our policy can learn to travel up to 2.0 m/s while trotting. This indicates that the learned policy does not simply memorize a reference motion, it has learned the abstract style of 'trotting' that is present in the dataset, and is able to generalize this to create out-of-distribution motions.  
-
-A video of the learned motion is available in Google Drive: https://drive.google.com/drive/folders/1PDJyRT8ubHQzPsSWIpw_OB3GY4x6A12e?usp=sharing
 
 ## Reproduction
 
