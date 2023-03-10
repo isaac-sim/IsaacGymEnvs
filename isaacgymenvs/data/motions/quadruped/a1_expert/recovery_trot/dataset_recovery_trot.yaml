@@ -1,0 +1,27 @@
+motions:
+- file: rough_v0.9__tpv_log.csv.txt
+  weight: 0.06250000000000001
+- file: flat_v0.3__tpv_log.csv.txt
+  weight: 0.06250000000000001
+- file: flat_v0.9__tpv_log.csv.txt
+  weight: 0.06250000000000001
+- file: rough_v0.3__tpv_log.csv.txt
+  weight: 0.06250000000000001
+- file: rough_v0.6__tpv_log.csv.txt
+  weight: 0.06250000000000001
+- file: rough_v1.2__tpv_log.csv.txt
+  weight: 0.06250000000000001
+- file: flat_v1.2__tpv_log.csv.txt
+  weight: 0.06250000000000001
+- file: flat_v0.6__tpv_log.csv.txt
+  weight: 0.06250000000000001
+- file: back_lying__tpv_log.csv.txt
+  weight: 0.10000000000000002
+- file: right_lying__tpv_log.csv.txt
+  weight: 0.10000000000000002
+- file: left_lying__tpv_log.csv.txt
+  weight: 0.10000000000000002
+- file: abs_lying_nominal__tpv_log.csv.txt
+  weight: 0.10000000000000002
+- file: abs_lying__tpv_log.csv.txt
+  weight: 0.10000000000000002

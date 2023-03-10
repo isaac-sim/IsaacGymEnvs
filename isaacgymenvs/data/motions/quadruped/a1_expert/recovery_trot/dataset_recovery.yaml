@@ -1,0 +1,11 @@
+motions:
+- file: back_lying__tpv_log.csv.txt
+  weight: 0.2
+- file: right_lying__tpv_log.csv.txt
+  weight: 0.2
+- file: left_lying__tpv_log.csv.txt
+  weight: 0.2
+- file: abs_lying_nominal__tpv_log.csv.txt
+  weight: 0.2
+- file: abs_lying__tpv_log.csv.txt
+  weight: 0.2
