@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     # Calculate target vel
     target_direction = task_state[:, 0, :3]
-    target_speed = task_state[:, 0, -1:]
+    target_speed = task_state[:, 0, 3:4]
     target_vel = target_direction * target_speed
     # shape (N, 3)
 
@@ -59,7 +59,10 @@ if __name__ == "__main__":
 
     # Plot histogram of fits
     def plot_histogram(ax):
-        ax.hist(dot_prod, bins=20)
+        binwidth = 0.25
+        data = dot_prod
+        bins=np.arange(min(data), max(data) + binwidth, binwidth)
+        ax.hist(dot_prod, bins=bins)
         ax.set_xlim(-4.0, 4.0)
         ax.set_title("Histogram of velocity-tracking error")
         ax.set_xlabel("Dot product of (target_vel, actual_vel)")
