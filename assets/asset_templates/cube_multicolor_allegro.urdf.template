@@ -4,17 +4,17 @@
     <visual>
       <origin xyz="0 0 0"/>
       <geometry>
-        <mesh filename="meshes/cube_multicolor.obj" scale=".065 .065 .065"/>
+        <mesh filename="$base_mesh" scale="$x_scale $y_scale $z_scale"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0"/>
       <geometry>
-        <box size="0.065 0.065 0.065"/>
+        <box size="$x_scale $y_scale $z_scale"/>
       </geometry>
     </collision>
     <inertial>
-      <density value="400.0"/>
+      <density value="$density"/>
     </inertial>
   </link>
 </robot>

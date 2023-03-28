@@ -29,7 +29,7 @@
 
 import numpy as np
 from bisect import bisect
-from isaacgym import gymapi 
+from isaacgym import gymapi
 
 
 def get_property_setter_map(gym):
@@ -146,8 +146,8 @@ def get_bucketed_val(new_prop_val, attr_randomization_params):
 
 
 def apply_random_samples(prop, og_prop, attr, attr_randomization_params,
-                         curr_gym_step_count, extern_sample=None):
-
+                         curr_gym_step_count, extern_sample=None, bucketing_randomization_params=None):
+    
     """
     @params:
         prop: property we want to randomise
@@ -155,12 +155,13 @@ def apply_random_samples(prop, og_prop, attr, attr_randomization_params,
         attr: which particular attribute we want to randomise e.g. damping, stiffness
         attr_randomization_params: the attribute randomisation meta-data e.g. distr, range, schedule
         curr_gym_step_count: gym steps so far 
+
     """
 
     if isinstance(prop, gymapi.SimParams):
-
+        
         if attr == 'gravity':
-
+            
             sample = generate_random_samples(attr_randomization_params, 3, curr_gym_step_count)
             if attr_randomization_params['operation'] == 'scaling':
                 prop.gravity.x = og_prop['gravity'].x * sample[0]
@@ -176,7 +177,7 @@ def apply_random_samples(prop, og_prop, attr, attr_randomization_params,
 
            sample = generate_random_samples(attr_randomization_params, 1, curr_gym_step_count)
            prop.physx.rest_offset = sample
-
+                
 
     elif isinstance(prop, np.ndarray):
         sample = generate_random_samples(attr_randomization_params, prop[attr].shape,
@@ -200,9 +201,11 @@ def apply_random_samples(prop, og_prop, attr, attr_randomization_params,
             new_prop_val = cur_attr_val + sample
 
         if 'num_buckets' in attr_randomization_params and attr_randomization_params['num_buckets'] > 0:
-            new_prop_val = get_bucketed_val(new_prop_val, attr_randomization_params)
+            if bucketing_randomization_params is None:
+                new_prop_val = get_bucketed_val(new_prop_val, attr_randomization_params)
+            else:
+                new_prop_val = get_bucketed_val(new_prop_val, bucketing_randomization_params)
         setattr(prop, attr, new_prop_val)
-
 
 def check_buckets(gym, envs, dr_params):
     total_num_buckets = 0

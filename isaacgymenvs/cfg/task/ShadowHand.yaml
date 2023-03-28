@@ -67,7 +67,7 @@ task:
     frequency: 720   # Define how many simulation steps between generating new randomizations
     observations:
       range: [0, .002] # range for the white noise
-      range_correlated: [0, .001 ] # range for correlated noise, refreshed with freq `frequency`
+      range_correlated: [0, .001] # range for correlated noise, refreshed with freq `frequency`
       operation: "additive"
       distribution: "gaussian"
       # schedule: "linear"   # "constant" is to turn on noise after `schedule_steps` num steps

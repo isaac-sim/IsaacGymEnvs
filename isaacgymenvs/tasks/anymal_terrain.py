@@ -37,6 +37,8 @@ from .base.vec_task import VecTask
 import torch
 from typing import Tuple, Dict
 
+from isaacgymenvs.tasks.base.vec_task import VecTask
+
 
 class AnymalTerrain(VecTask):
 

@@ -26,7 +26,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from typing import Dict, Any, Tuple
+import copy
+from readline import parse_and_bind
+from typing import Dict, Any, Tuple, List, Set
 
 import gym
 from gym import spaces
@@ -40,6 +42,10 @@ import torch
 import numpy as np
 import operator, random
 from copy import deepcopy
+from isaacgymenvs.utils.utils import nested_dict_get_attr, nested_dict_set_attr
+
+from collections import deque
+
 import sys
 
 import abc
@@ -58,7 +64,7 @@ def _create_sim_once(gym, *args, **kwargs):
 
 
 class Env(ABC):
-    def __init__(self, config: Dict[str, Any], rl_device: str, sim_device: str, graphics_device_id: int, headless: bool):
+    def __init__(self, config: Dict[str, Any], rl_device: str, sim_device: str, graphics_device_id: int, headless: bool): 
         """Initialise the env.
 
         Args:
@@ -93,19 +99,27 @@ class Env(ABC):
 
         self.num_environments = config["env"]["numEnvs"]
         self.num_agents = config["env"].get("numAgents", 1)  # used for multi-agent environments
-        self.num_observations = config["env"]["numObservations"]
-        self.num_states = config["env"].get("numStates", 0)
-        self.num_actions = config["env"]["numActions"]
 
-        self.control_freq_inv = config["env"].get("controlFrequencyInv", 1)
+        self.num_observations = config["env"].get("numObservations", 0)
+        self.num_states = config["env"].get("numStates", 0)
 
         self.obs_space = spaces.Box(np.ones(self.num_obs) * -np.Inf, np.ones(self.num_obs) * np.Inf)
         self.state_space = spaces.Box(np.ones(self.num_states) * -np.Inf, np.ones(self.num_states) * np.Inf)
+
+        self.num_actions = config["env"]["numActions"]
+        self.control_freq_inv = config["env"].get("controlFrequencyInv", 1)
 
         self.act_space = spaces.Box(np.ones(self.num_actions) * -1., np.ones(self.num_actions) * 1.)
 
         self.clip_obs = config["env"].get("clipObservations", np.Inf)
         self.clip_actions = config["env"].get("clipActions", np.Inf)
+
+        # Total number of training frames since the beginning of the experiment.
+        # We get this information from the learning algorithm rather than tracking ourselves.
+        # The learning algorithm tracks the total number of frames since the beginning of training and accounts for
+        # experiments restart/resumes. This means this number can be > 0 right after initialization if we resume the
+        # experiment.
+        self.total_train_env_frames = 0
 
     @abc.abstractmethod 
     def allocate_buffers(self):
@@ -114,7 +128,6 @@ class Env(ABC):
     @abc.abstractmethod
     def step(self, actions: torch.Tensor) -> Tuple[Dict[str, torch.Tensor], torch.Tensor, torch.Tensor, Dict[str, Any]]:
         """Step the physics of the environment.
-
         Args:
             actions: actions to apply
         Returns:
@@ -166,7 +179,7 @@ class VecTask(Env):
 
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 24}
 
-    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture: bool = False, force_render: bool = False):
+    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture: bool = False, force_render: bool = False): 
         """Initialise the `VecTask`.
 
         Args:
@@ -177,6 +190,7 @@ class VecTask(Env):
             virtual_screen_capture: Set to True to allow the users get captured screen in RGB array via `env.render(mode='rgb_array')`. 
             force_render: Set to True to always force rendering in the steps (if the `control_freq_inv` is greater than 1 we suggest stting this arg to True)
         """
+        # super().__init__(config, rl_device, sim_device, graphics_device_id, headless, use_dict_obs)
         super().__init__(config, rl_device, sim_device, graphics_device_id, headless)
         self.virtual_screen_capture = virtual_screen_capture
         self.virtual_display = None
@@ -766,4 +780,3 @@ class VecTask(Env):
                         raise Exception("Invalid extern_sample size")
 
         self.first_randomization = False
-

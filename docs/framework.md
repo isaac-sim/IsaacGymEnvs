@@ -162,7 +162,7 @@ task to the imports and `isaacgym_task_map` dict in the `tasks` [\_\_init\_\_.py
 
 
 ```python
-from tasks.my_new_task import MyNewTask
+from isaacgymenvs.tasks.my_new_task import MyNewTask
 ...
 isaac_gym_task_map = {
     'Anymal': Anymal,

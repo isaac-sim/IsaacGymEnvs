@@ -302,3 +302,17 @@ If you use the Factory simulation methods (e.g., SDF collisions, contact reducti
 	year = {2022}
 } 
 ```
+
+If you use the DeXtreme: Transfer of Agile In-hand Manipulation from Simulation to Reality work or the code related to Automatic Domain Randomisation, please cite the following paper:
+
+```
+@inproceedings{
+	handa2023dextreme,
+	author = {Ankur Handa, Arthur Allshire, Viktor Makoviychuk, Aleksei Petrenko, Ritvik Singh, Jingzhou Liu, Denys Makoviichuk, Karl Van Wyk, Alexander Zhurkevich, Balakumar Sundaralingam, Yashraj Narang, Jean-Francois Lafleche, Dieter Fox, Gavriel State},
+	title = {DeXtreme: Transfer of Agile In-hand Manipulation from Simulation to Reality},
+	booktitle = {ICRA},
+	year = {2023}
+} 
+```
+
+

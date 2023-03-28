@@ -10,8 +10,9 @@
     <collision>
       <origin xyz="0 0 0"/>
       <geometry>
-        <box size="0.065 0.065 0.065"/>
+        <mesh filename="meshes/cube_multicolor.obj" scale=".065 .065 .065"/>
       </geometry>
+      <sdf resolution="128"/>
     </collision>
     <inertial>
       <density value="400.0"/>

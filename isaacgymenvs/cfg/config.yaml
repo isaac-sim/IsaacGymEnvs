@@ -36,6 +36,8 @@ num_subscenes: 4 # Splits the simulation into N physics scenes and runs each one
 test: False
 # used to set checkpoint path
 checkpoint: ''
+# set sigma when restoring network
+sigma: ''
 # set to True to use multi-gpu horovod training
 multi_gpu: False
 
@@ -44,6 +46,9 @@ wandb_group: ''
 wandb_name: ${train.params.config.name}
 wandb_entity: ''
 wandb_project: 'isaacgymenvs'
+wandb_tags: []
+wandb_logcode_dir: '' 
+
 capture_video: False
 capture_video_freq: 1464
 capture_video_len: 100
