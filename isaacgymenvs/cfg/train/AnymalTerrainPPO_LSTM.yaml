@@ -47,6 +47,7 @@ params:
     name: ${resolve_default:AnymalTerrain,${....experiment}}
     full_experiment_name: ${.name}
     env_name: rlgpu
+    multi_gpu: ${....multi_gpu}
     ppo: True
     mixed_precision: True
     normalize_input: True

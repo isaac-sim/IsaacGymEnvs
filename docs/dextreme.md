@@ -4,7 +4,7 @@ If you are using a single GPU, run the following command to train DeXtreme RL po
 
 ```
 HYDRA_MANUAL_DR="train.py multi_gpu=False\ 
-task=AllegroHandManualDR \
+task=AllegroHandDextremeManualDR \
 task.env.resetTime=8 task.env.successTolerance=0.4 \
 experiment='allegrohand_dextreme_manual_dr'\
 headless=True seed=-1 \
@@ -23,7 +23,7 @@ task.env.apply_random_quat=True \
 python ${HYDRA_MANUAL_DR}
 ```
 
-The apply_random_quat=True flag samples unbiased quaternion goals which makes the training slightly hard. We use a successTolerance of 0.4 radians in these settings overriding the settings in AllegroHandManualDR.yaml.
+The apply_random_quat=True flag samples unbiased quaternion goals which makes the training slightly hard. We use a successTolerance of 0.4 radians in these settings overriding the settings in AllegroHandDextremeManualDR.yaml.
 
 # To run experiments with Automatic Domain Randomisation (ADR)
 
@@ -31,6 +31,7 @@ The ADR policies are trained with a successTolerance of 0.1 radians and use LSTM
 
 ```
 HYDRA_ADR="train.py multi_gpu=False \
+task=AllegroHandDextremeADR \
 headless=True seed=-1 \
 task.env.resetTime=8 \
 task.env.controlFrequencyInv=2 \

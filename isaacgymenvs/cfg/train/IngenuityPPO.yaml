@@ -38,6 +38,7 @@ params:
     name: ${resolve_default:Ingenuity,${....experiment}}
     full_experiment_name: ${.name}
     env_name: rlgpu
+    multi_gpu: ${....multi_gpu}
     ppo: True
     mixed_precision: False
     normalize_input: True

@@ -5,6 +5,7 @@ Release Notes
 -----
 
 * Fixed player and bug with AMP training environments.
+* Added DeXtreme environments with ADR support.
 
 1.3.2
 -----

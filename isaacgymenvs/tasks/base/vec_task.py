@@ -27,7 +27,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import copy
-from readline import parse_and_bind
 from typing import Dict, Any, Tuple, List, Set
 
 import gym

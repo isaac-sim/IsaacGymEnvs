@@ -27,6 +27,7 @@ params:
   config:
     name: ${resolve_default:AntSAC,${....experiment}}
     env_name: rlgpu
+    multi_gpu: ${....multi_gpu}
     normalize_input: True
     reward_shaper:
       scale_value: 1.0

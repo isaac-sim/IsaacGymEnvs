@@ -181,7 +181,7 @@ def launch_rlg_hydra(cfg: DictConfig):
 
     # dump config dict
     experiment_dir = os.path.join('runs', cfg.train.params.config.name + 
-    '-{date:%Y-%m-%d_%H:%M:%S}'.format( date=datetime.datetime.now()))
+    '-{date:%Y-%m-%d_%H-%M-%S}'.format( date=datetime.datetime.now()))
 
     os.makedirs(experiment_dir, exist_ok=True)
     with open(os.path.join(experiment_dir, 'config.yaml'), 'w') as f:

@@ -27,7 +27,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # python
-import pwd
+import getpass
 import tempfile
 import time
 from collections import OrderedDict
@@ -144,7 +144,7 @@ def safe_ensure_dir_exists(path):
 def get_username():
     uid = os.getuid()
     try:
-        return pwd.getpwuid(uid).pw_name
+        return getpass.getuser()
     except KeyError:
         # worst case scenario - let's just use uid
         return str(uid)

@@ -48,6 +48,7 @@ params:
     full_experiment_name: ${.name}
     env_name: rlgpu
     ppo: True
+    multi_gpu: ${....multi_gpu}
     mixed_precision: True
     normalize_input: True
     normalize_value: True
