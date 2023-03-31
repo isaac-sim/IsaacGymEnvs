@@ -58,7 +58,7 @@ params:
     mixed_precision: False
     normalize_input: True
     normalize_value: True
-    value_bootstrap: False  # TODO: enable bootstrap?
+    value_bootstrap: False  
     num_actors: ${....task.env.numEnvs}
     reward_shaper:
       scale_value: 1.0
@@ -85,10 +85,10 @@ params:
     clip_value: True
     seq_length: 16
     bounds_loss_coef: 0.0001
-    zero_rnn_flag: False
+    zero_rnn_on_done: False
 
     central_value_config:
-      minibatch_size: 16384 #32768
+      minibatch_size: 16384 
       mini_epochs: 4
       learning_rate: 1e-4
       kl_threshold: 0.016
@@ -120,19 +120,13 @@ params:
 
 
         mlp:
-          units: [512, 256, 128] #[256] # 
+          units: [512, 256, 128] 
           activation: elu
           d2rl: False
           initializer:
             name: default
           regularizer:
             name: None
-        # rnn:
-        #   name: lstm
-        #   units: 512
-        #   layers: 1
-        #   before_mlp: True
-        #   layer_norm: True
 
     player:
       deterministic: True

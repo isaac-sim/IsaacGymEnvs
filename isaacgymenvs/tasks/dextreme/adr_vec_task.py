@@ -333,15 +333,6 @@ class VecTaskDextreme(EnvDextreme, VecTask):
 
             return self.obs_dict, self.rew_buf.to(self.rl_device), self.reset_buf.to(self.rl_device), self.extras
 
-    # def zero_actions(self) -> torch.Tensor:
-    #     """Returns a buffer with zero actions.
-
-    #     Returns:
-    #         A buffer of zero torch actions
-    #     """
-
-    #     return torch.zeros([self.num_envs, self.num_actions], dtype=torch.float32, device=self.rl_device)
- 
     def reset(self) -> torch.Tensor:
         """Reset the environment.
         Returns:
@@ -926,14 +917,16 @@ class ADRVecTask(VecTaskDextreme):
             self.sample_adr_tensor(k, rand_envs)
 
 
-    def apply_randomizations(self, dr_params, randomize_buf, adr_objective=None, simopt=False, randomisation_callback=None):
+    def apply_randomizations(self, dr_params, randomize_buf, adr_objective=None, randomisation_callback=None):
         """Apply domain randomizations to the environment.
 
         Note that currently we can only apply randomizations only on resets, due to current PhysX limitations
 
         Args:
             dr_params: parameters for domain randomization to use.
-            simopt: whether we are running in simopt mode
+            randomize_buf: selective randomisation of environments
+            adr_objective: consecutive successes scalar
+            randomisation_callback: callbacks we may want to use from the environment class
         """
 
         # If we don't have a randomization frequency, randomize every step
@@ -945,10 +938,8 @@ class ADRVecTask(VecTaskDextreme):
         #   - on the first call, randomize everything
         self.last_step = self.gym.get_frame_count(self.sim)
 
-        if simopt:            
-            env_ids = list(range(self.num_envs))
-            do_nonenv_randomize = False #True
-        elif self.use_adr:
+        # for ADR 
+        if self.use_adr:
             
             if self.first_randomization:
                 adr_env_ids  = list(range(self.num_envs))
@@ -957,7 +948,19 @@ class ADRVecTask(VecTaskDextreme):
             self.adr_update(adr_env_ids, adr_objective)
             current_adr_params = self.get_current_adr_params(dr_params)
 
-        if not simopt and not self.use_adr:
+            if self.first_randomization:
+                do_nonenv_randomize = True
+                env_ids = list(range(self.num_envs))
+            else:
+                do_nonenv_randomize = (self.last_step - self.last_rand_step) >= rand_freq
+                                
+                env_ids = torch.nonzero(randomize_buf, as_tuple=False).squeeze(-1).tolist()
+            if do_nonenv_randomize:
+                self.last_rand_step = self.last_step            
+
+        # For Manual DR 
+        if not self.use_adr:
+
             if self.first_randomization:
                 do_nonenv_randomize = True
                 env_ids = list(range(self.num_envs))
@@ -970,18 +973,6 @@ class ADRVecTask(VecTaskDextreme):
                                
                 self.randomize_buf[rand_envs] = 0
 
-            if do_nonenv_randomize:
-                self.last_rand_step = self.last_step
-
-        if not simopt and self.use_adr:
-
-            if self.first_randomization:
-                do_nonenv_randomize = True
-                env_ids = list(range(self.num_envs))
-            else:
-                do_nonenv_randomize = (self.last_step - self.last_rand_step) >= rand_freq
-                                
-                env_ids = torch.nonzero(randomize_buf, as_tuple=False).squeeze(-1).tolist()
             if do_nonenv_randomize:
                 self.last_rand_step = self.last_step
             

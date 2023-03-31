@@ -54,7 +54,6 @@ env:
   resetDofPosRandomInterval: 0.2
   resetDofVelRandomInterval: 0.0
 
-  # startObjectPoseDY: -0.19
   startObjectPoseDY: -0.15
   startObjectPoseDZ: 0.06
 
@@ -73,12 +72,6 @@ env:
   random_cube_observation:
     enable: True 
     prob: 0.3
-
-  # # action clamping 
-  # action_clamping_annealing:
-  #   enable: True
-  #   range: [0.2, 1]
-  #   schedule_steps: 3_000_000
 
   # reward -> dictionary
   distRewardScale: -10.0
@@ -234,7 +227,6 @@ task:
 
     # set to false to not do update ADR ranges. useful for evaluation or training a base policy
     update_adr_ranges: True 
-
     clear_other_queues: False
 
     # if set, boundary sampling and performance eval will occur at (bound + delta) instead of at bound.
@@ -317,12 +309,6 @@ task:
         limits: [0.0, 1.0]
         delta: 0.01
         delta_style: 'additive'
-      # hand_friction_hand_and_fingers:
-      #   range_path: actor_params.hand.rigid_shape_properties.friction.range.hand_and_fingers
-      #   init_range: [0.2, 1.1]
-      #   limits: [0.1, 5.0]
-      #   delta: 0.02
-      #   delta_style: 'additive'
       object_mass:
         range_path: actor_params.object.rigid_body_properties.mass.range
         init_range: [0.8, 1.2]

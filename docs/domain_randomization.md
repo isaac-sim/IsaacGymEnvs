@@ -248,3 +248,94 @@ at every call to `apply_randomizations` if you wish. By using your own
 logic to generate these dictionaries, our current framework can be
 easily extended to use more intelligent algorithms for domain
 randomization, such as ADR or BayesSim.
+
+
+Automatic Domain Randomisation 
+------------------------------
+
+Our [DeXtreme](https://dextreme.org) work brings Automatic Domain Randomisation (ADR) into Isaac Gym. Since, the simulator is built on vectorising environments on the GPU, our ADR naturally comes with vectorised implementation. Note that we have only tested ADR for DeXtreme environments mentioned in [dextreme.md](dextreme.md) and we are working towards bringing ADR and DeXtreme to [OmniIsaacGymEnvs](https://github.com/NVIDIA-Omniverse/OmniIsaacGymEnvs).
+
+**Background**
+
+ADR was first introduced in [OpenAI 2019 et. al](https://arxiv.org/abs/1910.07113). We develop the vectorised version of this and use that to train our policies in sim and transfer to the real world. Our experiments reaffirm that ADR imbues robustness to the policies closing the sim-to-real gap significantly leading to better performance in the real world compared to traiditional manually tuned domain randomisation.
+
+Hand-tuning the randomisation ranges (_e.g._ means and stds of the distributions) of parameters can be onerous and may result in policies that lack adaptability, even for slight variations in parameters outside of the originally defined ranges. ADR starts with small ranges and automatically adjusts them gradually to keep them as wide as possible while keeping the policy performance above a certain threshold. The policies trained with ADR exhibit significant robustness to various perturbations and parameter ranges and improved sim-to-real transfer. Additionally, since the ranges are adjusted gradually, it also provides a natural curriculum for the policy to absorb the large diverity thrown at it.
+
+Each parameter that we wish to randomise with ADR is modelled with uniform distribution `U(p_lo, p_hi)` where `p_lo` and `p_hi` are the lower and the upper limit of the range respectively. At each step, a parameter is randomy chosen and its value set to either the lower or upper limit keeping the other parameters with their ranges unchanged. This randomly chosen parameter's range is updated based on its performance. A small fraction of the overall environments (40% in our [DeXtreme](https://dextreme.org) work) is used to evaluate the performance. Based on the performance, either the range shrinks or expands. A visualisation from the DeXtreme paper is shown below: 
+
+![ADR](https://user-images.githubusercontent.com/686480/228732516-2d70870d-828c-4934-a3c2-17b989683a6d.png)
+
+If the parameter value was set to the lower limit, then a decrease in performance, measured by performance threshold `t_l`, dicatates reducing the range of the parameter (shown in (a) in the image) by increasing the lower limit value by a small delta. Conversely, if the performance is increased, measured by performance threshold, `t_h`, the lower limit is decreased (shown in (c) in the image) leading to expanding the overall range.
+
+Similarly, if the parameter value was set to the upper limit, then an increase in performance, measured by performance threshold `t_h`, expands the range (shown in (b) in the image) by increasing the upper limit value by a small delta. However, if the performance is decreased, measured by performance threshold, `t_l`, the upper limit is decreased (shown in (d) in the image) leading to shrinking the overall range.
+
+**Implementation**
+
+The ADR implementation resides in [adr_vec_task.py](../isaacgymenvs/tasks/dextreme/adr_vec_task.py) located in `isaacgymenvs/tasks/dextreme` folder. The `ADRVecTask` inherits much of the `VecTask` functionality and an additional class to denote the state of the environment when evaluating the performance 
+
+```
+class RolloutWorkerModes:
+    ADR_ROLLOUT  = 0 # rollout with current ADR params
+    ADR_BOUNDARY = 1 # rollout with params on boundaries of ADR, used to decide whether to expand ranges
+```
+
+Since ADR needs to have the evaluation in the loop to benchmark the performance and adjust the ranges consequently, some fraction of the environments are dedicated to the evaluation denoted by `ADR_BOUNDARY`. Rest of the environments continue to use the unchanged ranges and are denoted by `ADR_ROLLOUT`.
+
+The `apply_randomisation` has additional arguments this time `randomise_buf`, `adr_objective` and `randomisation_callback`. The variable `randomise_buf` enables selective randomisation of some environments while keeping others unchanged, `adr_objective` is the number of consecutive successes and `randomisation_callback` allows using any callbacks for randomisation from the `ADRDextreme` class.
+
+YAML Interface 
+--------------
+
+The YAML file interface now has additional `adr` key where we need to set the appropriate variables and it looks like the following:
+
+```
+adr:
+
+    use_adr: True
+
+    # set to false to not do update ADR ranges. 
+    # useful for evaluation or training a base policy
+    update_adr_ranges: True 
+    clear_other_queues: False
+
+    # if set, boundary sampling and performance eval will occur at (bound + delta) instead of at bound.
+    adr_extended_boundary_sample: False
+
+    worker_adr_boundary_fraction: 0.4 # fraction of workers dedicated 
+    to measuring perf of ends of ADR ranges to update the ranges
+
+    adr_queue_threshold_length: 256
+
+    adr_objective_threshold_low: 5
+    adr_objective_threshold_high: 20
+
+    adr_rollout_perf_alpha: 0.99
+    adr_load_from_checkpoint: false
+
+    params:
+      ### Hand Properties
+      hand_damping:
+        range_path: actor_params.hand.dof_properties.damping.range
+        init_range: [0.5, 2.0]
+        limits: [0.01, 20.0]
+        delta: 0.01
+        delta_style: 'additive'
+        ....
+```
+
+Lets unpack the variables here and go over them one by one:
+
+- `use_adr`: This flag enables ADR. 
+- `update_adr_ranges`: This flag when set to `True` ensures that the ranges of the parameters are updated.
+- `clear_other_queues`: This means that for when evaluating parameter A, whether we want to clear the queue for parameter B. More information on the queue is provided for `adr_queue_threshold_length` below.
+-  `adr_extended_boundary_sample`: We test the performance at either the boundary of the parameter limits of boundary + delta. When this flag is set to `True`, the performance evaluation of the parameter is doing on boundary + delta instead of boundary.
+- `worker_adr_boundary_fraction`: For the evaluation, certain fraction of the overall environments are chosen and this variable allows setting that fraction. 
+- `adr_queue_threshold_length`: The performance is evaluated periodically and stored in a queue and averaged. This variable allows choosing the length of the queue so that statistics are computed over a sufficiently large window. We do not want to rely on policy achieving the thresholds by chance; we want it to maintain the peaks for a while. Therefore, a queue allows logging statistics over a given time frame to be sure that its performing above the threshold.
+- `adr_objective_threshold_low`: This is the `t_l` threshold mentioned in the **Background** section above. Also shown in the image.
+- `adr_objective_threshold_high`: This is the `t_h` threshold as mentioned above in the image.
+- `adr_rollout_perf_alpha`: This is the smoothing factor used to compute the performance.
+- `adr_load_from_checkpoint`: The saved checkpoints also contain the ADR optimised ranges. Therefore, if you want to load up those ranges for future post-hoc evaluation, you should set this to `True`. If set to `False`, it will only load the ranges from the YAML file and not update them from the checkpoint.
+
+Additionally, as you may have noticed, each parameter now also comes with `limit` and `delta` variables. The variable `limits` refers to the complete range within which the parameter is permitted to move, while `delta` represents the incremental change that the parameter can undergo with each ADR update.  
+
+

@@ -1,3 +1,93 @@
+
+DeXtreme is our recent work on transferring cube rotation with allegro hand from simulations to the real world. This task is especially challenging due to increased number of contacts that come into play with doing physics simulation. Naturally, the transfer requires carefully modelling and scheduling the randomisation for both physics and non-physics parameters. More details of the work can be found on the website https://dextreme.org/ as well as the paper (accepted at ICRA 2023, London) available on arXiv https://arxiv.org/pdf/2210.13702.pdf.
+
+
+The work builds on top of our previously released `AllegroHand` environment but with changes to accomodate training for sim-to-real involving two different variants: ManualDR (where the ranges  of parameter domain randomisation are chosen by the user manually) and Automatic Domain Randomisation or ADR (where the ranges of the parameter are updated automatically based on periodic simulation performance benchmarking in the loop). 
+
+Overview 
+--------
+
+There are two different classes **AllegroHandDextremeManualDR** and **AllegroHandDextremeADR** both located in [tasks/dextreme/allegro_hand_dextreme.py](../isaacgymenvs/tasks/dextreme/allegro_hand_dextreme.py) python file. There's additional [adr_vec_task.py](../isaacgymenvs/tasks/dextreme/adr_vec_task.py) located in the same [folder](../isaacgymenvs/tasks/dextreme/) that covers the necessary code related to training with ADR in the `ADRVecTask` class. 
+
+Both the variants are trained with `Asymmetric Actor-Critic` where the `policy` only receives the input that is available in the real world while the `value function` receives additional privileged information available from the simulator. At inference, only the policy is used to obtain the action given the history of states and value function is discarded. For more information, please look at `Section 2` of the DeXtreme paper.
+
+As we will show below, both environments are compatible with the standard way of training with Isaac Gym via `python train.py task=<AllegroHandDextremeManualDR or AllegroHandDextremeADR>`. Additionally, the code uses `dictionary observations` enabled via `use_dict_obs=True` (set as default for these enviornments) in the `ADRVecTask` where the relevant observations needed for training are provided as dictionaries as opposed to filling in the data via slicing and indexing. This keeps it cleaner and easier to manage. Which observations to choose for the policy and value function can be described in the corresponding `yaml` files for training located in `cfg/train` folder. For instance, the policy in the [AllegroHandDextremeManualDRPPO.yaml](../isaacgymenvs/cfg/train/AllegroHandDextremeManualDRPPO.yaml) can be described below like 
+
+```
+    inputs:
+
+      dof_pos_randomized: { }
+      object_pose_cam_randomized: { }
+      goal_pose_randomized: { }
+      goal_relative_rot_cam_randomized: { }
+      last_actions_randomized: { }
+```
+Similarly, for the value function
+
+``` network:
+        name: actor_critic
+        central_value: True
+
+        inputs:
+          dof_pos: { }
+          dof_vel: { }
+          dof_force: { }
+
+          object_pose: { }
+          object_pose_cam_randomized: { }
+          object_vels: { }
+
+          goal_pose: { }
+          goal_relative_rot: {}
+
+          last_actions: { }
+
+          ft_force_torques: {}
+          gravity_vec: {}
+          ft_states: {}
+```
+
+Similar configuration set up is done for [AllegroHandDextremeADRPPO.yaml](../isaacgymenvs/cfg/train/AllegroHandDextremeManualDRPPO.yaml).
+
+Various parameters that the user wishes to randomise for their training can be chosen and tuned in the corresponding `task` files located in `cfg/task` [folder](../isaacgymenvs/cfg/task/). For instance, in [AllegroHandDextremeManualDR.yaml](../isaacgymenvs/cfg/task/AllegroHandDextremeManualDR.yaml), the randomisation parameters and ranges can be found under 
+
+```
+task:
+  randomize: True
+  randomization_params:
+    ....
+```
+
+For the [AllegroHandDextremeADR.yaml](../isaacgymenvs/cfg/task/AllegroHandDextremeADR.yaml), additional configuration is needed and can be found under 
+
+```
+  adr:
+
+    use_adr: True
+
+    # set to false to not do update ADR ranges. useful for evaluation or training a base policy
+    update_adr_ranges: True 
+    ...
+
+
+    # raw ADR params. more are added by affine transforms code
+    params:
+      ### Hand Properties
+      hand_damping:
+        range_path: actor_params.hand.dof_properties.damping.range
+        init_range: [0.5, 2.0]
+        limits: [0.01, 20.0]
+        delta: 0.01
+        delta_style: 'additive'
+```
+
+You will also see that there are two key variables: `limits` and `delta`. The variable `limits` refers to the complete range within which the parameter is permitted to move, while `delta` represents the incremental change that the parameter can undergo with each ADR update. These variables play a crucial role in determining the scope and pace of parameter adjustments made by ADR.
+
+
+We highly recommend to familiarise yourself with the codebase and configuration files first before training to understand the relevant classes and the inheritence involved. 
+
+Below we provide the exact settings for training the two different variants of the environment we used in our work for reproducibility.
+
 # To run experiments with Manual DR settings
 
 If you are using a single GPU, run the following command to train DeXtreme RL policies with Manual DR
@@ -23,7 +113,7 @@ task.env.apply_random_quat=True \
 python ${HYDRA_MANUAL_DR}
 ```
 
-The apply_random_quat=True flag samples unbiased quaternion goals which makes the training slightly hard. We use a successTolerance of 0.4 radians in these settings overriding the settings in AllegroHandDextremeManualDR.yaml.
+The `apply_random_quat=True` flag samples unbiased quaternion goals which makes the training slightly harder. We use a successTolerance of 0.4 radians in these settings overriding the settings in AllegroHandDextremeManualDR.yaml via hydra CLI.
 
 # To run experiments with Automatic Domain Randomisation (ADR)
 
@@ -41,15 +131,13 @@ wandb_activate=True wandb_group=multi_gpu wandb_project=dextreme"
 python ${HYDRA_ADR}
 ```
 
-
-
 If you want to do `wandb_logging` you can also add the following to the `HYDRA_MANUAL_DR` 
 
 ```
 wandb_activate=True wandb_group=group_name wandb_project=project_name"
 ```
 
-To log the entire isaacgymenvs code used to train in the wandb dashboard you can add: 
+To log the entire isaacgymenvs code used to train in the wandb dashboard (this is useful for reproducibility as you make changes to your code) you can add: 
 
 ```
 wandb_logcode_dir=<isaac_gym_dir>
@@ -133,14 +221,14 @@ ADR Params after loading from checkpoint: {'hand_damping': {'range_path': 'actor
 
 # Multi-GPU settings 
 
-If you want to train on multiple GPUs (or a single DGX node), we also provide training scripts and the code to run both Manual DR as well as ADR below. The ${GPUS} variable needs to be set beforehand in your bash e.g. GPUS=8 if you are using a single node.
+If you want to train on multiple GPUs (or a single DGX node), we also provide training scripts and the code to run both Manual DR as well as ADR below. The ${GPUS} variable needs to be set beforehand in your bash e.g. GPUS=8 if you are using a single node. Throughout our experimentation for the DeXtreme work, We trained our policies on a single node containg 8 NVIDIA A40 GPUs.
 
 # Manual DR 
 
-To run the training with Manual DR settings on Multi-GPU settings, you need to add the following to the previous Manual DR command:
+To run the training with Manual DR settings on Multi-GPU settings set the flag `multi_gpu=True`. You will also need to add the following to the previous Manual DR command:
 
 ```
-torchrun --nnodes=1 --nproc_per_node=${GPUS} --master_addr '127.0.0.1' ${HYDRA_MANUAL_DR}
+torchrun --nnodes=1 --nproc_per_node=${GPUS} --master_addr '127.0.0.1' ${HYDRA_MANUAL_DR} 
 ```
 
 # ADR 

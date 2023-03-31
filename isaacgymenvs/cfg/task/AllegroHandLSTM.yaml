@@ -73,29 +73,10 @@ env:
     prob: 0.15
     weight_sample_freq: 1000 # steps 
 
-
-  # Deform cube vertices to provide randomness 
-  cube_size_m: 0.065
-  # this needs to be obtained from the URDF
-  # check with Aleksei why he added it here.
-  cube_density: 400.0
-
-  deform_objects:
-    enable: False #True
-    noise_sigma_m: 0.003
-    # noise_max_m: 0.01
-    noise_max_m: 0.01
-
   # Provide random cube observations to model pose jumps in the real
   random_cube_observation:
     enable: True 
     prob: 0.3
-
-  random_obs_repeat: 
-    enable: False #True 
-    prob: 0.2
-    rate_max: 7
-    activate_after: 100_000
 
   # reward -> dictionary
   distRewardScale: -10.0
@@ -106,11 +87,6 @@ env:
   reachGoalBonus: 250
   fallDistance: 0.24
   fallPenalty: 0.0
-
-  # about saving the behaviour of trained policy
-  saveStates: False 
-  saveStateFile: 'allegro_capture'
-  saveEpisodes: 2
 
   objectType: "block" # can be block, egg or pen
   observationType: "no_vel" #"full_state" # can be "no_vel", "full_state"

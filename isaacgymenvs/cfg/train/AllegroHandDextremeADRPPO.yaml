@@ -56,7 +56,7 @@ params:
     mixed_precision: False
     normalize_input: True
     normalize_value: True
-    value_bootstrap: False  # TODO: enable bootstrap?
+    value_bootstrap: False  
     num_actors: ${....task.env.numEnvs}
     reward_shaper:
       scale_value: 1.0
@@ -84,13 +84,13 @@ params:
     seq_length: 16
     bound_loss_type: regularization
     bounds_loss_coef: 0.005
-    zero_rnn_flag: False
+    zero_rnn_on_done: False
 
     # optimize summaries to prevent tf.event files from growing to gigabytes
     force_interval_writer: True
 
     central_value_config:
-      minibatch_size: 16384 #32768
+      minibatch_size: 16384 
       mini_epochs: 4
       learning_rate: 5e-5
       kl_threshold: 0.016
@@ -128,7 +128,7 @@ params:
           rb_forces: {}
 
         mlp:
-          units: [1024, 512] #[1024, 512, 512, 256]  #[512, 512] #[512, 256, 128] #[256]
+          units: [1024, 512] 
           activation: elu
           d2rl: False
           initializer:
@@ -137,7 +137,7 @@ params:
             name: None
         rnn:
           name: lstm
-          units: 2048 #1024
+          units: 2048 
           layers: 1
           before_mlp: True
           layer_norm: True
