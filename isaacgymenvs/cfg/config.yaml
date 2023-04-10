@@ -61,7 +61,8 @@ headless: False
 defaults:
   - task: Ant
   - train: ${task}PPO
-  - hydra/job_logging: disabled
+  - override hydra/job_logging: disabled
+  - _self_
 
 # set the directory where the output files get saved
 hydra:
