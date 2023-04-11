@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2021, NVIDIA Corporation
+# Copyright (c) 2018-2023, NVIDIA Corporation
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -394,7 +394,8 @@ class VecTaskDextreme(EnvDextreme, VecTask):
             self.__dict__[key] = value
             print(f'Loaded env state value {key}:{value}')
 
-        print(f'ADR Params after loading from checkpoint: {self.adr_params}')
+        if self.use_adr:
+            print(f'ADR Params after loading from checkpoint: {self.adr_params}')
 
                   
     def get_randomization_dict(self, dr_params, obs_shape):

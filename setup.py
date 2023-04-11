@@ -29,7 +29,7 @@ INSTALL_REQUIRES = [
 setup(
     name="isaacgymenvs",
     author="NVIDIA",
-    version="1.3.3",
+    version="1.3.4",
     description="Benchmark environments for high-speed robot learning in NVIDIA IsaacGym.",
     keywords=["robotics", "rl"],
     include_package_data=True,

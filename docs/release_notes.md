@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+1.3.4
+-----
+
+* Fixed bug when running inferencing on DeXtreme environments.
+* Fixed links in examples documentation.
+* Minor fixes in documentation.
+
 1.3.3
 -----
 

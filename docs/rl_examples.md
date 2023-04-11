@@ -12,21 +12,22 @@ training progress.
 List of Examples
 ----------------
 
-* [Ant](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#ant-antpy)
-* [Humanoid](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#humanoid-humanoidpy)
-* [Shadow Hand](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#shadow-hand-object-manipulation-shadow_handpy)
-* [Allegro Hand](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#allegro-hand-allegro_handpy)
-* [ANYmal](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#anymal-anymalpy)
-* [ANYmal Rough Terrain](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#anymal-rough-terrain-anymal_terrainpy)
-* [TriFinger](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#trifinger-trifingerpy)
-* [NASA Ingenuity Helicopter](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#nasa-ingenuity-helicopter-ingenuitypy)
-* [Cartpole](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#cartpole-cartpolepy)
-* [Ball Balance](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#ball-balance-ball_balancepy)
-* [Franka Cabinet](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#franka-cabinet-franka_cabinetpy)
-* [Franka Cube Stack](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#franka-cube-stack-franka_cube_stackpy)
-* [Quadcopter](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#quadcopter-quadcopterpy)
-* [Adversarial Motion Priors](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#amp-adversarial-motion-priors-humanoidamppy)
-* [Factory](https://gitlab-master.nvidia.com/carbon-gym/isaacgymenvs/-/blob/dev/docs/rl_examples.md#factory-fast-contact-for-robotic-assembly)
+* [Ant](#ant-antpy)
+* [Humanoid](#humanoid-humanoidpy)
+* [Shadow Hand](#shadow-hand-object-manipulation-shadow_handpy)
+* [Allegro Hand](#allegro-hand-allegro_handpy)
+* [ANYmal](#anymal-anymalpy)
+* [ANYmal Rough Terrain](#anymal-rough-terrain-anymal_terrainpy)
+* [TriFinger](#trifinger-trifingerpy)
+* [NASA Ingenuity Helicopter](#nasa-ingenuity-helicopter-ingenuitypy)
+* [Cartpole](#cartpole-cartpolepy)
+* [Ball Balance](#ball-balance-ball_balancepy)
+* [Franka Cabinet](#franka-cabinet-franka_cabinetpy)
+* [Franka Cube Stack](#franka-cube-stack-franka_cube_stackpy)
+* [Quadcopter](#quadcopter-quadcopterpy)
+* [Adversarial Motion Priors](#amp-adversarial-motion-priors-humanoidamppy)
+* [Factory](#factory-fast-contact-for-robotic-assembly)
+* [DeXtreme](#dextreme-transfer-of-agile-in-hand-manipulation-from-simulation-to-reality)
 
 ### Ant [ant.py](../isaacgymenvs/tasks/ant.py)
 
@@ -432,10 +433,10 @@ There are two [DeXtreme](https://dextreme.org) tasks: **AllegroHandDextremeManua
 For `AllegroHandDextremeManualDR`, you should use the following command for training 
 
 ```
-HYDRA_MANUAL_DR="train.py multi_gpu=False\ 
+HYDRA_MANUAL_DR="train.py multi_gpu=False \
 task=AllegroHandDextremeManualDR \
 task.env.resetTime=8 task.env.successTolerance=0.4 \
-experiment='allegrohand_dextreme_manual_dr'\
+experiment='allegrohand_dextreme_manual_dr' \
 headless=True seed=-1 \
 task.env.startObjectPoseDY=-0.15 \
 task.env.actionDeltaPenaltyScale=-0.2 \
@@ -446,7 +447,7 @@ train.params.network.rnn.units=768 \
 train.params.network.rnn.name=lstm \
 train.params.config.central_value_config.network.mlp.units=[1024,512,256] \
 train.params.config.max_epochs=50000 \
-task.env.apply_random_quat=True \
+task.env.apply_random_quat=True"
 
 
 python ${HYDRA_MANUAL_DR}
@@ -462,9 +463,10 @@ For `AllegroHandDextremeADR`, you should use the following command for training
 HYDRA_ADR="train.py multi_gpu=False \
 task=AllegroHandDextremeADR \
 headless=True seed=-1 \
+num_envs=8192 \
 task.env.resetTime=8 \
 task.env.controlFrequencyInv=2 \
-train.params.config.max_epochs=50000 \
+train.params.config.max_epochs=50000"
 
 python ${HYDRA_ADR}
 ```

@@ -93,10 +93,10 @@ Below we provide the exact settings for training the two different variants of t
 If you are using a single GPU, run the following command to train DeXtreme RL policies with Manual DR
 
 ```
-HYDRA_MANUAL_DR="train.py multi_gpu=False\ 
+HYDRA_MANUAL_DR="train.py multi_gpu=False \
 task=AllegroHandDextremeManualDR \
 task.env.resetTime=8 task.env.successTolerance=0.4 \
-experiment='allegrohand_dextreme_manual_dr'\
+experiment='allegrohand_dextreme_manual_dr' \
 headless=True seed=-1 \
 task.env.startObjectPoseDY=-0.15 \
 task.env.actionDeltaPenaltyScale=-0.2 \
@@ -107,7 +107,7 @@ train.params.network.rnn.units=768 \
 train.params.network.rnn.name=lstm \
 train.params.config.central_value_config.network.mlp.units=[1024,512,256] \
 train.params.config.max_epochs=50000 \
-task.env.apply_random_quat=True \
+task.env.apply_random_quat=True"
 
 
 python ${HYDRA_MANUAL_DR}
@@ -123,10 +123,10 @@ The ADR policies are trained with a successTolerance of 0.1 radians and use LSTM
 HYDRA_ADR="train.py multi_gpu=False \
 task=AllegroHandDextremeADR \
 headless=True seed=-1 \
+num_envs=8192 \
 task.env.resetTime=8 \
 task.env.controlFrequencyInv=2 \
-train.params.config.max_epochs=50000 \
-wandb_activate=True wandb_group=multi_gpu wandb_project=dextreme"
+train.params.config.max_epochs=50000"
 
 python ${HYDRA_ADR}
 ```
@@ -150,10 +150,15 @@ To load a given checkpoint using ManualDR, you can use the following
 
 ```
 python train.py task=AllegroHandDextremeManualDR \
-num_envs=2048 checkpoint=<your_checkpoint_path> \
-test=True \
-task.env.printNumSuccesses=True \
-headless=True
+num_envs=32 task.env.startObjectPoseDY=-0.15 \
+task.env.actionDeltaPenaltyScale=-0.2 \
+task.env.controlFrequencyInv=2 train.params.network.mlp.units=[512,512] \
+train.params.network.rnn.units=768 \
+train.params.network.rnn.name=lstm \
+train.params.config.central_value_config.network.mlp.units=[1024,512,256] \
+task.env.random_network_adversary.enable=True checkpoint=<ckpt_path> \
+test=True task.env.apply_random_quat=True task.env.printNumSuccesses=False
+
 ```
 
 and for ADR, add `task.task.adr.adr_load_from_checkpoint=True` to the command above, i.e.
@@ -239,8 +244,13 @@ Similarly for ADR:
 torchrun --nnodes=1 --nproc_per_node=${GPUS} --master_addr '127.0.0.1' ${HYDRA_ADR}
 ```
 
-Below, we show two batches of 8 different trials each run on a single node (8 GPUs) across different weeks. Each of these plots are meant to highlight the variability in the runs. 
+Below, we show the npd (nats per dimension cf. Algorithm 5.2 [OpenAI et al. 2019](https://arxiv.org/pdf/1910.07113.pdf) and Section 2.6.3 [DeXtreme](https://arxiv.org/pdf/2210.13702.pdf)) graphs of two batches of 8 different trials each run on a single node (8 GPUs) across different weeks. Each of these plots are meant to highlight the variability in the runs. Increase in npd means the networks are being trained on more divesity.
 
 ![npd_1](./images/npd_1.jpg)
 
 ![npd_2](./images/npd_2.jpg)
+
+
+## RL training
+
+To try the exact version of rl_games we used for training our experiments, please git clone and install `https://github.com/ArthurAllshire/rl_games`

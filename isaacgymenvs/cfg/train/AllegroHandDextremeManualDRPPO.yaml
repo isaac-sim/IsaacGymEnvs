@@ -130,5 +130,6 @@ params:
 
     player:
       deterministic: True
+      use_vecenv: True
       games_num: 1000000
       print_stats: False
