@@ -84,11 +84,19 @@ class TargetVelocity(AbstractTask):
         
         self.use_position_pd = self.cfg['reset']["position_pd_control"]["enabled"]
         if self.use_position_pd:
-            self.kp = self.cfg["position_pd_control"]["kp"]
-            self.kd = self.cfg["position_pd_control"]["kd"]
+            self.kp = self.cfg['reset']["position_pd_control"]["kP"]
+            self.kd = self.cfg['reset']["position_pd_control"]["kD"]
+            target_position_schedule = np.load(self.cfg['reset']["position_pd_control"]["path"])
+            self.target_position_schedule = to_torch(target_position_schedule, device=self.device, dtype=self.dtype)
     
     def get_state(self):
-        return torch.cat([self.target_direction, self.target_speed, self.target_yaw_rate], dim=-1)
+        return torch.cat([
+            self.target_direction, 
+            self.target_speed, 
+            self.target_yaw_rate,
+            self.get_current_position(), 
+            self.get_goal_position()
+        ], dim=-1)
 
     def get_current_position(self):
         return self.root_states[:, :3]
@@ -109,6 +117,9 @@ class TargetVelocity(AbstractTask):
         goal_velocity = self.get_goal_velocity()
         target_velocity = self.kd * (goal_position - current_position) + self.kp * (goal_velocity - current_velocity)
         target_velocity[:,2] = 0
+        
+        # Clip to [-2, 2]
+        target_velocity = torch.clip(target_velocity, -1, 1)
         return target_velocity
 
     def on_step(self):
@@ -120,6 +131,7 @@ class TargetVelocity(AbstractTask):
             target_velocity = self.compute_target_velocity()
             self.target_direction[:] = target_velocity / torch.norm(target_velocity, dim=-1, keepdim=True)
             self.target_speed[:] = torch.norm(target_velocity, dim=-1, keepdim=True)
+        
 
     def reset(self, env_ids):
         """ Reset subset of commands """

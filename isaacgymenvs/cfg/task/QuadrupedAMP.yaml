@@ -54,7 +54,7 @@ env:
         # Implement a closed-loop controller for going to target position
         enabled: False
         path: pos_schedule.npy
-        kP: 5.0
+        kP: 1.0
         kD: 1.0
       targetDirection:
         strategy: Fixed

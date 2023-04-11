@@ -235,6 +235,7 @@ class QuadrupedAMPBase(VecTask):
 
     def pre_physics_step(self, actions):
         self.actions = actions.to(self.device).clone()
+        self.task.update_sim_state(self.root_states)
 
         if (self._pd_control):
             pd_tar = self._action_to_pd_targets(self.actions)
@@ -249,7 +250,6 @@ class QuadrupedAMPBase(VecTask):
 
     def post_physics_step(self):
         self.task.on_step()
-        self.task.update_sim_state(self.root_states)
         self.progress_buf += 1
 
         env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)

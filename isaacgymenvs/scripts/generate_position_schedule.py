@@ -6,9 +6,9 @@ if __name__ == "__main__":
     ts = np.linspace(0, 1, n_timesteps)
 
     waypoints = [
-        (0.0, 1.0, 0.0),
-        (1.0, 1.0, 0.0),
-        (1.0, 0.0, 0.0),
+        (0.0, 5.0, 0.0),
+        (5.0, 5.0, 0.0),
+        (5.0, 0.0, 0.0),
         (0.0, 0.0, 0.0),
     ]
     position_schedule = [w for w in waypoints for _ in range(n_timesteps // len(waypoints))]
