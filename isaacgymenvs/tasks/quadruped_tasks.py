@@ -48,6 +48,9 @@ class AbstractTask(abc.ABC):
 
     def get_state(self):
         return None
+    
+    def update_sim_state(self, root_states):
+        self.root_states = root_states
 
     @staticmethod
     @abc.abstractmethod
@@ -78,16 +81,46 @@ class TargetVelocity(AbstractTask):
         if self.use_schedule:
             target_velocity_schedule = np.load(self.cfg["reset"]["schedule"]["path"])
             self.target_velocity_schedule = to_torch(target_velocity_schedule, device=self.device, dtype=self.dtype)
+        
+        self.use_position_pd = self.cfg['reset']["position_pd_control"]["enabled"]
+        if self.use_position_pd:
+            self.kp = self.cfg["position_pd_control"]["kp"]
+            self.kd = self.cfg["position_pd_control"]["kd"]
     
     def get_state(self):
         return torch.cat([self.target_direction, self.target_speed, self.target_yaw_rate], dim=-1)
+
+    def get_current_position(self):
+        return self.root_states[:, :3]
     
+    def get_current_velocity(self):
+        return self.root_states[:, 7:10]
+    
+    def get_goal_position(self):
+        return self.target_position_schedule[self.progress_buf, :]
+    
+    def get_goal_velocity(self):
+        return torch.zeros_like(self.get_current_velocity())
+    
+    def compute_target_velocity(self):
+        current_position = self.get_current_position()
+        goal_position = self.get_goal_position()
+        current_velocity = self.get_current_velocity()
+        goal_velocity = self.get_goal_velocity()
+        target_velocity = self.kd * (goal_position - current_position) + self.kp * (goal_velocity - current_velocity)
+        target_velocity[:,2] = 0
+        return target_velocity
+
     def on_step(self):
         super().on_step()
         if self.use_schedule:
             self.target_direction[:] = self.target_velocity_schedule[self.progress_buf, :3]
             self.target_speed[:] = self.target_velocity_schedule[self.progress_buf, 3:4]
-    
+        if self.use_position_pd:
+            target_velocity = self.compute_target_velocity()
+            self.target_direction[:] = target_velocity / torch.norm(target_velocity, dim=-1, keepdim=True)
+            self.target_speed[:] = torch.norm(target_velocity, dim=-1, keepdim=True)
+
     def reset(self, env_ids):
         """ Reset subset of commands """
         tar_dir_rs = self.target_direction_reset["strategy"]

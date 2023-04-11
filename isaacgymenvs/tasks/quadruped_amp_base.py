@@ -249,6 +249,7 @@ class QuadrupedAMPBase(VecTask):
 
     def post_physics_step(self):
         self.task.on_step()
+        self.task.update_sim_state(self.root_states)
         self.progress_buf += 1
 
         env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
