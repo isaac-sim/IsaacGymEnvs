@@ -5,6 +5,8 @@
 
 ### About this repository
 
+This branch has minimal code to export data (observations, actions, RNN hidden states, etc) from Isaac Gym.
+
 This repository contains example RL environments for the NVIDIA Isaac Gym high performance environments described [in our NeurIPS 2021 Datasets and Benchmarks paper](https://openreview.net/forum?id=fgFBtYgJQX_)
 
 
