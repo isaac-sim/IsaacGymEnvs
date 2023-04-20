@@ -49,7 +49,7 @@ wandb_project: 'isaacgymenvs'
 wandb_tags: []
 wandb_logcode_dir: '' 
 
-capture_video: False
+capture_video: True
 capture_video_freq: 1464
 capture_video_len: 100
 force_render: True
@@ -60,7 +60,7 @@ headless: False
 # set default task and default training config based on task
 defaults:
   - task: Ant
-  - train: ${task}PPO
+  - train: ${task}PPO_LSTM
   - hydra/job_logging: disabled
 
 # set the directory where the output files get saved

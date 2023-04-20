@@ -31,3 +31,5 @@ runs/
 outputs/
 *.hydra*
 /isaacgymenvs/wandb
+*.csv
+*.json

@@ -23,7 +23,7 @@ params:
         fixed_sigma: True
 
     mlp:
-      units: [512] #, 256, 128]
+      units: [512, 256]
       activation: elu
       d2rl: False
 
@@ -33,10 +33,10 @@ params:
         name: None
     rnn:
       name: lstm
-      units: 256 #128
+      units: 128
       layers: 1
       before_mlp: False #True
-      concat_input: True
+      concat_input: False
       layer_norm: False
 
 
@@ -49,7 +49,7 @@ params:
     env_name: rlgpu
     multi_gpu: ${....multi_gpu}
     ppo: True
-    mixed_precision: True
+    mixed_precision: False
     normalize_input: True
     normalize_value: True
     normalize_advantage: True
@@ -61,7 +61,7 @@ params:
     gamma: 0.99
     tau: 0.95
     e_clip: 0.2
-    entropy_coef: 0.001
+    entropy_coef: 0.000
     learning_rate: 3.e-4 # overwritten by adaptive lr_schedule
     lr_schedule: adaptive
     kl_threshold: 0.008 # target kl for adaptive lr
@@ -69,13 +69,13 @@ params:
     grad_norm: 1.
     horizon_length: 24
     minibatch_size: 16384
-    mini_epochs: 5
+    mini_epochs: 4
     critic_coef: 2
-    clip_value: True
-    seq_len: 4 # only for rnn
-    bounds_loss_coef: 0.
+    clip_value: False
+    seq_len: 24 # only for rnn
+    bounds_loss_coef: 0.001
 
-    max_epochs: ${resolve_default:750,${....max_iterations}}
+    max_epochs: ${resolve_default:3000,${....max_iterations}}
     save_best_after: 100
     score_to_win: 20000
     save_frequency: 50
