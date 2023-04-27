@@ -543,7 +543,7 @@ class FrankaCubeStack(VecTask):
         elif cube.lower() == 'b':
             this_cube_state_all = self._init_cubeB_state
             other_cube_state = self._init_cubeA_state[env_ids, :]
-            cube_heights = self.states["cubeA_size"]
+            cube_heights = self.states["cubeB_size"]
         else:
             raise ValueError(f"Invalid cube specified, options are 'A' and 'B'; got: {cube}")
 
