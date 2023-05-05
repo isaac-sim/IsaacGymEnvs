@@ -49,10 +49,10 @@ def write_motion_data(filepath: str, frames: np.ndarray, dt: float, loop_mode: s
 def write_dataset(motion_fps: str, dataset_fp: str):
     dataset = []
     # Uniformly weight all files
-    weight = round(1 / len(filepaths), 5) 
+    weight = round(1 / len(motion_fps), 5) 
     for fp in motion_fps: 
         dataset.append({
-            'file': fp.name + '.txt',
+            'file': fp.name,
             'weight': weight
         })
     with open(dataset_fp, 'w') as file:
