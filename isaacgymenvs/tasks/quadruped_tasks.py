@@ -105,7 +105,10 @@ class TargetVelocity(AbstractTask):
         return self.root_states[:, 7:10]
     
     def get_goal_position(self):
-        return self.target_position_schedule[self.progress_buf, :]
+        if self.use_position_pd:
+            return self.target_position_schedule[self.progress_buf, :]
+        else:
+            return torch.zeros_like(self.get_current_position())
     
     def get_goal_velocity(self):
         return torch.zeros_like(self.get_current_velocity())
