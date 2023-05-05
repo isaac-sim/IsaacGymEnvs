@@ -63,24 +63,31 @@ if __name__ == "__main__":
 
     # Set up directories
     input_dir = pathlib.Path(args.input_dir)
-    filepaths = [
-        'base_position3.npz',
-        'base_orientation3.npz',
-        'joint_angles3.npz'
-    ]
-    filepaths = [input_dir / fp for fp in filepaths]
+    output_filepaths = []
 
-    base_position = np.load(filepaths[0])['base_position']
-    base_orientation = np.load(filepaths[1])['base_orientation']
-    joint_angles = np.load(filepaths[2])['joint_angles']
-    joint_angles = reorder_dofs(joint_angles.T).T
-    frame_data = np.concatenate([base_position, base_orientation, joint_angles], axis=-1)
-    
-    # Write motion data
-    output_dir = pathlib.Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_filepath = output_dir / 'motion.txt'
-    write_motion_data(output_filepath, frame_data, dt=0.02)
+    for i in range(1, 9):
+        if (i == 5): continue # No 5 for some reason
+        filepaths = [
+            f'base_position{i}.npz',
+            f'base_orientation{i}.npz',
+            f'joint_angles{i}.npz'
+        ]
+        filepaths = [input_dir / fp for fp in filepaths]
+
+        base_position = np.load(filepaths[0])['base_position']
+        base_orientation = np.load(filepaths[1])['base_orientation']
+        joint_angles = np.load(filepaths[2])['joint_angles']
+        joint_angles = reorder_dofs(joint_angles.T).T
+        frame_data = np.concatenate([base_position, base_orientation, joint_angles], axis=-1)
+
+        # Write motion data
+        output_dir = pathlib.Path(args.output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_filepath = output_dir / f'motion{i}.txt'
+        output_filepaths.append(output_filepath)
+        write_motion_data(output_filepath, frame_data, dt=0.02)
+
+    write_dataset(output_filepaths, output_dir / f'{args.dataset_name}.yaml')
 
     # Plot motion data
     import matplotlib.pyplot as plt
