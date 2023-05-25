@@ -90,6 +90,7 @@ params:
     disc_logit_reg: 0.05
     disc_grad_penalty: 5
     disc_reward_scale: 2
+    disc_temperature:  1.0
     disc_weight_decay: 0.0001
     normalize_amp_input: True
 

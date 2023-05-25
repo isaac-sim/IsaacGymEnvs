@@ -383,6 +383,7 @@ class AMPAgent(common_agent.CommonAgent):
         self._disc_grad_penalty = config['disc_grad_penalty']
         self._disc_weight_decay = config['disc_weight_decay']
         self._disc_reward_scale = config['disc_reward_scale']
+        self._disc_temperature = config['disc_temperature']
         self._normalize_amp_input = config.get('normalize_amp_input', True)
         return
 
@@ -511,7 +512,7 @@ class AMPAgent(common_agent.CommonAgent):
     def _calc_disc_rewards(self, amp_obs):
         with torch.no_grad():
             disc_logits = self._eval_disc(amp_obs)
-            prob = 1 / (1 + torch.exp(-disc_logits)) 
+            prob = 1 / (1 + torch.exp(-self._disc_temperature * disc_logits)) 
             disc_r = -torch.log(torch.maximum(1 - prob, torch.tensor(0.0001, device=self.ppo_device)))
             disc_r *= self._disc_reward_scale
         return disc_r
