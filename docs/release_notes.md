@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+1.4.0
+-----
+
+* Added multi-node training support.
+
 1.3.4
 -----
 

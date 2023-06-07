@@ -59,7 +59,7 @@ def get_rlgames_env_creator(
         rl_device: str,
         graphics_device_id: int,
         headless: bool,
-        # Used to handle multi-gpu case
+        # used to handle multi-gpu case
         multi_gpu: bool = False,
         post_create_hook: Callable = None,
         virtual_screen_capture: bool = False,
@@ -87,23 +87,24 @@ def get_rlgames_env_creator(
         Creates the task from configurations and wraps it using RL-games wrappers if required.
         """
         if multi_gpu:
-            # import horovod.torch as hvd
 
-            # hvd.init()
+            local_rank = int(os.getenv("LOCAL_RANK", "0"))
+            global_rank = int(os.getenv("RANK", "0"))
 
-            # rank = hvd.rank()
+            # local rank of the GPU in a node
+            local_rank = int(os.getenv("LOCAL_RANK", "0"))
+            # global rank of the GPU
+            global_rank = int(os.getenv("RANK", "0"))
+            # total number of GPUs across all nodes
+            world_size = int(os.getenv("WORLD_SIZE", "1"))
 
-            rank = int(os.getenv("LOCAL_RANK", "0"))
+            print(f"global_rank = {global_rank} local_rank = {local_rank} world_size = {world_size}")
 
-            # set_seed(seed + rank)
+            _sim_device = f'cuda:{local_rank}'
+            _rl_device = f'cuda:{local_rank}'
 
-            print("Horovod rank: ", rank)
-
-            _sim_device = f'cuda:{rank}'
-            _rl_device = f'cuda:{rank}'
-
-            task_config['rank'] = rank
-            task_config['rl_device'] = 'cuda:' + str(rank)
+            task_config['rank'] = local_rank
+            task_config['rl_device'] = 'cuda:' + str(local_rank)
         else:
             _sim_device = sim_device
             _rl_device = rl_device

@@ -44,6 +44,7 @@ import gym
 from isaacgymenvs.utils.reformat import omegaconf_to_dict, print_dict
 from isaacgymenvs.utils.utils import set_np_formatting, set_seed
 
+
 def preprocess_train_config(cfg, config_dict):
     """
     Adding common configuration parameters to the rl_games train config.
@@ -95,12 +96,12 @@ def launch_rlg_hydra(cfg: DictConfig):
     # set numpy formatting for printing only
     set_np_formatting()
 
-    # sets seed. if seed is -1 will pick a random one
-    rank = int(os.getenv("LOCAL_RANK", "0"))
-    cfg.seed += rank
-    cfg.seed = set_seed(cfg.seed, torch_deterministic=cfg.torch_deterministic)
-    cfg.train.params.config.multi_gpu = cfg.multi_gpu
+    # global rank of the GPU
+    global_rank = int(os.getenv("RANK", "0"))
 
+    # sets seed. if seed is -1 will pick a random one
+    cfg.seed = set_seed(cfg.seed, torch_deterministic=cfg.torch_deterministic, rank=global_rank)
+    cfg.train.params.config.multi_gpu = cfg.multi_gpu
 
     def create_isaacgym_env(**kwargs):
         envs = isaacgymenvs.make(
@@ -165,11 +166,11 @@ def launch_rlg_hydra(cfg: DictConfig):
 
     observers = [RLGPUAlgoObserver()]
 
-    if cfg.wandb_activate and rank ==0 :
+    if cfg.wandb_activate and global_rank == 0 :
 
         import wandb
         
-        # initialize wandb only once per horovod run (or always for non-horovod runs)
+        # initialize wandb only once for GPU 0 in multi-gpu run (or always for single-gpu runs)
         wandb_observer = WandbAlgoObserver(cfg)
         observers.append(wandb_observer)
 
@@ -194,7 +195,7 @@ def launch_rlg_hydra(cfg: DictConfig):
         'sigma': cfg.sigma if cfg.sigma != '' else None
     })
 
-    if cfg.wandb_activate and rank == 0:
+    if cfg.wandb_activate and global_rank == 0:
         wandb.finish()
 
 if __name__ == "__main__":
