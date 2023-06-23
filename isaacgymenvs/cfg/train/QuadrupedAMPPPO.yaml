@@ -65,7 +65,7 @@ params:
     lr_schedule: constant
     kl_threshold: 0.008 # target kl for adaptive lr
     score_to_win: 20000
-    max_epochs: ${resolve_default:1000,${....max_iterations}}
+    max_epochs: ${resolve_default:5000,${....max_iterations}}
     save_best_after: 200
     save_frequency: 50
     print_stats: True
@@ -93,6 +93,7 @@ params:
     disc_weight_decay: 0.0001
     normalize_amp_input: True
 
-    task_reward_w: 0.0
-    disc_reward_w: 1.0
+    task_reward_w: 0.3
+    disc_reward_w: 0.7
+
 

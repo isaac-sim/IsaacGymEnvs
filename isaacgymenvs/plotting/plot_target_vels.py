@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser("Visualize expert dataset")
-    parser.add_argument("-i", "--input-filepath", type=str)
+    parser.add_argument("-i", "--input-filepath", type=str, default='data/motions/quadruped/mania_pos/motion7.txt')
     parser.add_argument('-o', "--output-filepath", type=str, default="")
     args = parser.parse_args()
     return args

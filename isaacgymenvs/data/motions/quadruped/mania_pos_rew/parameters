@@ -1,0 +1,35 @@
+Parameters: 
+
+control: Position 
+
+velocity: vx = 0.6
+
+action_repeat: 1
+time-step: 0.002
+
+
+
+ABDUCTION_P_GAIN = 60.
+ABDUCTION_D_GAIN =1
+HIP_P_GAIN = 25.
+HIP_D_GAIN = 0.5
+KNEE_P_GAIN = 20.
+KNEE_D_GAIN = 0.5
+
+
+motor_kp = [
+ABDUCTION_P_GAIN, HIP_P_GAIN, KNEE_P_GAIN, ABDUCTION_P_GAIN,
+HIP_P_GAIN, KNEE_P_GAIN, ABDUCTION_P_GAIN, HIP_P_GAIN, KNEE_P_GAIN,
+ABDUCTION_P_GAIN, HIP_P_GAIN, KNEE_P_GAIN
+]
+motor_kd = [
+ABDUCTION_D_GAIN, HIP_D_GAIN, KNEE_D_GAIN, ABDUCTION_D_GAIN,
+HIP_D_GAIN, KNEE_D_GAIN, ABDUCTION_D_GAIN, HIP_D_GAIN, KNEE_D_GAIN,
+ABDUCTION_D_GAIN, HIP_D_GAIN, KNEE_D_GAIN
+]
+
+
+ 
+motor_torques = -1 * (kp * (motor_angle - desired_motor_angles)) - kd * ( motor_velocity) 
+
+motor_sscaling (torques multiplied after pd controller) : 0.06

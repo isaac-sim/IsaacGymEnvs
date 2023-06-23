@@ -1,0 +1,5 @@
+motions:
+- file: motion6.txt
+  weight: 0.5
+- file: motion7.txt
+  weight: 0.5

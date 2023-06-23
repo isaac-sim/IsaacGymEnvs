@@ -5,13 +5,16 @@ physics_engine: ${..physics_engine}
 
 env:
   # AMP-specific things
-  motionFile: 'data/motions/quadruped/dog_mocap/dog_trot_hq.txt'
+  motionFile: 'data/motions/quadruped/mania_pos/dataset.yaml'
+#  motionFile: 'data/motions/quadruped/mania_pos/motion7.txt'
   # End AMP-specific things
   numEnvs: ${resolve_default:4096,${...num_envs}}
   envSpacing: 4.  # [m]
-  episodeLength_s: 8
-  cameraFollow: True # if the camera follows humanoid or not
+  episodeLength_s: 20
+  cameraFollow: False # if the camera follows humanoid or not
   enableDebugVis: False
+
+  terrrainType: "plane"
 
   pdControl: True
   powerScale: 1.0
@@ -27,6 +30,8 @@ env:
   clipObservations: 5.0
   clipActions: 1.0
 
+  velocityBlending: False
+
   plane:
     staticFriction: 1.0  # [-]
     dynamicFriction: 1.0  # [-]
@@ -39,7 +44,7 @@ env:
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
 
   randomCommandVelocityRanges:
-    linear_x: [0., 2.] # min max [m/s]
+    linear_x: [0., 1.] # min max [m/s]
     linear_y: [0., 0.]   # min max [m/s]
     yaw: [-0., 0.]          # min max [rad/s]
 
@@ -57,7 +62,7 @@ env:
         kP: 1.0
         kD: 1.0
       targetDirection:
-        strategy: Fixed
+        strategy: RandomUnitVector #Fixed
         # 'Fixed' strategy params
         value: [1, 0, 0]
         # 'RandomUnitVector' strategy params
@@ -67,48 +72,51 @@ env:
         # 'Fixed' strategy params
         value: 1.0 # m/s
         # 'RandomUniform' strategy params
-        lower: 0.0 # lower bound, uniform distribution
-        upper: 2.0 # upper bound, uniform distribution 
+        lower: 0.6 # lower bound, uniform distribution
+        upper: 0.7 # upper bound, uniform distribution
       targetYawRate:
         strategy: Fixed
         # 'Fixed' strategy params
         value: 0.0 # rad/s 
         # 'RandomUniform' strategy params
         lower: 0.0 # lower bound, uniform distribution
-        upper: 0.4 # upper bound, uniform distribution
+        upper: 0.0 # upper bound, uniform distribution
     reward:
       linearVelocity: 
-        scale: 1.0 
-        weight: 1.0    
+        scale: 1.0
+        weight: 1.0
 
   control:
     # PD Drive parameters:
-    stiffness: 40.0  # [N*m/rad]
-    damping: 1.0     # [N*m*s/rad]
+    stiffness:  [60.,25.,20.]  # [N*m/rad]
+    damping: [1., 0.5, 0.5] # [N*m*s/rad]
     # Replaced manual actionScale with automatic action scale calculated from URDF
-    # actionScale: 2.0
+    actionScale: 0.06
     controlFrequencyInv: 1 # 60 Hz
+    decimation: 1
 
   defaultJointAngles:  # = target angles when action = 0.0
-    FL_hip_joint: 0.0    # [rad]
-    RL_hip_joint: 0.0    # [rad]
-    FR_hip_joint: 0.0   # [rad]
-    RR_hip_joint: 0.0   # [rad]
 
-    FL_thigh_joint: 0.8     # [rad]
-    RL_thigh_joint: 0.8    # [rad]
-    FR_thigh_joint: 0.8     # [rad]
-    RR_thigh_joint: 0.8    # [rad]
+      FR_hip_joint: -0.1    # [rad]
+      FR_thigh_joint: 0.8   # [rad]
+      FR_calf_joint: -1.5   # [rad]
 
-    FL_calf_joint: -1.6    # [rad]
-    RL_calf_joint: -1.6    # [rad]
-    FR_calf_joint: -1.6    # [rad]
-    RR_calf_joint: -1.6     # [rad]
+      FL_hip_joint: 0.1     # [rad]
+      FL_thigh_joint: 0.8   # [rad]
+      FL_calf_joint: -1.5   # [rad]
+
+      RR_hip_joint: -0.1    # [rad]
+      RR_thigh_joint: 1.0   # [rad]
+      RR_calf_joint: -1.5   # [rad]
+
+      RL_hip_joint: 0.1     # [rad]
+      RL_thigh_joint: 1.0   # [rad]
+      RL_calf_joint: -1.5   # [rad]
 
   urdfAsset:
     collapseFixedJoints: True
     fixBaseLink: False
-    defaultDofDriveMode: 4 # see GymDofDriveModeFlags (0 is none, 1 is pos tgt, 2 is vel tgt, 4 effort)
+    defaultDofDriveMode: 1 # see GymDofDriveModeFlags (0 is none, 1 is pos tgt, 2 is vel tgt, 4 effort)
 
   learn:
     # normalization
@@ -125,6 +133,7 @@ env:
 
   # set to True if you use camera sensors in the environment
   enableCameraSensors: False
+
 
 sim:
   dt: 0.02

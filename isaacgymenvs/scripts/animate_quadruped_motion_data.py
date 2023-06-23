@@ -25,7 +25,8 @@ def parse_arguments(description="Isaac Gym Example", headless=False, no_graphics
     parser.add_argument('--num_threads', type=int, default=0, help='Number of cores used by PhysX')
     parser.add_argument('--subscenes', type=int, default=0, help='Number of PhysX subscenes to simulate in parallel')
     parser.add_argument('--slices', type=int, help='Number of client threads that process env slices')
-    parser.add_argument('-i', '--input-filepath', type=str, default='data/motions/quadruped/a1_expert/trot_0.9mps.txt')
+    parser.add_argument('-i', '--input-filepath', type=str, default='data/motions/quadruped/mania_pos/motion7.txt')
+    # parser.add_argument('-i', '--input-filepath', type=str, default='data/motions/quadruped/mania_pos/dataset.yaml')
 
     for argument in custom_parameters:
         if ("name" in argument) and ("type" in argument or "action" in argument):
@@ -95,6 +96,7 @@ def init_camera(gym, sim, viewer):
     gym.refresh_actor_root_state_tensor(sim)
     _root_tensor = gym.acquire_actor_root_state_tensor(sim)
     root_states = gymtorch.wrap_tensor(_root_tensor)
+
     _cam_prev_char_pos = root_states[0, 0:3].cpu().numpy()
     
     cam_pos = gymapi.Vec3(_cam_prev_char_pos[0], 
@@ -171,6 +173,7 @@ if __name__ == "__main__":
     pose.p.z = 1.
     pose.p.x = 40.
 
+
     envs = []
     # set random seed
     np.random.seed(17)
@@ -209,6 +212,7 @@ if __name__ == "__main__":
     # subscribe to spacebar event for reset
     gym.subscribe_viewer_keyboard_event(viewer, gymapi.KEY_R, "reset")
 
+
     time = 0
     while not gym.query_viewer_has_closed(viewer):
 
@@ -222,6 +226,12 @@ if __name__ == "__main__":
         root_pos, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel = motion_lib.get_motion_state([0], [time * sim_params.dt])
         set_env_state(gym, sim, root_pos, root_rot, root_vel, root_ang_vel, dof_pos, dof_vel)
         prev_char_pos = update_camera(gym, sim, viewer, root_pos[0], prev_char_pos)
+
+
+        print(root_ang_vel)
+
+
+
         # step the physics
         gym.simulate(sim)
         gym.fetch_results(sim, True)

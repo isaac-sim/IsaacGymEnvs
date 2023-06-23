@@ -191,6 +191,15 @@ class TargetVelocity(AbstractTask):
         v = (u - l) * v + l
         self.target_speed[env_ids] = v
 
+    # def reset_random_speed(self, env_ids):
+    #     """ Set speed to random speed """
+    #     # Sample a standard uniform
+    #     v = torch.rand_like(self.target_speed[env_ids])
+    #     # Translate from [0,1] to [l, u]
+    #     l, u = self.target_speed_reset["lower"], self.target_speed_reset["upper"]
+    #     v = (u - l) * v + l
+    #     self.target_speed[env_ids] = v
+
     def reset_fixed_yaw_rate(self, env_ids):
         val = to_torch(self.target_yaw_rate_reset["value"])
         dyaw = torch.unsqueeze(val, 0)

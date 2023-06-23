@@ -83,6 +83,9 @@ class QuadrupedAMP(QuadrupedAMPBase):
         self._reset_ref_env_ids = []
         self._local_root_obs = cfg["env"]["localRootObs"]
 
+        ##velocity blending
+        self._velocity_blending = cfg["env"]["velocityBlending"]
+
         super().__init__(cfg=cfg, rl_device=rl_device, sim_device=sim_device, graphics_device_id=graphics_device_id, headless=headless, virtual_screen_capture=virtual_screen_capture, force_render=force_render)
 
         # Load motion file
@@ -119,15 +122,21 @@ class QuadrupedAMP(QuadrupedAMPBase):
     def fetch_amp_obs_demo(self, num_samples):
         return self.task.fetch_amp_obs_demo(num_samples)
 
+
     def fetch_amp_obs_demo(self, num_samples):
         dt = self.dt
-        motion_ids = self._motion_lib.sample_motions(num_samples)
+
+        if self._velocity_blending:
+            motion_ids = self._motion_lib.sample_motions_targeted_velocity(num_samples,self.task.target_speed)
+        else:
+            motion_ids = self._motion_lib.sample_motions(num_samples)
+
 
         if (self._amp_obs_demo_buf is None):
             self._build_amp_obs_demo_buf(num_samples)
         else:
-            assert(self._amp_obs_demo_buf.shape[0] == num_samples)
-            
+            assert (self._amp_obs_demo_buf.shape[0] == num_samples)
+
         motion_times0 = self._motion_lib.sample_time(motion_ids)
         motion_ids = np.tile(np.expand_dims(motion_ids, axis=-1), [1, self._num_amp_obs_steps])
         motion_times = np.expand_dims(motion_times0, axis=-1)
@@ -137,10 +146,10 @@ class QuadrupedAMP(QuadrupedAMPBase):
         motion_ids = motion_ids.flatten()
         motion_times = motion_times.flatten()
         root_pos, root_rot, dof_pos, root_vel, root_ang_vel, dof_vel \
-               = self._motion_lib.get_motion_state(motion_ids, motion_times)
+            = self._motion_lib.get_motion_state(motion_ids, motion_times)
         root_states = torch.cat([root_pos, root_rot, root_vel, root_ang_vel], dim=-1)
         amp_obs_demo = compute_quadruped_observations(root_states, dof_pos, dof_vel,
-                                      self._local_root_obs)
+                                                      self._local_root_obs)
         self._amp_obs_demo_buf[:] = amp_obs_demo.view(self._amp_obs_demo_buf.shape)
 
         amp_obs_demo_flat = self._amp_obs_demo_buf.view(-1, self.get_num_amp_obs())
@@ -204,7 +213,11 @@ class QuadrupedAMP(QuadrupedAMPBase):
         
         For each env, a reference motion is selected and used to initialize the robot state."""
         num_envs = env_ids.shape[0]
-        motion_ids = self._motion_lib.sample_motions(num_envs)
+
+        if self._velocity_blending:
+            motion_ids = self._motion_lib.sample_motions_targeted_velocity(num_envs, self.task.target_speed)
+        else:
+            motion_ids = self._motion_lib.sample_motions(num_envs)
         
         if (self._state_init == QuadrupedAMP.StateInit.Random
             or self._state_init == QuadrupedAMP.StateInit.Hybrid):
@@ -325,7 +338,9 @@ class QuadrupedAMP(QuadrupedAMPBase):
         self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self.root_states), 
                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
         self.gym.set_dof_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self.dof_state),
-                                                    gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+                                    gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+
+
         return
 
     def _update_hist_amp_obs(self, env_ids=None):

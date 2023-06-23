@@ -54,7 +54,25 @@ class MotionLib(object):
         m = self.num_motions()
         motion_ids = np.random.choice(m, size=n, replace=True, p=self._motion_weights)
 
+        #TODO: sort the ids
+        motion_ids_sorted = np.sort(motion_ids)
+
+
+        return motion_ids_sorted
+
+
+    def sample_motions_targeted_velocity(self, n, speed) -> torch.Tensor:
+        m = self.num_motions()
+
+        speed = torch.squeeze(speed,1)
+        index = speed.detach().cpu().numpy()
+        indeces = np.round(index, decimals=1)
+
+        index_from_vel = (indeces*10 - 1).astype(int)
+        motion_ids = index_from_vel
+        # motion_ids = np.random.choice(m, size=n, replace=True, p=self._motion_weights)
         return motion_ids
+
 
     def sample_time(self, motion_ids, truncate_time=None):
         n = len(motion_ids)

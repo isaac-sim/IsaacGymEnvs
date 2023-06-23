@@ -64,6 +64,14 @@ class MotionLib():
 
         return motion_ids
 
+    def sample_motions_targeted_velocity(self, n, indeces):
+        m = self.num_motions()
+        index_from_vel = int(indeces * 10) + 1
+        motion_ids = index_from_vel
+        # motion_ids = np.random.choice(m, size=n, replace=True, p=self._motion_weights)
+        return motion_ids
+
+
     def sample_time(self, motion_ids, truncate_time=None):
         n = len(motion_ids)
         phase = np.random.uniform(low=0.0, high=1.0, size=motion_ids.shape)

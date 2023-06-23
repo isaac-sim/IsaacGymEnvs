@@ -15,6 +15,23 @@ def generate_random_speed_schedule(n_timesteps):
         speed_schedule[:,0] += a * np.sin(omega * ts + phi)
     return speed_schedule
 
+def generate_sigmoid_speed_schedile(n_timesteps):
+
+    vel1 = [np.rando.uniform(), ] * n_timesteps
+
+    # vel2 = np.array([np.round(random.random(), decimals =1),] * self.data_size)
+    vel2 = [np.rando.uniform(),] * n_timesteps
+
+    if vel1 is vel2:
+        vel2 =[np.random.uniform(), ] * n_timesteps
+
+    w = 0.15
+    D = np.linspace(0, 2, n_timesteps)
+    sigmaD = 1.0 / (1.0 + np.exp(-(1 - D) / w))
+    vels = vel1 + (vel2 - vel1) * (1 - sigmaD)
+
+    return vels
+
 def generate_random_polar_direction_schedule(n_timesteps):
     direction_schedule = np.zeros((n_timesteps, 3))
     ts = np.linspace(0, 1, n_timesteps)
@@ -54,9 +71,6 @@ if __name__ == "__main__":
     # Visualize the schedule
     import matplotlib.pyplot as plt 
     fig, ax = plt.subplots()
-    ax.plot(ts, velocity_schedule)
-    fig.show() 
-    
     combined_schedule = np.concatenate([direction_schedule, speed_schedule], axis=-1)
 
     inp = input("[S]ave, or [E]xit\n")

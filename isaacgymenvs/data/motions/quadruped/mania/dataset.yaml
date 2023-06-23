@@ -7,9 +7,9 @@ motions:
   weight: 0.14286
 - file: motion4.txt
   weight: 0.14286
+- file: motion5.txt
+  weight: 0.14286
 - file: motion6.txt
   weight: 0.14286
 - file: motion7.txt
-  weight: 0.14286
-- file: motion8.txt
   weight: 0.14286
