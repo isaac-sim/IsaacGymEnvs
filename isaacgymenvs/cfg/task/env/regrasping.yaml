@@ -1,0 +1,6 @@
+subtask: "regrasping"
+
+episodeLength: 300
+
+# requires holding a grasp for a whole second, thus trained policies develop a robust grasp
+successSteps: 30

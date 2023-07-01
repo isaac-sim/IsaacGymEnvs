@@ -10,7 +10,7 @@ sim:
 
 env:
     env_name: 'FactoryEnvGears'
-    
+
     tight_or_loose: loose  # use assets with loose (maximal clearance) or tight (minimal clearance) shafts
     gears_lateral_offset: 0.1  # Y-axis offset of gears before initial reset to prevent initial interpenetration with base plate
     gears_density: 1000.0  # density of gears

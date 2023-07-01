@@ -37,7 +37,8 @@ import omegaconf
 import os
 import torch
 
-from isaacgym import gymapi, gymtorch, torch_utils
+from isaacgym import gymapi, gymtorch
+from isaacgymenvs.utils import torch_jit_utils as torch_utils
 import isaacgymenvs.tasks.factory.factory_control as fc
 from isaacgymenvs.tasks.factory.factory_env_nut_bolt import FactoryEnvNutBolt
 from isaacgymenvs.tasks.factory.factory_schema_class_task import FactoryABCTask

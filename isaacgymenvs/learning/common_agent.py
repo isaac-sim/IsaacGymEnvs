@@ -65,9 +65,7 @@ class CommonAgent(a2c_continuous.A2CAgent):
         self.bounds_loss_coef = config.get('bounds_loss_coef', None)
         self.clip_actions = config.get('clip_actions', True)
 
-        self.network_path = config.get('network_path', "./runs")
-        self.network_path = os.path.join(self.network_path, self.config['name'])
-        self.network_path = os.path.join(self.network_path, 'nn')
+        self.network_path = self.nn_dir
         
         net_config = self._build_net_config()
         self.model = self.network.build(net_config)
@@ -120,12 +118,15 @@ class CommonAgent(a2c_continuous.A2CAgent):
         self.obs = self.env_reset()
         self.curr_frames = self.batch_size_envs
 
-        self.model_output_file = os.path.join(self.network_path, self.config['name'])
 
-        if self.multi_gpu:
-            self.hvd.setup_algo(self)
+        self.model_output_file = os.path.join(self.network_path, 
+            self.config['name'] + '_{date:%d-%H-%M-%S}'.format(date=datetime.now()))
 
         self._init_train()
+
+        # global rank of the GPU
+        # multi-gpu training is not currently supported for AMP
+        self.global_rank = int(os.getenv("RANK", "0"))
 
         while True:
             epoch_num = self.update_epoch()
@@ -134,10 +135,8 @@ class CommonAgent(a2c_continuous.A2CAgent):
             sum_time = train_info['total_time']
             total_time += sum_time
             frame = self.frame
-            if self.multi_gpu:
-                self.hvd.sync_stats(self)
 
-            if self.rank == 0:
+            if self.global_rank == 0:
                 scaled_time = sum_time
                 scaled_play_time = train_info['play_time']
                 curr_frames = self.curr_frames
@@ -214,9 +213,7 @@ class CommonAgent(a2c_continuous.A2CAgent):
                 curr_train_info = self.train_actor_critic(self.dataset[i])
                 print(type(curr_train_info))
                 
-                if self.schedule_type == 'legacy':  
-                    if self.multi_gpu:
-                        curr_train_info['kl'] = self.hvd.average_value(curr_train_info['kl'], 'ep_kls')
+                if self.schedule_type == 'legacy':
                     self.last_lr, self.entropy_coef = self.scheduler.update(self.last_lr, self.entropy_coef, self.epoch_num, 0, curr_train_info['kl'].item())
                     self.update_lr(self.last_lr)
 
@@ -231,14 +228,10 @@ class CommonAgent(a2c_continuous.A2CAgent):
             av_kls = torch_ext.mean_list(train_info['kl'])
 
             if self.schedule_type == 'standard':
-                if self.multi_gpu:
-                    av_kls = self.hvd.average_value(av_kls, 'ep_kls')
                 self.last_lr, self.entropy_coef = self.scheduler.update(self.last_lr, self.entropy_coef, self.epoch_num, 0, av_kls.item())
                 self.update_lr(self.last_lr)
 
         if self.schedule_type == 'standard_epoch':
-            if self.multi_gpu:
-                av_kls = self.hvd.average_value(torch_ext.mean_list(kls), 'ep_kls')
             self.last_lr, self.entropy_coef = self.scheduler.update(self.last_lr, self.entropy_coef, self.epoch_num, 0, av_kls.item())
             self.update_lr(self.last_lr)
 

@@ -12,6 +12,12 @@ RL Games will be installed automatically along with `isaacgymenvs`.
 Otherwise, to install **rl_games** manually the following instructions should be performed:
 
 ```bash
+pip install rl-games
+```
+
+Or to use the latest, unreleased version:
+
+```bash
 git clone https://github.com/Denys88/rl_games.git
 pip install -e .
 ```
@@ -208,3 +214,12 @@ If you have existing environments set up with Isaac Gym Preview 2 release or ear
 * For task configs, the following are modified: `physics_engine`, `numEnvs`, `use_gpu_pipeline`, `num_threads`, `solver_type`, `use_gpu`, `num_subscenes`.
 * For train configs, the following are modified: `seed`, `load_checkpoint`, `load_path`, `name`, `full_experiment_name`, `num_actors`, `max_epochs`.
 * Also note a few naming changes required for the latest version of rl_games: `lr_threshold` --> `kl_threshold`, `steps_num` --> `horizon_length`.
+
+### Viewer ###
+
+When using the viewer, various actions can be executed with specific reserved keys:
+
+* 'V' - Toggles rendering on and off. This is useful for speeding up training and observing the results.
+* 'R' - Initiates video recording, saving the rendered frames to a designated folder.
+* 'Tab' - Toggles the left panel, allowing you to remove and bring it back as necessary.
+* 'ESC' - Stops the simulation and rendering processes, effectively quitting the program.

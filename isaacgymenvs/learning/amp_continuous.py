@@ -32,7 +32,7 @@ from rl_games.common import a2c_common
 from rl_games.common import schedulers
 from rl_games.common import vecenv
 
-from isaacgym.torch_utils import *
+from isaacgymenvs.utils.torch_jit_utils import to_torch
 
 import time
 from datetime import datetime
@@ -210,9 +210,7 @@ class AMPAgent(common_agent.CommonAgent):
             for i in range(len(self.dataset)):
                 curr_train_info = self.train_actor_critic(self.dataset[i])
                 
-                if self.schedule_type == 'legacy':  
-                    if self.multi_gpu:
-                        curr_train_info['kl'] = self.hvd.average_value(curr_train_info['kl'], 'ep_kls')
+                if self.schedule_type == 'legacy':
                     self.last_lr, self.entropy_coef = self.scheduler.update(self.last_lr, self.entropy_coef, self.epoch_num, 0, curr_train_info['kl'].item())
                     self.update_lr(self.last_lr)
 
@@ -227,14 +225,10 @@ class AMPAgent(common_agent.CommonAgent):
             av_kls = torch_ext.mean_list(train_info['kl'])
 
             if self.schedule_type == 'standard':
-                if self.multi_gpu:
-                    av_kls = self.hvd.average_value(av_kls, 'ep_kls')
                 self.last_lr, self.entropy_coef = self.scheduler.update(self.last_lr, self.entropy_coef, self.epoch_num, 0, av_kls.item())
                 self.update_lr(self.last_lr)
 
         if self.schedule_type == 'standard_epoch':
-            if self.multi_gpu:
-                av_kls = self.hvd.average_value(torch_ext.mean_list(kls), 'ep_kls')
             self.last_lr, self.entropy_coef = self.scheduler.update(self.last_lr, self.entropy_coef, self.epoch_num, 0, av_kls.item())
             self.update_lr(self.last_lr)
 

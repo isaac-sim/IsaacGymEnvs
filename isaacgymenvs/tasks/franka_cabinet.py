@@ -31,7 +31,8 @@ import os
 import torch
 
 from isaacgym import gymutil, gymtorch, gymapi
-from isaacgym.torch_utils import *
+from isaacgymenvs.utils.torch_jit_utils import to_torch, get_axis_params, tensor_clamp, \
+    tf_vector, tf_combine
 from .base.vec_task import VecTask
 
 

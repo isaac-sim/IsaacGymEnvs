@@ -20,8 +20,7 @@ params:
           name: const_initializer
           val: 0
         fixed_sigma: True
-      
-    
+
     inputs:
 
       dof_pos_randomized: { }

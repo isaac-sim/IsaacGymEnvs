@@ -1,0 +1,31 @@
+task.env.distRewardScale: "mutate_float"
+task.env.rotRewardScale: "mutate_float"
+task.env.actionPenaltyScale: "mutate_float"
+task.env.liftingRewScale: "mutate_float"
+task.env.liftingBonus: "mutate_float"
+task.env.liftingBonusThreshold: "mutate_float"
+task.env.keypointRewScale: "mutate_float"
+task.env.distanceDeltaRewScale: "mutate_float"
+task.env.reachGoalBonus: "mutate_float"
+task.env.kukaActionsPenaltyScale: "mutate_float"
+task.env.allegroActionsPenaltyScale: "mutate_float"
+task.env.fallDistance: "mutate_float"
+
+# Could be additionally mutated
+#train.params.config.learning_rate: "mutate_float"
+#train.params.config.entropy_coef: "mutate_float"  # this is 0, no reason to mutate
+
+train.params.config.grad_norm: "mutate_float"
+train.params.config.critic_coef: "mutate_float"
+train.params.config.bounds_loss_coef: "mutate_float"
+train.params.config.kl_threshold: "mutate_float"
+
+train.params.config.e_clip: "mutate_eps_clip"
+
+train.params.config.mini_epochs: "mutate_mini_epochs"
+
+train.params.config.gamma: "mutate_discount"
+
+# These would require special mutation rules
+# 'train.params.config.steps_num': 8
+# 'train.params.config.minibatch_size': 256

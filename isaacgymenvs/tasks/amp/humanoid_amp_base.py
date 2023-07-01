@@ -33,9 +33,9 @@ import torch
 
 from isaacgym import gymtorch
 from isaacgym import gymapi
-from isaacgym.torch_utils import *
+from isaacgymenvs.utils.torch_jit_utils import quat_mul, to_torch, get_axis_params, calc_heading_quat_inv, \
+     exp_map_to_quat, quat_to_tan_norm, my_quat_rotate, calc_heading_quat_inv
 
-from isaacgymenvs.utils.torch_jit_utils import *
 from ..base.vec_task import VecTask
 
 DOF_BODY_IDS = [1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14]

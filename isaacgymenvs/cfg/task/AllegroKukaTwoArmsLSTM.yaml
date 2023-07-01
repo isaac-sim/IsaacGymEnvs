@@ -1,0 +1,17 @@
+defaults:
+  - AllegroKukaLSTM
+  - _self_
+
+name: AllegroKukaTwoArms
+
+env:
+  numArms: 2
+
+  envSpacing: 1.75
+
+  # two arms essentially need to throw the object to each other
+  # training is much harder with random forces, so we disable it here as we do for the throw task
+  # forceScale: 0.0
+
+  armXOfs: 1.1  # distance from the center of the table, distance between arms is 2x this
+  armYOfs: 0.0

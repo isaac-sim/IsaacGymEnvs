@@ -19,15 +19,13 @@ class WandbAlgoObserver(AlgoObserver):
 
         import wandb
 
-        cfg = self.cfg
-        # ema = cfg.task.env.actionsMovingAverage
+        wandb_unique_id = f"uid_{experiment_name}"
+        print(f"Wandb using unique id {wandb_unique_id}")
 
-        # wandb_unique_id = f'unique_id_{experiment_name}' + f'_ema={ema}'
-        wandb_unique_id = f'{experiment_name}' # + f'_ema={ema}'
-        print(f'Wandb using unique id {wandb_unique_id}')
+        cfg = self.cfg
 
         # this can fail occasionally, so we try a couple more times
-        @retry(3, exceptions=(Exception, ))
+        @retry(3, exceptions=(Exception,))
         def init_wandb():
             wandb.init(
                 project=cfg.wandb_project,

@@ -26,7 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from isaacgym.torch_utils import *
+from isaacgymenvs.utils.torch_jit_utils import quat_mul, quat_from_angle_axis
 import torch
 import json
 import numpy as np

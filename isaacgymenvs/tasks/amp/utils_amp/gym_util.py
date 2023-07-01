@@ -31,7 +31,8 @@ from . import logger
 from isaacgym import gymapi
 import numpy as np
 import torch
-from isaacgym.torch_utils import *
+from isaacgymenvs.utils.torch_jit_utils import scale, unscale, quat_mul, quat_conjugate, quat_from_angle_axis, \
+    to_torch, get_axis_params, torch_rand_float, tensor_clamp
 from isaacgym import gymtorch
 
 
@@ -215,16 +216,16 @@ def get_robot_states_from_torch_tensor(config, ts, global_quats, vels, avels,
 
     if config['env_frame_ob']:
         if type(motion_length) == np.ndarray:
-            motion_length = motion_length.astype(np.float)
-            progress_ob = np.expand_dims(progress.astype(np.float) /
+            motion_length = motion_length.astype(float)
+            progress_ob = np.expand_dims(progress.astype(float) /
                                          motion_length, axis=-1)
         else:
-            progress_ob = np.expand_dims(progress.astype(np.float) /
+            progress_ob = np.expand_dims(progress.astype(float) /
                                          float(motion_length), axis=-1)
         obs = np.concatenate([obs, progress_ob], axis=-1)
 
     if config['env_motion_ob'] and not config['env_motion_ob_onehot']:
-        motion_id_ob = np.expand_dims(motion_id.astype(np.float) /
+        motion_id_ob = np.expand_dims(motion_id.astype(float) /
                                       float(num_motion), axis=-1)
         obs = np.concatenate([obs, motion_id_ob], axis=-1)
     elif config['env_motion_ob'] and config['env_motion_ob_onehot']:

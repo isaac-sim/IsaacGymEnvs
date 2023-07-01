@@ -33,7 +33,8 @@ import torch
 import xml.etree.ElementTree as ET
 
 from isaacgym import gymutil, gymtorch, gymapi
-from isaacgym.torch_utils import *
+
+from isaacgymenvs.utils.torch_jit_utils import to_torch, torch_rand_float, tensor_clamp, torch_random_dir_2
 from .base.vec_task import VecTask
 
 

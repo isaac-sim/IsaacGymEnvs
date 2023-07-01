@@ -18,8 +18,9 @@ INSTALL_REQUIRES = [
     "torch",
     "omegaconf",
     "termcolor",
+    "jinja2",
     "hydra-core>=1.1",
-    "rl-games==1.6.0",
+    "rl-games>=1.6.0",
     "pyvirtualdisplay",
     ]
 
@@ -29,7 +30,7 @@ INSTALL_REQUIRES = [
 setup(
     name="isaacgymenvs",
     author="NVIDIA",
-    version="1.3.4",
+    version="1.4.0",
     description="Benchmark environments for high-speed robot learning in NVIDIA IsaacGym.",
     keywords=["robotics", "rl"],
     include_package_data=True,

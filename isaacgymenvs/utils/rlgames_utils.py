@@ -25,6 +25,7 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 import os
 from collections import deque
 from typing import Callable, Dict, Tuple, Any
@@ -35,7 +36,6 @@ import numpy as np
 import torch
 from rl_games.common import env_configurations, vecenv
 from rl_games.common.algo_observer import AlgoObserver
-from rl_games.algos_torch import torch_ext
 
 from isaacgymenvs.tasks import isaacgym_task_map
 from isaacgymenvs.utils.utils import set_seed, flatten_dict
@@ -104,7 +104,7 @@ def get_rlgames_env_creator(
             _rl_device = f'cuda:{local_rank}'
 
             task_config['rank'] = local_rank
-            task_config['rl_device'] = 'cuda:' + str(local_rank)
+            task_config['rl_device'] = _rl_device
         else:
             _sim_device = sim_device
             _rl_device = rl_device
@@ -244,7 +244,7 @@ class RLGPUEnv(vecenv.IVecEnv):
         self.env = env_configurations.configurations[config_name]['env_creator'](**kwargs)
 
     def step(self, actions):
-        return  self.env.step(actions)
+        return self.env.step(actions)
 
     def reset(self):
         return self.env.reset()
@@ -259,6 +259,7 @@ class RLGPUEnv(vecenv.IVecEnv):
         info = {}
         info['action_space'] = self.env.action_space
         info['observation_space'] = self.env.observation_space
+
         if hasattr(self.env, "amp_observation_space"):
             info['amp_observation_space'] = self.env.amp_observation_space
 
@@ -292,6 +293,7 @@ class RLGPUEnv(vecenv.IVecEnv):
     def set_env_state(self, env_state):
         if hasattr(self.env, 'set_env_state'):
             self.env.set_env_state(env_state)
+
 
 class ComplexObsRLGPUEnv(vecenv.IVecEnv):
     

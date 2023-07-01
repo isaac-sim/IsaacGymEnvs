@@ -29,7 +29,6 @@
 import numpy as np
 import os, time
 
-from isaacgym.torch_utils import *
 from isaacgym import gymtorch
 from isaacgym import gymapi
 from .base.vec_task import VecTask
@@ -37,6 +36,7 @@ from .base.vec_task import VecTask
 import torch
 from typing import Tuple, Dict
 
+from isaacgymenvs.utils.torch_jit_utils import to_torch, get_axis_params, torch_rand_float, normalize, quat_apply, quat_rotate_inverse
 from isaacgymenvs.tasks.base.vec_task import VecTask
 
 

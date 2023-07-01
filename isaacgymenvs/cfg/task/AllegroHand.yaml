@@ -56,7 +56,7 @@ env:
   maxConsecutiveSuccesses: 0
 
   asset:
-    assetFileName: "urdf/kuka_allegro_description/allegro.urdf"
+    assetFileName: "urdf/kuka_allegro_description/allegro_touch_sensor.urdf"
     assetFileNameBlock: "urdf/objects/cube_multicolor_allegro.urdf"
     assetFileNameEgg: "mjcf/open_ai_assets/hand/egg.xml"
     assetFileNamePen: "mjcf/open_ai_assets/hand/pen.xml"

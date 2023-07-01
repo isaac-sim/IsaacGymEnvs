@@ -4,17 +4,18 @@
     <visual>
       <origin xyz="0 0 0"/>
       <geometry>
-        <mesh filename="$base_mesh" scale="$x_scale $y_scale $z_scale"/>
+        <mesh filename="{{ base_mesh }}" scale="{{ x_scale }} {{ y_scale }} {{ z_scale }}"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0"/>
       <geometry>
-        <box size="$x_scale $y_scale $z_scale"/>
+        <box size="{{ x_scale }} {{ y_scale }} {{ z_scale }}"/>
       </geometry>
     </collision>
     <inertial>
-      <density value="$density"/>
+      <density value="400.0"/>
+      <!-- <density value="{{ density }}"/> -->
     </inertial>
   </link>
 </robot>

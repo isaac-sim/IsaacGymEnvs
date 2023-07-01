@@ -1,0 +1,25 @@
+defaults:
+  - AllegroKukaPPO
+  - _self_
+
+params:
+  network:
+    mlp:
+      units: [768, 512, 256]
+      activation: elu
+      d2rl: False
+      initializer:
+        name: default
+      regularizer:
+        name: None
+    rnn:
+      name: lstm
+      units: 768
+      layers: 1
+      before_mlp: True
+      layer_norm: True
+
+  config:
+    name: ${resolve_default:AllegroKukaLSTMPPO,${....experiment}}
+    minibatch_size: 32768
+    mini_epochs: 2

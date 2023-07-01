@@ -62,6 +62,7 @@ defaults:
   - task: Ant
   - train: ${task}PPO
   - hydra/job_logging: disabled
+  - pbt: no_pbt
 
 # set the directory where the output files get saved
 hydra:

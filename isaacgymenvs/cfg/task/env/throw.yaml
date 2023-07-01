@@ -1,0 +1,17 @@
+subtask: "throw"
+
+episodeLength: 300
+
+forceScale: 0.0  # random forces don't allow us to throw precisely so we turn them off
+
+# curriculum not needed - if we hit a bin, that's good!
+successTolerance: 0.075
+targetSuccessTolerance: 0.075
+
+# adds a small pause every time we hit a target
+successSteps: 5
+
+# throwing big objects is hard and they don't fit in the bin, so focus on randomized but smaller objects
+withSmallCuboids: True
+withBigCuboids: False
+withSticks: False
