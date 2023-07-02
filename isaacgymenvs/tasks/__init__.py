@@ -46,6 +46,8 @@ from .shadow_hand import ShadowHand
 from .allegro_hand import AllegroHand
 from .dextreme.allegro_hand_dextreme import AllegroHandDextremeManualDR, AllegroHandDextremeADR
 from .trifinger import Trifinger
+from .quadruped import Quadruped
+from .quadruped_amp import QuadrupedAMP
 
 from .allegro_kuka.allegro_kuka_reorientation import AllegroKukaReorientation
 from .allegro_kuka.allegro_kuka_regrasping import AllegroKukaRegrasping
@@ -104,6 +106,8 @@ isaacgym_task_map = {
     "HumanoidAMP": HumanoidAMP,
     "Ingenuity": Ingenuity,
     "Quadcopter": Quadcopter,
+    "Quadruped": Quadruped, 
+    "QuadrupedAMP": QuadrupedAMP,
     "ShadowHand": ShadowHand,
     "Trifinger": Trifinger,
 }
