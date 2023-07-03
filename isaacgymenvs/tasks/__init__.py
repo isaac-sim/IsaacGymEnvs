@@ -29,7 +29,6 @@
 from .ant import Ant
 from .anymal import Anymal
 from .anymal_terrain import AnymalTerrain
-from .gankenkun import GankenKun
 from .gankenkun_kick import GankenKunKick
 from .ball_balance import BallBalance
 from .cartpole import Cartpole 
@@ -93,7 +92,6 @@ isaacgym_task_map = {
     "Ant": Ant,
     "Anymal": Anymal,
     "AnymalTerrain": AnymalTerrain,
-    "GankenKun": GankenKun,
     "GankenKunKick": GankenKunKick,
     "BallBalance": BallBalance,
     "Cartpole": Cartpole,
