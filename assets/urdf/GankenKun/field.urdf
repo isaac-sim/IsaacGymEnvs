@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<robot name="field">
+  <material name="white"> <color rgba="1.0 1.0 1.0 1.0"/> </material>
+  <material name="green"> <color rgba="0.2 0.6 0.2 1.0"/> </material>
+
+  <link name="base_link"/>
+  <joint name="field_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="field_link"/>
+    <origin rpy="0 0 0" xyz="2.25 0 0"/>
+  </joint>
+  <!-- Field -->
+  <link name="field_link">
+    <visual>
+      <geometry>
+        <box size="6.5 8 0.001"/>
+      </geometry>
+      <material name="green"/>
+    </visual>
+  </link>
+
+  <joint name="line1_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="line1_link"/>
+    <origin rpy="0 0 0" xyz="4.5 0 0"/>
+  </joint>
+
+  <link name="line1_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.05 6 0.002"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <joint name="line3_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="line3_link"/>
+    <origin rpy="0 0 0" xyz="1.75 -3 0"/>
+  </joint>
+
+  <link name="line3_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="5.5 0.05 0.002"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <joint name="line4_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="line4_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+
+  <link name="line4_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.05 6 0.002"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <joint name="line2_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="line2_link"/>
+    <origin rpy="0 0 0" xyz="1.75 3 0"/>
+  </joint>
+
+  <link name="line2_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="5.5 0.05 0.002"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <joint name="right_goal_post_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="right_goal_post_link"/>
+    <origin rpy="0 0 0" xyz="4.5 -1.3 0.6"/>
+  </joint>
+
+  <link name="right_goal_post_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.10 0.10 1.2"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <joint name="left_goal_post_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="left_goal_post_link"/>
+    <origin rpy="0 0 0" xyz="4.5 1.3 0.6"/>
+  </joint>
+
+  <link name="left_goal_post_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.10 0.10 1.2"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <joint name="top_goal_post_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="top_goal_post_link"/>
+    <origin rpy="0 0 0" xyz="4.5 0 1.2"/>
+  </joint>
+
+  <link name="top_goal_post_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.10 2.7 0.10"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+</robot>
+
+
