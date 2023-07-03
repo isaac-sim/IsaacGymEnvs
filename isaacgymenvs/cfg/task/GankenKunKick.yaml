@@ -38,7 +38,7 @@ env:
     damping: 2.0     # [N*m*s/rad]
     actionScale: 0.2
     controlFrequencyInv: 1 # 100 Hz
-    walkingPeriod: 0.34
+    walkingPeriod: 0.50
 
   defaultJointAngles:  # = target angles when action = 0.0
     right_ankle_roll_joint: 0.0   # [rad]
