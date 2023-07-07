@@ -100,6 +100,9 @@ env:
     assetFileNameEgg: "mjcf/open_ai_assets/hand/egg.xml"
     assetFileNamePen: "mjcf/open_ai_assets/hand/pen.xml"
 
+  # set to True if you use camera sensors in the environment
+  enableCameraSensors: False
+
 task:
   randomize: True
   randomization_params:
@@ -238,10 +241,6 @@ task:
             range: [0.0, 0.4]
             operation: "additive"
             distribution: "uniform"
-
-
-  # set to True if you use camera sensors in the environment
-  enableCameraSensors: False
 
 sim:
   dt: 0.01667 # 1/60
