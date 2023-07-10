@@ -93,7 +93,7 @@ class Env(ABC):
         # if training in a headless mode
         self.headless = headless
 
-        enable_camera_sensors = config.get("enableCameraSensors", False)
+        enable_camera_sensors = config["env"].get("enableCameraSensors", False)
         self.graphics_device_id = graphics_device_id
         if enable_camera_sensors == False and self.headless == True:
             self.graphics_device_id = -1

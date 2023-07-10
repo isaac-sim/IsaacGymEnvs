@@ -61,6 +61,9 @@ env:
     assetFileNameEgg: "mjcf/open_ai_assets/hand/egg.xml"
     assetFileNamePen: "mjcf/open_ai_assets/hand/pen.xml"
 
+  # set to True if you use camera sensors in the environment
+  enableCameraSensors: False
+
 task:
   randomize: False
   randomization_params:
@@ -154,9 +157,6 @@ task:
             distribution: "uniform"
             # schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
             # schedule_steps: 30000
-
-  # set to True if you use camera sensors in the environment
-  enableCameraSensors: False
 
 sim:
   dt: 0.01667 # 1/60
