@@ -28,26 +28,11 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-import logging
-import os
-from datetime import datetime
-
-# noinspection PyUnresolvedReferences
-import isaacgym
 
 import hydra
 
-from isaacgymenvs.utils.rlgames_utils import multi_gpu_get_rank
-
-from isaacgymenvs.pbt.pbt import PbtAlgoObserver, initial_pbt_check
 from omegaconf import DictConfig, OmegaConf
-from hydra.utils import to_absolute_path
-from isaacgymenvs.tasks import isaacgym_task_map
 from omegaconf import DictConfig, OmegaConf
-import gym
-
-from isaacgymenvs.utils.reformat import omegaconf_to_dict, print_dict
-from isaacgymenvs.utils.utils import set_np_formatting, set_seed
 
 
 def preprocess_train_config(cfg, config_dict):
@@ -83,8 +68,22 @@ def preprocess_train_config(cfg, config_dict):
     return config_dict
 
 
-@hydra.main(config_name="config", config_path="./cfg")
+@hydra.main(version_base="1.1", config_name="config", config_path="./cfg")
 def launch_rlg_hydra(cfg: DictConfig):
+
+    import logging
+    import os
+    from datetime import datetime
+
+    # noinspection PyUnresolvedReferences
+    import isaacgym
+    from isaacgymenvs.pbt.pbt import PbtAlgoObserver, initial_pbt_check
+    from isaacgymenvs.utils.rlgames_utils import multi_gpu_get_rank
+    from hydra.utils import to_absolute_path
+    from isaacgymenvs.tasks import isaacgym_task_map
+    import gym
+    from isaacgymenvs.utils.reformat import omegaconf_to_dict, print_dict
+    from isaacgymenvs.utils.utils import set_np_formatting, set_seed
 
     if cfg.pbt.enabled:
         initial_pbt_check(cfg)
