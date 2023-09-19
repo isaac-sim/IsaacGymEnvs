@@ -334,4 +334,13 @@ Please cite this work as:
 } 
 ```
 
-
+**Note** if you use the IndustReal training environments or algorithms in your work, please cite the following paper:
+```
+@inproceedings{
+	tang2023industreal,
+	author = {Bingjie Tang and Michael A Lin and Iretiayo Akinola and Ankur Handa and Gaurav S Sukhatme and Fabio Ramos and Dieter Fox and Yashraj Narang},
+	title = {IndustReal: Transferring contact-rich assembly tasks from simulation to reality},
+	booktitle = {Robotics: Science and Systems},
+	year = {2023}
+}
+```

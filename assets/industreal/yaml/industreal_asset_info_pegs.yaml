@@ -1,0 +1,139 @@
+round_peg_hole_4mm:
+    round_peg_4mm:
+        urdf_path: 'industreal_round_peg_4mm'
+        diameter: 0.003988
+        length: 0.050
+        density: 8000.0 
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.004
+    round_hole_4mm:
+        urdf_path: 'industreal_round_hole_4mm'
+        diameter: 0.0041
+        height: 0.028
+        depth: 0.023
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_8mm:
+    round_peg_8mm:
+        urdf_path: 'industreal_round_peg_8mm'
+        diameter: 0.007986
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.008
+    round_hole_8mm:
+        urdf_path: 'industreal_round_hole_8mm'
+        diameter: 0.0081
+        height: 0.028
+        depth: 0.023
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_12mm:
+    round_peg_12mm:
+        urdf_path: 'industreal_round_peg_12mm'
+        diameter: 0.011983
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.012
+    round_hole_12mm:
+        urdf_path: 'industreal_round_hole_12mm'
+        diameter: 0.0122
+        height: 0.028
+        depth: 0.023
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_16mm:
+    round_peg_16mm:
+        urdf_path: 'industreal_round_peg_16mm'
+        diameter: 0.015983
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.016
+    round_hole_16mm:
+        urdf_path: 'industreal_round_hole_16mm'
+        diameter: 0.0165
+        height: 0.028
+        depth: 0.023
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_4mm:
+    rectangular_peg_4mm:
+        urdf_path: 'industreal_rectangular_peg_4mm'
+        width: 0.00397
+        depth: 0.00397
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.004
+    rectangular_hole_4mm:
+        urdf_path: 'industreal_rectangular_hole_4mm'
+        width: 0.00411
+        height: 0.028
+        depth: 0.023
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_8mm:
+    rectangular_peg_8mm:
+        urdf_path: 'industreal_rectangular_peg_8mm'
+        width: 0.007964
+        depth: 0.006910
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.008
+    rectangular_hole_8mm:
+        urdf_path: 'industreal_rectangular_hole_8mm'
+        width: 0.0081444
+        height: 0.028
+        depth: 0.023
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_12mm:
+    rectangular_peg_12mm:
+        urdf_path: 'industreal_rectangular_peg_12mm'
+        width: 0.011957
+        depth: 0.007910
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.012
+    rectangular_hole_12mm:
+        urdf_path: 'industreal_rectangular_hole_12mm'
+        width: 0.0121778
+        height: 0.028
+        depth: 0.023
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_16mm:
+    rectangular_peg_16mm:
+        urdf_path: 'industreal_rectangular_peg_16mm'
+        width: 0.015957
+        depth: 0.009910
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.016
+    rectangular_hole_16mm:
+        urdf_path: 'industreal_rectangular_hole_16mm'
+        width: 0.0162182
+        height: 0.028
+        depth: 0.023
+        density: 8000.0
+        friction: 0.5

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<robot name="industreal_round_peg_16mm">
+    <link name="industreal_round_peg_16mm">
+        <visual>
+            <geometry>
+                <mesh filename="../mesh/industreal_pegs/industreal_round_peg_16mm.obj"/>
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="../mesh/industreal_pegs/industreal_round_peg_16mm.obj"/>
+            </geometry>
+            <sdf resolution="256"/>
+        </collision>
+    </link>
+</robot>

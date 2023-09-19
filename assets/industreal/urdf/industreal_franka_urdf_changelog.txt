@@ -1,0 +1,18 @@
+Command to generate original xacro:
+xacro $(rospack find franka_description)/robots/panda/panda.urdf.xacro arm:=panda hand:=true gazebo:=true
+
+Changes:
+- Removed dummy sub-links
+- Removed Gazebo fields, safety fields, and mimic fields
+- For dynamics fields, kept only damping and friction parameters, which were set to 0.0
+- Verified that joint limits, joint velocity limits, and torque limits match Franka spec sheet
+- Reduced joint effort limits on hand to 70 (max continuous force according to Franka spec sheet)
+- Reduced joint velocity limits on hand to 0.050 (max velocity according to spec sheet)
+- Removed joint limit on joint 7 to allow continuous rotation for screwing tasks
+- Removed link 8 (dummy link), removed joint 8 (connects joint 7 to joint 8), and modified panda_hand_joint 
+ (connected joint 7 to hand instead of joint 8 to hand; updated transform to include offset of original joint 8)
+- Renamed panda_hand_tcp joint and panda_hand_tcp link (dummy link); added finite mass and inertia
+- Replaced *.dae* with *.obj*, as *.dae* files are actually never used by Gym
+- Updated visual geometry (original fingers) and collision geometry (boxes) on fingers to match our custom fingertips;
+  updated mass, COM, and inertia based on mass measurements and Onshape COM and inertia calculations
+- Added friction to gripper joints to mitigate non-mirroring artifact

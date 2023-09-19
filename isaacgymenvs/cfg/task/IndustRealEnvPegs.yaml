@@ -1,0 +1,19 @@
+# See schema in factory_schema_config_env.py for descriptions of common parameters.
+
+defaults:
+    - IndustRealBase
+    - _self_
+    - /factory_schema_config_env
+
+env:
+    env_name: 'IndustRealEnvPegs'
+
+    desired_subassemblies: ['round_peg_hole_8mm', 
+                            'round_peg_hole_12mm', 
+                            'round_peg_hole_16mm',
+                            'rectangular_peg_hole_8mm', 
+                            'rectangular_peg_hole_12mm', 
+                            'rectangular_peg_hole_16mm']
+
+    plug_lateral_offset: 0.1  # Y-axis offset of plug before initial reset to prevent initial interpenetration with socket
+    # Density and friction values are specified in industreal_asset_info_pegs.yaml

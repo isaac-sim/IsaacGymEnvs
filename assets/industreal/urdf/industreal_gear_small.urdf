@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<robot name="industreal_gear_small">
+    <link name="industreal_gear_small">
+        <visual>
+            <geometry>
+                <mesh filename="../mesh/industreal_gears/industreal_gear_small.obj"/>
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="../mesh/industreal_gears/industreal_gear_small.obj"/>
+            </geometry>
+            <sdf resolution="256"/>
+        </collision>
+    </link>
+</robot>

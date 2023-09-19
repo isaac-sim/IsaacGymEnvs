@@ -1,0 +1,117 @@
+# See schema in factory_schema_config_task.py for descriptions of common parameters.
+
+defaults:
+    - IndustRealBase
+    - _self_
+    # - /factory_schema_config_task
+
+name: IndustRealTaskPegsInsert
+physics_engine: ${..physics_engine}
+
+env:
+    numEnvs: 128
+    numObservations: 24
+    numStates: 47
+    numActions: 6
+
+    socket_base_height: 0.003
+
+    num_gripper_move_sim_steps: 120  # number of timesteps to reserve for moving gripper before first step of episode
+    num_gripper_close_sim_steps: 60  # number of timesteps to reserve for closing gripper onto plug during each reset
+
+    socket_pos_obs_noise: [0.001, 0.001, 0.0]
+    socket_rot_obs_noise: [0.0, 0.0, 0.0]  
+
+randomize:
+    franka_arm_initial_dof_pos: [-1.7574766278484677, 0.8403247702305783, 2.015877580177467, -2.0924931236718334, -0.7379389376686856, 1.6256438760537268, 1.2689337870766628]  # initial joint angles after reset; FrankX home pose
+    fingertip_centered_pos_initial: [0.0, 0.0, 0.2]  # initial position of midpoint between fingertips above table
+    fingertip_centered_pos_noise: [0.0, 0.0, 0.0]  # noise on fingertip pos
+    fingertip_centered_rot_initial: [3.141593, 0.0, 0.0]  # initial rotation of fingertips (Euler)
+    fingertip_centered_rot_noise: [0.0, 0.0, 0.0]  # noise on fingertip rotation
+
+    socket_pos_xy_initial: [0.5, 0.0]  # initial position of socket on table
+    socket_pos_xy_noise: [0.1, 0.1]  # noise on socket position
+    socket_pos_z_noise_bounds: [0.0, 0.05]  # noise on socket offset from table
+    socket_rot_noise: [0.0, 0.0, 0.0872665]  # noise on socket rotation
+
+    plug_pos_xy_noise: [0.01, 0.01]  # noise on plug position
+
+rl:
+    pos_action_scale: [0.01, 0.01, 0.01]
+    rot_action_scale: [0.01, 0.01, 0.01]
+    force_action_scale: [1.0, 1.0, 1.0]
+    torque_action_scale: [1.0, 1.0, 1.0]
+
+    unidirectional_rot: True  # constrain Franka Z-rot to be unidirectional
+    unidirectional_force: False  # constrain Franka Z-force to be unidirectional (useful for debugging)
+
+    clamp_rot: True
+    clamp_rot_thresh: 1.0e-6
+
+    num_keypoints: 4  # number of keypoints used in reward
+    keypoint_scale: 0.5  # length of line of keypoints
+
+    max_episode_length: 256
+
+    # SAPU
+    interpen_thresh: 0.001  # SAPU: max allowed interpenetration between plug and socket
+
+    # SDF-Based Reward
+    sdf_reward_scale: 10.0
+    sdf_reward_num_samples: 1000
+
+    # SBC
+    initial_max_disp: 0.01  # max initial downward displacement of plug at beginning of curriculum
+    curriculum_success_thresh: 0.75  # success rate threshold for increasing curriculum difficulty
+    curriculum_failure_thresh: 0.5  # success rate threshold for decreasing curriculum difficulty
+    curriculum_height_step: [-0.005, 0.003]  # how much to increase max initial downward displacement after hitting success or failure thresh
+    curriculum_height_bound: [-0.01, 0.01]  # max initial downward displacement of plug at hardest and easiest stages of curriculum
+
+    # Success bonus
+    close_error_thresh: 0.15  # threshold below which plug is considered close to socket
+    success_height_thresh: 0.003  # threshold distance below which plug is considered successfully inserted
+    engagement_bonus: 10.0  # bonus if plug is engaged (partially inserted) with socket
+
+ctrl:
+    ctrl_type: task_space_impedance  # {gym_default,
+                                     #  joint_space_ik, joint_space_id, 
+                                     #  task_space_impedance, operational_space_motion, 
+                                     #  open_loop_force, closed_loop_force,
+                                     #  hybrid_force_motion}
+    all:
+        jacobian_type: geometric
+        gripper_prop_gains: [500, 500]
+        gripper_deriv_gains: [2, 2]
+    gym_default:
+        ik_method: dls
+        joint_prop_gains: [40, 40, 40, 40, 40, 40, 40]
+        joint_deriv_gains: [8, 8, 8, 8, 8, 8, 8]
+        gripper_prop_gains: [500, 500]
+        gripper_deriv_gains: [20, 20]
+    joint_space_ik:
+        ik_method: dls
+        joint_prop_gains: [1, 1, 1, 1, 1, 1, 1]
+        joint_deriv_gains: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    joint_space_id:
+        ik_method: dls
+        joint_prop_gains: [40, 40, 40, 40, 40, 40, 40]
+        joint_deriv_gains: [8, 8, 8, 8, 8, 8, 8]
+    task_space_impedance:
+        motion_ctrl_axes: [1, 1, 1, 1, 1, 1]
+        task_prop_gains: [300, 300, 300, 50, 50, 50]
+        task_deriv_gains: [34, 34, 34, 1.4, 1.4, 1.4]
+    operational_space_motion:
+        motion_ctrl_axes: [1, 1, 1, 1, 1, 1]
+        task_prop_gains: [60, 60, 60, 5, 5, 5]
+        task_deriv_gains: [15.5, 15.5, 15.5, 4.5, 4.5, 4.5]
+    open_loop_force:
+        force_ctrl_axes: [0, 0, 1, 0, 0, 0]
+    closed_loop_force:
+        force_ctrl_axes: [0, 0, 1, 0, 0, 0]
+        wrench_prop_gains: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    hybrid_force_motion:
+        motion_ctrl_axes: [1, 1, 1, 1, 1, 1]
+        task_prop_gains: [40, 40, 40, 40, 40, 40]
+        task_deriv_gains: [8, 8, 8, 8, 8, 8]
+        force_ctrl_axes: [0, 0, 1, 0, 0, 0]
+        wrench_prop_gains: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]

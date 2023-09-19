@@ -29,6 +29,7 @@ List of Examples
 * [Factory](#factory-fast-contact-for-robotic-assembly)
 * [DeXtreme](#dextreme-transfer-of-agile-in-hand-manipulation-from-simulation-to-reality)
 * [DexPBT](#dexpbt-scaling-up-dexterous-manipulation-for-hand-arm-systems-with-population-based-training)
+* [IndustReal](#industreal-transferring-contact-rich-assembly-tasks-from-simulation-to-reality)
 
 ### Ant [ant.py](../isaacgymenvs/tasks/ant.py)
 
@@ -511,4 +512,52 @@ More videos are available at [https://sites.google.com/view/dexpbt](https://site
 	booktitle = {RSS},
 	year = {2023}
 }
+```
+
+### IndustReal: Transferring Contact-Rich Assembly Tasks from Simulation to Reality
+
+There are 2 IndustRealSim example tasks: **IndustRealTaskPegsInsert** and **IndustRealTaskGearsInsert**. The examples train policies for peg insertion tasks and gear insertion tasks, respectively. They can be launched with command line argument `task=IndustRealTaskPegsInsert` or `task=IndustRealTaskGearsInsert`. The first time you run these examples, it may take some time for Gym to generate signed distance field representations (SDFs) for the assets. However, these SDFs will then be cached.
+
+The examples correspond very closely to the code used to train the same policies in the IndustReal paper, but due to simplifications and improvements, may produce slightly different results than the original implementations. They may take 8 to 10 hours on a modern GPU to achieve similar success rates to the results presented in the IndustReal paper. 
+
+The core configuration files for these 2 IndustRealSim example tasks are the [IndustRealTaskPegsInsert.yaml](../isaacgymenvs/cfg/task/IndustRealTaskPegsInsert.yaml) and [IndustRealTaskGearsInsert.yaml](../isaacgymenvs/cfg/task/IndustRealTaskGearsInsert.yaml) task configuration files and the [IndustRealTaskPegsInsertPPO.yaml](../isaacgymenvs/cfg/train/IndustRealTaskPegsInsertPPO.yaml) and [IndustRealTaskGearsInsertPPO.yaml](../isaacgymenvs/cfg/train/IndustRealTaskGearsInsertPPO.yaml) training configuration files. In addition to the task and training configuration files described earlier, there are also base-level configuration files and environment-level configuration files. The base-level configuration file is [IndustRealBase.yaml](../isaacgymenvs/cfg/task/IndustRealBase.yaml), and the environment-level configuration files are [IndustRealEnvPegs.yaml](../isaacgymenvs/cfg/task/IndustRealEnvPegs.yaml) and [IndustRealEnvGears.yaml](../isaacgymenvs/cfg/task/IndustRealEnvGears.yaml).
+
+We highly recommend reading the [extended documentation](industreal.md) for IndustRealSim, which includes more code details and best practices.
+
+
+<table align="center">
+    <tr>
+        <th>Initialization of Peg Insertion</th>
+        <th>Trained Peg Insertion Policy</th>
+      <th>Initialization of Gear Insertion</th>
+        <th>Trained Gear Insertion Policy</th>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/bingjietang718/bingjietang718.github.io/assets/78517784/5d14452f-06ab-41cd-8545-bcf303dc4229" alt="drawing" width="200"/></th>
+        <td><img src="https://github.com/bingjietang718/bingjietang718.github.io/assets/78517784/0baeaf2d-a21d-47e9-b74a-877ad59c4112" alt="drawing" width="200"/></th>
+        <td><img src="https://github.com/bingjietang718/bingjietang718.github.io/assets/78517784/52df52f0-b122-4429-b6e2-b0b6ba9c29f6" alt="drawing" width="200"/></th>
+        <td><img src="https://github.com/bingjietang718/bingjietang718.github.io/assets/78517784/af383243-3165-4255-9606-4a1419baee27" alt="drawing" width="200"/></th>
+    </tr>
+</table>
+
+If you use any of the IndustRealSim training environments or algorithms in your work, please cite [IndustReal](https://arxiv.org/abs/2305.17110):
+```
+@inproceedings{
+  tang2023industreal,
+  author = {Bingjie Tang and Michael A Lin and Iretiayo Akinola and Ankur Handa and Gaurav S Sukhatme and Fabio Ramos and Dieter Fox and Yashraj Narang},
+  title = {IndustReal: Transferring contact-rich assembly tasks from simulation to reality},
+  booktitle = {Robotics: Science and Systems},
+  year = {2023}
+}
+```
+
+Also note that the simulation methods, original environments, and low-level control algorithms were described in [Factory](https://arxiv.org/abs/2205.03532), which you may want to refer to or cite as well:
+```
+@inproceedings{
+  narang2022factory,
+  author = {Yashraj Narang and Kier Storey and Iretiayo Akinola and Miles Macklin and Philipp Reist and Lukasz Wawrzyniak and Yunrong Guo and Adam Moravanszky and Gavriel State and Michelle Lu and Ankur Handa and Dieter Fox},
+  title = {Factory: Fast contact for robotic assembly},
+  booktitle = {Robotics: Science and Systems},
+  year = {2022}
+} 
 ```

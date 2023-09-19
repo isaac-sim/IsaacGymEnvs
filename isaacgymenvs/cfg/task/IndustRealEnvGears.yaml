@@ -1,0 +1,13 @@
+# See schema in factory_schema_config_env.py for descriptions of common parameters.
+
+defaults:
+    - IndustRealBase
+    - _self_
+    - /factory_schema_config_env
+
+env:
+    env_name: 'IndustRealEnvGears'
+    
+    gears_lateral_offset: 0.1  # Y-axis offset of gears before initial reset to prevent initial interpenetration with base plate
+    gears_friction: 0.5  # coefficient of friction associated with gears
+    base_friction: 0.5  # coefficient of friction associated with base plate
