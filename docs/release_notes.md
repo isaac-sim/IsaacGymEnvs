@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+1.5.0
+-----
+
+* Added [IndustReal](https://sites.google.com/nvidia.com/industreal) environments: IndustRealTaskPegsInsert and IndustRealTaskGearsInsert.
+* Updated hydra version to 1.2.
+
 1.4.0
 -----
 

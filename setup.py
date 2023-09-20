@@ -19,7 +19,7 @@ INSTALL_REQUIRES = [
     "omegaconf",
     "termcolor",
     "jinja2",
-    "hydra-core>=1.1",
+    "hydra-core>=1.2",
     "rl-games>=1.6.0",
     "pyvirtualdisplay",
     "urdfpy==0.0.22",
@@ -34,7 +34,7 @@ INSTALL_REQUIRES = [
 setup(
     name="isaacgymenvs",
     author="NVIDIA",
-    version="1.4.0",
+    version="1.5.0",
     description="Benchmark environments for high-speed robot learning in NVIDIA IsaacGym.",
     keywords=["robotics", "rl"],
     include_package_data=True,
