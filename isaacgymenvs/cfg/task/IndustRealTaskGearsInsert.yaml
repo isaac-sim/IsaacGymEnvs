@@ -50,17 +50,17 @@ rl:
     num_keypoints: 4  # number of keypoints used in reward
     keypoint_scale: 0.5  # length of line of keypoints
 
-    max_episode_length: 256
+    max_episode_length: 128
 
     # SAPU
     interpen_thresh: 0.001  # max allowed interpenetration between gear and shaft
 
     # SDF-Based Reward
     sdf_reward_scale: 10.0
-    sdf_reward_num_samples: 1000
+    sdf_reward_num_samples: 5000
 
     # SBC
-    initial_max_disp: 0.015  # max initial downward displacement of gear at beginning of curriculum
+    initial_max_disp: 0.01  # max initial downward displacement of gear at beginning of curriculum
     curriculum_success_thresh: 0.6  # success rate threshold for increasing curriculum difficulty
     curriculum_failure_thresh: 0.3  # success rate threshold for decreasing curriculum difficulty
     curriculum_height_step: [-0.005, 0.002]  # how much to increase max initial downward displacement after hitting success or failure thresh
@@ -97,7 +97,7 @@ ctrl:
         joint_deriv_gains: [8, 8, 8, 8, 8, 8, 8]
     task_space_impedance:
         motion_ctrl_axes: [1, 1, 1, 1, 1, 1]
-        task_prop_gains: [300, 300, 300, 50, 50, 50]
+        task_prop_gains: [300, 300, 600, 50, 50, 50]
         task_deriv_gains: [34, 34, 34, 1.4, 1.4, 1.4]
     operational_space_motion:
         motion_ctrl_axes: [1, 1, 1, 1, 1, 1]

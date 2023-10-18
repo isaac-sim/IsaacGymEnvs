@@ -350,6 +350,63 @@ class IndustRealBase(FactoryBase, FactoryABCBase):
             (self.num_envs, self.num_actions), device=self.device
         )
 
+    def generate_ctrl_signals(self):
+        """Get Jacobian. Set Franka DOF position targets or DOF torques."""
+        # Get desired Jacobian
+        if self.cfg_ctrl['jacobian_type'] == 'geometric':
+            self.fingertip_midpoint_jacobian_tf = self.fingertip_centered_jacobian
+        elif self.cfg_ctrl['jacobian_type'] == 'analytic':
+            self.fingertip_midpoint_jacobian_tf = fc.get_analytic_jacobian(
+                fingertip_quat=self.fingertip_quat,
+                fingertip_jacobian=self.fingertip_centered_jacobian,
+                num_envs=self.num_envs,
+                device=self.device)
+        # Set PD joint pos target or joint torque
+        if self.cfg_ctrl['motor_ctrl_mode'] == 'gym':
+            self._set_dof_pos_target()
+        elif self.cfg_ctrl['motor_ctrl_mode'] == 'manual':
+            self._set_dof_torque()
+
+    def _set_dof_pos_target(self):
+        """Set Franka DOF position target to move fingertips towards target pose."""
+        self.ctrl_target_dof_pos = fc.compute_dof_pos_target(
+            cfg_ctrl=self.cfg_ctrl,
+            arm_dof_pos=self.arm_dof_pos,
+            fingertip_midpoint_pos=self.fingertip_centered_pos,
+            fingertip_midpoint_quat=self.fingertip_centered_quat,
+            jacobian=self.fingertip_midpoint_jacobian_tf,
+            ctrl_target_fingertip_midpoint_pos=self.ctrl_target_fingertip_centered_pos,
+            ctrl_target_fingertip_midpoint_quat=self.ctrl_target_fingertip_centered_quat,
+            ctrl_target_gripper_dof_pos=self.ctrl_target_gripper_dof_pos,
+            device=self.device)
+        self.gym.set_dof_position_target_tensor_indexed(self.sim,
+                                                        gymtorch.unwrap_tensor(self.ctrl_target_dof_pos),
+                                                        gymtorch.unwrap_tensor(self.franka_actor_ids_sim),
+                                                        len(self.franka_actor_ids_sim))
+    def _set_dof_torque(self):
+        """Set Franka DOF torque to move fingertips towards target pose."""
+        self.dof_torque = fc.compute_dof_torque(
+            cfg_ctrl=self.cfg_ctrl,
+            dof_pos=self.dof_pos,
+            dof_vel=self.dof_vel,
+            fingertip_midpoint_pos=self.fingertip_centered_pos,
+            fingertip_midpoint_quat=self.fingertip_centered_quat,
+            fingertip_midpoint_linvel=self.fingertip_centered_linvel,
+            fingertip_midpoint_angvel=self.fingertip_centered_angvel,
+            left_finger_force=self.left_finger_force,
+            right_finger_force=self.right_finger_force,
+            jacobian=self.fingertip_midpoint_jacobian_tf,
+            arm_mass_matrix=self.arm_mass_matrix,
+            ctrl_target_gripper_dof_pos=self.ctrl_target_gripper_dof_pos,
+            ctrl_target_fingertip_midpoint_pos=self.ctrl_target_fingertip_centered_pos,
+            ctrl_target_fingertip_midpoint_quat=self.ctrl_target_fingertip_centered_quat,
+            ctrl_target_fingertip_contact_wrench=self.ctrl_target_fingertip_contact_wrench,
+            device=self.device)
+        self.gym.set_dof_actuation_force_tensor_indexed(self.sim,
+                                                        gymtorch.unwrap_tensor(self.dof_torque),
+                                                        gymtorch.unwrap_tensor(self.franka_actor_ids_sim),
+                                                        len(self.franka_actor_ids_sim))
+
     def simulate_and_refresh(self):
         """Simulate one step, refresh tensors, and render results."""
 
