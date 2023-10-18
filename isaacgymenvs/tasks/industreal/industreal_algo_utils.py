@@ -183,8 +183,8 @@ def get_sapu_reward_scale(
     )
 
     # Determine if envs have low interpenetration or high interpenetration
-    low_interpen_envs = torch.argwhere(max_interpen_dists <= interpen_thresh)
-    high_interpen_envs = torch.argwhere(max_interpen_dists > interpen_thresh)
+    low_interpen_envs = torch.nonzero(max_interpen_dists <= interpen_thresh)
+    high_interpen_envs = torch.nonzero(max_interpen_dists > interpen_thresh)
 
     # Compute reward scale
     reward_scale = 1 - torch.tanh(
