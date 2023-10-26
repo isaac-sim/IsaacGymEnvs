@@ -14,6 +14,9 @@ Download the Isaac Gym Preview 4 release from the [website](https://developer.nv
 follow the installation instructions in the documentation. We highly recommend using a conda environment 
 to simplify set up.
 
+Another option could be to setup a cloud instance on AWS, Azure or GPC
+using [IsaacSim Automator](https://github.com/NVIDIA-Omniverse/IsaacSim-Automator/).
+
 Ensure that Isaac Gym works on your system by running one of the examples from the `python/examples` 
 directory, like `joint_monkey.py`. Follow troubleshooting steps described in the Isaac Gym Preview 4
 install instructions if you have any trouble running the samples.
