@@ -145,6 +145,7 @@ class HumanoidAMPBase(VecTask):
 
     def reset_idx(self, env_ids):
         self._reset_actors(env_ids)
+        self._reset_env_tensors(env_ids)
         self._refresh_sim_tensors()
         self._compute_observations(env_ids)
         return
@@ -342,17 +343,18 @@ class HumanoidAMPBase(VecTask):
         return obs
 
     def _reset_actors(self, env_ids):
+        self._root_states[env_ids] = self._initial_root_states[env_ids]
         self._dof_pos[env_ids] = self._initial_dof_pos[env_ids]
         self._dof_vel[env_ids] = self._initial_dof_vel[env_ids]
 
-        env_ids_int32 = env_ids.to(dtype=torch.int32)
-        self.gym.set_actor_root_state_tensor_indexed(self.sim,
-                                                     gymtorch.unwrap_tensor(self._initial_root_states),
-                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+        return
 
-        self.gym.set_dof_state_tensor_indexed(self.sim,
-                                              gymtorch.unwrap_tensor(self._dof_state),
-                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+    def _reset_env_tensors(self, env_ids):
+        env_ids_int32 = env_ids.to(dtype=torch.int32)
+        self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._root_states),
+                                                    gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+        self.gym.set_dof_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self._dof_state),
+                                                    gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
 
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 0
