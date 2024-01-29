@@ -37,6 +37,7 @@ class WandbAlgoObserver(AlgoObserver):
                 name=experiment_name,
                 resume=True,
                 settings=wandb.Settings(start_method='fork'),
+                monitor_gym=True,
             )
        
             if cfg.wandb_logcode_dir:
