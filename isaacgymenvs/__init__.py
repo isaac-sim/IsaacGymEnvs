@@ -32,10 +32,16 @@ def make(
             task = HydraConfig.get().runtime.choices['task']
             hydra.core.global_hydra.GlobalHydra.instance().clear()
 
-        with initialize(config_path="./cfg"):
-            cfg = compose(config_name="config", overrides=[f"task={task}"])
-            cfg_dict = omegaconf_to_dict(cfg.task)
-            cfg_dict['env']['numEnvs'] = num_envs
+        if 'Contextual' in task:
+            with initialize(config_path="./cfg/contextual"):
+                cfg = compose(config_name="config", overrides=[f"task={task}"])
+                cfg_dict = omegaconf_to_dict(cfg.task)
+                cfg_dict['env']['numEnvs'] = num_envs    
+        else:
+            with initialize(config_path="./cfg"):
+                cfg = compose(config_name="config", overrides=[f"task={task}"])
+                cfg_dict = omegaconf_to_dict(cfg.task)
+                cfg_dict['env']['numEnvs'] = num_envs
     # reuse existing config
     else:
         cfg_dict = omegaconf_to_dict(cfg.task)
