@@ -48,7 +48,7 @@ from torch.utils.tensorboard import SummaryWriter
 class Args:
     exp_name: str = os.path.basename(__file__)[: -len(".py")]
     """the name of this experiment"""
-    seed: int = 1
+    seed: int = 0
     """seed of the experiment"""
     torch_deterministic: bool = True
     """if toggled, `torch.backends.cudnn.deterministic=False`"""
@@ -102,6 +102,10 @@ class Args:
     """the scale factor applied to the reward during training"""
     record_video_step_frequency: int = 1464
     """the frequency at which to record the videos"""
+    num_checkpoints: int = 10 # cwkang: added to save the model parameters
+    """the number of checkpoints to save the model"""
+    device_id: int = 7 # cwkang: set the gpu id
+    """the gpu id"""
 
     # to be filled in runtime
     batch_size: int = 0
@@ -110,7 +114,7 @@ class Args:
     """the mini-batch size (computed in runtime)"""
     num_iterations: int = 0
     """the number of iterations (computed in runtime)"""
-
+    
 
 class RecordEpisodeStatisticsTorch(gym.Wrapper):
     def __init__(self, env, device):
@@ -194,7 +198,9 @@ if __name__ == "__main__":
     args.batch_size = int(args.num_envs * args.num_steps)
     args.minibatch_size = int(args.batch_size // args.num_minibatches)
     args.num_iterations = args.total_timesteps // args.batch_size
-    run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
+    # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
+    run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}" # cwkang: use datetime format for readability
+    os.makedirs(f"runs/{run_name}/checkpoints", exist_ok=True) # cwkang: prepare the directory for saving the model parameters
     if args.track:
         import wandb
 
@@ -220,14 +226,14 @@ if __name__ == "__main__":
     torch.backends.cudnn.deterministic = args.torch_deterministic
 
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
-
+    
     # env setup
     envs = isaacgymenvs.make(
         seed=args.seed,
         task=args.env_id,
         num_envs=args.num_envs,
-        sim_device="cuda:0" if torch.cuda.is_available() and args.cuda else "cpu",
-        rl_device="cuda:0" if torch.cuda.is_available() and args.cuda else "cpu",
+        sim_device=f"cuda:{args.device_id}" if torch.cuda.is_available() and args.cuda else "cpu",
+        rl_device=f"cuda:{args.device_id}" if torch.cuda.is_available() and args.cuda else "cpu",
         graphics_device_id=0 if torch.cuda.is_available() and args.cuda else -1,
         headless=False if torch.cuda.is_available() and args.cuda else True,
         multi_gpu=False,
@@ -388,6 +394,11 @@ if __name__ == "__main__":
         writer.add_scalar("losses/clipfrac", np.mean(clipfracs), global_step)
         print("SPS:", int(global_step / (time.time() - start_time)))
         writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
+
+        # cwkang: save the model parameters
+        if iteration % (args.num_iterations // args.num_checkpoints) == 0 or iteration == args.num_iterations:
+            torch.save(agent.state_dict(), f"runs/{run_name}/checkpoints/checkpoint_{global_step}.pth")
+
 
     # envs.close()
     writer.close()
