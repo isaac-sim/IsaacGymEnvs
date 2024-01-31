@@ -61,41 +61,19 @@ sim:
     contact_collection: 0 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (broken - do not use!)
 
 task:
-  randomize: False
+  randomize: True
   randomization_params:
-    # specify which attributes to randomize for each actor type and property
-    frequency: 600   # Define how many environment steps between generating new randomizations
-    observations:
-      range: [0, .002] # range for the white noise
-      operation: "additive"
-      distribution: "gaussian"
-    actions:
-      range: [0., .02]
-      operation: "additive"
-      distribution: "gaussian"
+    frequency: 100000000
     actor_params:
       ant:
-        color: True
         rigid_body_properties:
-          mass: 
-            range: [0.5, 1.5]
+          mass:
+            range: [[0.75, 0.75]]
             operation: "scaling"
-            distribution: "uniform"
+            distribution: "uniform_multirange"
             setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
         dof_properties:
           damping: 
-            range: [0.5, 1.5]
+            range: [[1.0, 1.0]]
             operation: "scaling"
-            distribution: "uniform"
-          stiffness: 
-            range: [0.5, 1.5]
-            operation: "scaling"
-            distribution: "uniform"
-          lower:
-            range: [0, 0.01]
-            operation: "additive"
-            distribution: "gaussian"
-          upper:
-            range: [0, 0.01]
-            operation: "additive"
-            distribution: "gaussian"
+            distribution: "uniform_multirange"

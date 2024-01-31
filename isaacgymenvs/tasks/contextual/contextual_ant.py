@@ -47,8 +47,6 @@ class ContextualAnt(VecTask):
         self.max_episode_length = self.cfg["env"]["episodeLength"]
 
         self.randomization_params = self.cfg["task"]["randomization_params"]
-        print('\n\n', self.randomization_params, '\n\n')
-        1/0
         self.randomize = self.cfg["task"]["randomize"]
         self.dof_vel_scale = self.cfg["env"]["dofVelocityScale"]
         self.contact_force_scale = self.cfg["env"]["contactForceScale"]
@@ -115,6 +113,36 @@ class ContextualAnt(VecTask):
         self.potentials = to_torch([-1000./self.dt], device=self.device).repeat(self.num_envs)
         self.prev_potentials = self.potentials.clone()
 
+        ###### cwkang: for debugging
+
+        handle = self.gym.find_actor_handle(self.envs[0], 'ant')
+
+        rigid_body_prop = self.gym.get_actor_rigid_body_properties(self.envs[0], handle)
+        print('111', self.gym.get_actor_rigid_body_names(self.envs[0], handle))
+        print()
+        rigid_paramss = {attr: getattr(rigid_body_prop[0], attr) for attr in dir(rigid_body_prop[0])}
+        rigid_paramss1 = {attr: getattr(rigid_body_prop[1], attr) for attr in dir(rigid_body_prop[1])}
+
+        dof_prop = self.gym.get_actor_dof_properties(self.envs[0], handle)
+        print('222', self.gym.get_actor_dof_names(self.envs[0], handle))
+        print()
+        
+        # dof_prop = self.gym.get_actor_dof_properties(self.envs[0], handle)
+        # print(dof_prop)
+        # dof_params = {attr: getattr(dof_prop, attr) for attr in dir(dof_prop)}
+
+        print('\n\n')
+        
+        print(rigid_paramss['mass'])
+        print(rigid_paramss1['mass'])
+        print()
+        print(dof_prop)
+        # print(rigid_paramss.keys())
+        # print(dof_params.keys())
+        print('\n\n')
+        # 1/0
+        ######
+
     def create_sim(self):
         self.up_axis_idx = 2 # index of up axis: Y=1, Z=2
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
@@ -138,7 +166,7 @@ class ContextualAnt(VecTask):
         lower = gymapi.Vec3(-spacing, -spacing, 0.0)
         upper = gymapi.Vec3(spacing, spacing, spacing)
 
-        asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../assets')
+        asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../assets')
         asset_file = "mjcf/nv_ant.xml"
 
         if "asset" in self.cfg["env"]:

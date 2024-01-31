@@ -32,8 +32,8 @@ def make(
             task = HydraConfig.get().runtime.choices['task']
             hydra.core.global_hydra.GlobalHydra.instance().clear()
 
-        if 'Contextual' in task:
-            with initialize(config_path="./cfg/contextual"):
+        if 'ContextualAnt' in task:
+            with initialize(config_path="./cfg/contextual/ant"):
                 cfg = compose(config_name="config", overrides=[f"task={task}"])
                 cfg_dict = omegaconf_to_dict(cfg.task)
                 cfg_dict['env']['numEnvs'] = num_envs    

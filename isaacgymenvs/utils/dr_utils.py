@@ -129,6 +129,32 @@ def generate_random_samples(attr_randomization_params, shape, curr_gym_step_coun
             hi = hi * sched_scaling + 1 * (1 - sched_scaling)
         sample = np.random.uniform(lo, hi, shape)
 
+    ### cwkang: add multi-range randomization
+    elif distribution == "uniform_multirange":
+
+        samples = []
+        for range in rand_range:
+            lo, hi = range
+            if operation == 'additive':
+                lo *= sched_scaling
+                hi *= sched_scaling
+            elif operation == 'scaling':
+                lo = lo * sched_scaling + 1 * (1 - sched_scaling)
+                hi = hi * sched_scaling + 1 * (1 - sched_scaling)
+            
+            # sample = np.random.uniform(lo, hi, shape)
+            ### cwkang: use the same random value for the whole parts (links/joints) instead of different values
+            if isinstance(shape, int):
+                sample = np.random.uniform(lo, hi, 1).repeat(repeats=shape, axis=-1)
+            elif isinstance(shape, tuple):
+                sample = np.random.uniform(lo, hi, shape[:-1]+(1,)).repeat(repeats=shape[-1], axis=-1)
+            else:
+                raise Exception
+            ###
+            samples.append(sample)
+        sample = samples[np.random.choice(len(samples))]
+    ###
+
     return sample
 
 
@@ -146,7 +172,8 @@ def get_bucketed_val(new_prop_val, attr_randomization_params):
 
 
 def apply_random_samples(prop, og_prop, attr, attr_randomization_params,
-                         curr_gym_step_count, extern_sample=None, bucketing_randomization_params=None):
+                         curr_gym_step_count, extern_sample=None, bucketing_randomization_params=None,
+                         custom_sample=None): # cwkang: add custom_samples
     
     """
     @params:
@@ -162,7 +189,7 @@ def apply_random_samples(prop, og_prop, attr, attr_randomization_params,
         
         if attr == 'gravity':
             
-            sample = generate_random_samples(attr_randomization_params, 3, curr_gym_step_count)
+            sample = generate_random_samples(attr_randomization_params, 3, curr_gym_step_count) if custom_sample is None else custom_sample
             if attr_randomization_params['operation'] == 'scaling':
                 prop.gravity.x = og_prop['gravity'].x * sample[0]
                 prop.gravity.y = og_prop['gravity'].y * sample[1]
@@ -175,13 +202,13 @@ def apply_random_samples(prop, og_prop, attr, attr_randomization_params,
 
         if attr == 'rest_offset':
 
-           sample = generate_random_samples(attr_randomization_params, 1, curr_gym_step_count)
+           sample = generate_random_samples(attr_randomization_params, 1, curr_gym_step_count) if custom_sample is None else custom_sample
            prop.physx.rest_offset = sample
                 
 
     elif isinstance(prop, np.ndarray):
         sample = generate_random_samples(attr_randomization_params, prop[attr].shape,
-                                         curr_gym_step_count, extern_sample)
+                                         curr_gym_step_count, extern_sample) if custom_sample is None else custom_sample
 
         if attr_randomization_params['operation'] == 'scaling':
             new_prop_val = og_prop[attr] * sample
@@ -193,7 +220,7 @@ def apply_random_samples(prop, og_prop, attr, attr_randomization_params,
         prop[attr] = new_prop_val
     else:
         sample = generate_random_samples(attr_randomization_params, 1,
-                                         curr_gym_step_count, extern_sample)
+                                         curr_gym_step_count, extern_sample) if custom_sample is None else custom_sample
         cur_attr_val = og_prop[attr]
         if attr_randomization_params['operation'] == 'scaling':
             new_prop_val = cur_attr_val * sample
@@ -206,6 +233,7 @@ def apply_random_samples(prop, og_prop, attr, attr_randomization_params,
             else:
                 new_prop_val = get_bucketed_val(new_prop_val, bucketing_randomization_params)
         setattr(prop, attr, new_prop_val)
+    return sample # cwkang: return the sample (random values) so that we can use the same sample to randomize other parts(links/joints) for each property
 
 def check_buckets(gym, envs, dr_params):
     total_num_buckets = 0
