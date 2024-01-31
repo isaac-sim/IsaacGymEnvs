@@ -164,7 +164,9 @@ if __name__ == "__main__":
     args.total_episodes = args.num_envs
     # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
     # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}" # cwkang: use datetime format for readability
-    run_name = args.checkpoint_path[:-len('.pth')] # cwkang: reuse the directory
+    checkpoint_idx=os.path.basename(args.checkpoint_path).replace('.pth', '') # cwkang: add filename_suffix for tensorboard summarywriter
+    run_name = f"{os.path.join(os.path.dirname(args.checkpoint_path), args.env_id, checkpoint_idx)}"
+
     if args.track:
         import wandb
 
@@ -177,8 +179,6 @@ if __name__ == "__main__":
             monitor_gym=True,
             save_code=True,
         )
-    checkpoint_name=os.path.basename(args.checkpoint_path).replace('.pth', '') # cwkang: add filename_suffix for tensorboard summarywriter
-    checkpoint_idx = checkpoint_name.split('_')[1]
     writer = SummaryWriter(run_name, filename_suffix=f".seed_{args.seed}")
     writer.add_text(
         "hyperparameters",
@@ -255,12 +255,9 @@ if __name__ == "__main__":
                 test_results['episodic_return'][idx] = episodic_return # cwkang: record results
                 test_results['episodic_length'][idx] = episodic_length # cwkang: record results
 
-                writer.add_scalar(f"evaluation_seed_{args.seed}/episodic_return", episodic_return, idx)
-                writer.add_scalar(f"evaluation_seed_{args.seed}/episodic_length", episodic_length, idx)
                 if "consecutive_successes" in info:  # ShadowHand and AllegroHand metric
                     consecutive_successes = info["consecutive_successes"].item()
                     test_results['consecutive_successes'][idx] = consecutive_successes # cwkang: record results
-                    writer.add_scalar(f"evaluation_seed_{args.seed}/consecutive_successes", consecutive_successes, idx)
 
                 num_episodes = len(test_results['episodic_return']) # cwkang: count the number of episodes for recording
                 if num_episodes % (args.total_episodes // 10) == 0 or num_episodes == args.total_episodes:
@@ -271,6 +268,10 @@ if __name__ == "__main__":
         
         # print("SPS:", int(global_step / (time.time() - start_time)))
         writer.add_scalar(f"evaluation_seed_{args.seed}/SPS", int(global_step / (time.time() - start_time)), global_step)
+
+    for key in test_results:
+        for idx in sorted(list(test_results[key].keys())):
+            writer.add_scalar(f"evaluation_seed_{args.seed}/{key}", test_results[key][idx], idx)
 
     # TRY NOT TO MODIFY: record rewards for plotting purposes
     print()

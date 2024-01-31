@@ -397,7 +397,7 @@ if __name__ == "__main__":
 
         # cwkang: save the model parameters
         if iteration % (args.num_iterations // args.num_checkpoints) == 0 or iteration == args.num_iterations:
-            torch.save(agent.state_dict(), f"runs/{run_name}/checkpoints/checkpoint_{global_step}.pth")
+            torch.save(agent.state_dict(), f"runs/{run_name}/checkpoints/{global_step}.pth")
 
 
     # envs.close()
