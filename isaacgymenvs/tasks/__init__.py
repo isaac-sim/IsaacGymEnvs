@@ -57,6 +57,7 @@ from .industreal.industreal_task_pegs_insert import IndustRealTaskPegsInsert
 from .industreal.industreal_task_gears_insert import IndustRealTaskGearsInsert
 
 from .contextual.contextual_ant import ContextualAnt
+from .contextual.contextual_anymal import ContextualAnymal
 
 
 def resolve_allegro_kuka(cfg, *args, **kwargs):
@@ -115,4 +116,5 @@ isaacgym_task_map = {
     "Trifinger": Trifinger,
 
     "ContextualAnt": ContextualAnt,
+    "ContextualAnymal": ContextualAnymal,
 }

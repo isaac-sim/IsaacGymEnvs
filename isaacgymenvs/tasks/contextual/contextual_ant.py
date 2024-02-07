@@ -113,36 +113,6 @@ class ContextualAnt(VecTask):
         self.potentials = to_torch([-1000./self.dt], device=self.device).repeat(self.num_envs)
         self.prev_potentials = self.potentials.clone()
 
-        ###### cwkang: for debugging
-
-        handle = self.gym.find_actor_handle(self.envs[0], 'ant')
-
-        rigid_body_prop = self.gym.get_actor_rigid_body_properties(self.envs[0], handle)
-        print('111', self.gym.get_actor_rigid_body_names(self.envs[0], handle))
-        print()
-        rigid_paramss = {attr: getattr(rigid_body_prop[0], attr) for attr in dir(rigid_body_prop[0])}
-        rigid_paramss1 = {attr: getattr(rigid_body_prop[1], attr) for attr in dir(rigid_body_prop[1])}
-
-        dof_prop = self.gym.get_actor_dof_properties(self.envs[0], handle)
-        print('222', self.gym.get_actor_dof_names(self.envs[0], handle))
-        print()
-        
-        # dof_prop = self.gym.get_actor_dof_properties(self.envs[0], handle)
-        # print(dof_prop)
-        # dof_params = {attr: getattr(dof_prop, attr) for attr in dir(dof_prop)}
-
-        print('\n\n')
-        
-        print(rigid_paramss['mass'])
-        print(rigid_paramss1['mass'])
-        print()
-        print(dof_prop)
-        # print(rigid_paramss.keys())
-        # print(dof_params.keys())
-        print('\n\n')
-        # 1/0
-        ######
-
     def create_sim(self):
         self.up_axis_idx = 2 # index of up axis: Y=1, Z=2
         self.sim = super().create_sim(self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
@@ -151,9 +121,35 @@ class ContextualAnt(VecTask):
         print(f'num envs {self.num_envs} env spacing {self.cfg["env"]["envSpacing"]}')
         self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
 
+        ###### cwkang: save the original system parameters
+        self.original_sys_params = torch.zeros((self.num_envs, 2), device=self.device, dtype=torch.float)
+        self.sys_param_weights = torch.ones((self.num_envs, 2), device=self.device, dtype=torch.float)
+
+        for i in range(self.num_envs):
+            handle = self.gym.find_actor_handle(self.envs[i], 'ant')
+            rigid_body_prop = self.gym.get_actor_rigid_body_properties(self.envs[i], handle)
+            self.original_sys_params[i][0] = rigid_body_prop[0].mass
+
+            dof_prop = self.gym.get_actor_dof_properties(self.envs[i], handle)
+            self.original_sys_params[i][1] = dof_prop[0][7].item()
+        # print('ori')
+        # print(self.original_sys_params[0])
+        ######
+
         # If randomizing, apply once immediately on startup before the fist sim step
         if self.randomize:
             self.apply_randomizations(self.randomization_params)
+            ###### cwkang: update the system parameter weights
+            for i in range(self.num_envs):
+                handle = self.gym.find_actor_handle(self.envs[i], 'ant')
+                rigid_body_prop = self.gym.get_actor_rigid_body_properties(self.envs[i], handle)
+                self.sys_param_weights[i][0] = rigid_body_prop[0].mass / self.original_sys_params[i][0]
+
+                dof_prop = self.gym.get_actor_dof_properties(self.envs[i], handle)
+                self.sys_param_weights[i][1] = dof_prop[0][7] / self.original_sys_params[i][1]
+            # print('sys')
+            # print(self.sys_param_weights[0])
+            ######
 
     def _create_ground_plane(self):
         plane_params = gymapi.PlaneParams()
@@ -282,7 +278,17 @@ class ContextualAnt(VecTask):
     def reset_idx(self, env_ids):
         # Randomization can happen only at reset time, since it can reset actor positions on GPU
         if self.randomize:
-            self.apply_randomizations(self.randomization_params)
+            # self.apply_randomizations(self.randomization_params)
+            ###### cwkang: update the system parameter weights
+            randomized_ids = self.apply_randomizations(self.randomization_params)
+            for i in randomized_ids:
+                handle = self.gym.find_actor_handle(self.envs[i], 'ant')
+                rigid_body_prop = self.gym.get_actor_rigid_body_properties(self.envs[i], handle)
+                self.sys_param_weights[i][0] = rigid_body_prop[0].mass / self.original_sys_params[i][0]
+
+                dof_prop = self.gym.get_actor_dof_properties(self.envs[i], handle)
+                self.sys_param_weights[i][1] = dof_prop[0][7] / self.original_sys_params[i][1]
+            ######
 
         positions = torch_rand_float(-0.2, 0.2, (len(env_ids), self.num_dof), device=self.device)
         velocities = torch_rand_float(-0.1, 0.1, (len(env_ids), self.num_dof), device=self.device)
@@ -325,6 +331,8 @@ class ContextualAnt(VecTask):
         self.compute_observations()
         self.compute_reward(self.actions)
         self.compute_true_objective()
+
+        self.extras['system_param_weights'] = self.sys_param_weights # cwkang: put the system param info into extras
 
         # debug viz
         if self.viewer and self.debug_viz:

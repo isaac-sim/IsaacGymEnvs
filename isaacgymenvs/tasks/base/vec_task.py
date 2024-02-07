@@ -839,3 +839,5 @@ class VecTask(Env):
                         raise Exception("Invalid extern_sample size")
 
         self.first_randomization = False
+
+        return env_ids # cwkang: to track the system parameter values for updated envs only
