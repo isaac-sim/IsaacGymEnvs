@@ -74,6 +74,6 @@ task:
             setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
         dof_properties:
           damping: 
-            range: [[1.0, 1.0]]
+            range: [[2.0, 2.0]]
             operation: "scaling"
             distribution: "uniform_multirange"

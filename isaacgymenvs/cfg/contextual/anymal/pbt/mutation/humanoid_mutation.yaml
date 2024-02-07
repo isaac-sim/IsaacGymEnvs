@@ -1,0 +1,23 @@
+task.env.headingWeight: "mutate_float"
+task.env.upWeight: "mutate_float"
+
+task.env.fingertipDeltaRewScale: "mutate_float"
+task.env.liftingRewScale: "mutate_float"
+task.env.liftingBonus: "mutate_float"
+task.env.keypointRewScale: "mutate_float"
+task.env.reachGoalBonus: "mutate_float"
+task.env.kukaActionsPenaltyScale: "mutate_float"
+task.env.allegroActionsPenaltyScale: "mutate_float"
+
+train.params.config.reward_shaper.scale_value: "mutate_float"
+train.params.config.learning_rate: "mutate_float"
+train.params.config.grad_norm: "mutate_float"
+train.params.config.entropy_coef: "mutate_float"
+train.params.config.critic_coef: "mutate_float"
+train.params.config.bounds_loss_coef: "mutate_float"
+
+train.params.config.e_clip: "mutate_eps_clip"
+
+train.params.config.mini_epochs: "mutate_mini_epochs"
+
+train.params.config.gamma: "mutate_discount"

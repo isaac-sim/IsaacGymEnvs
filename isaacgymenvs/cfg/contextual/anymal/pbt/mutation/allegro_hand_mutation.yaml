@@ -1,0 +1,29 @@
+task.env.dist_reward_scale: "mutate_float"
+task.env.rot_reward_scale: "mutate_float"
+task.env.rot_eps: "mutate_float"
+task.env.reach_goal_bonus: "mutate_float"
+
+# Could be additionally mutated
+#task.env.actionPenaltyScale: "mutate_float"
+#task.env.actionDeltaPenaltyScale: "mutate_float"
+
+#task.env.startObjectPoseDY: "mutate_float"
+#task.env.startObjectPoseDZ: "mutate_float"
+#task.env.fallDistance: "mutate_float"
+
+train.params.config.learning_rate: "mutate_float"
+train.params.config.grad_norm: "mutate_float"
+train.params.config.entropy_coef: "mutate_float"
+train.params.config.critic_coef: "mutate_float"
+train.params.config.bounds_loss_coef: "mutate_float"
+train.params.config.kl_threshold: "mutate_float"
+
+train.params.config.e_clip: "mutate_eps_clip"
+
+train.params.config.mini_epochs: "mutate_mini_epochs"
+
+train.params.config.gamma: "mutate_discount"
+
+# These would require special mutation rules
+# 'train.params.config.steps_num': 8
+# 'train.params.config.minibatch_size': 256
