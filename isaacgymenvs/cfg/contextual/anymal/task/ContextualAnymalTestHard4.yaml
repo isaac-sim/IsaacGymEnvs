@@ -107,12 +107,12 @@ task:
       anymal:
         rigid_body_properties:
           mass:
-            range: [[2.0, 2.0]]
+            range: [[1.5, 1.5]]
             operation: "scaling"
             distribution: "uniform_multirange"
             setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
         dof_properties:
           damping: 
-            range: [[2.0, 2.0]]
+            range: [[1.5, 1.5]]
             operation: "scaling"
             distribution: "uniform_multirange"
