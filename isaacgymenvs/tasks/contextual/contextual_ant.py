@@ -406,7 +406,8 @@ def compute_ant_reward(
     reset = torch.where(obs_buf[:, 0] < termination_height, torch.ones_like(reset_buf), reset_buf)
     reset = torch.where(progress_buf >= max_episode_length - 1, torch.ones_like(reset_buf), reset)
 
-    return total_reward, reset
+    # return total_reward, reset
+    return total_reward*0.01, reset # cwkang: scale reward by 0.01
 
 
 @torch.jit.script
