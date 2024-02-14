@@ -1,3 +1,5 @@
+# reference: https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_continuous_action_isaacgym/ppo_continuous_action_isaacgym.py
+
 # Copyright (c) 2018-2022, NVIDIA Corporation
 # All rights reserved.
 #

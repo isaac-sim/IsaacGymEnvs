@@ -1,3 +1,5 @@
+# reference: https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_continuous_action_isaacgym/ppo_continuous_action_isaacgym.py
+
 # Copyright (c) 2018-2022, NVIDIA Corporation
 # All rights reserved.
 #
@@ -156,18 +158,19 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     return layer
 
 
+NUM_SYS_PARAMS = 2 # cwkang: add input dim
 class Agent(nn.Module):
     def __init__(self, envs):
         super().__init__()
         self.critic = nn.Sequential(
-            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod(), 256)),
+            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod() + NUM_SYS_PARAMS, 256)), # cwkang: add input dim
             nn.Tanh(),
             layer_init(nn.Linear(256, 256)),
             nn.Tanh(),
             layer_init(nn.Linear(256, 1), std=1.0),
         )
         self.actor_mean = nn.Sequential(
-            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod(), 256)),
+            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod() + NUM_SYS_PARAMS, 256)), # cwkang: add input dim
             nn.Tanh(),
             layer_init(nn.Linear(256, 256)),
             nn.Tanh(),
@@ -266,12 +269,14 @@ if __name__ == "__main__":
     dones = torch.zeros((args.num_steps, args.num_envs), dtype=torch.float).to(device)
     values = torch.zeros((args.num_steps, args.num_envs), dtype=torch.float).to(device)
     advantages = torch.zeros_like(rewards, dtype=torch.float).to(device)
+    sys_param_weights = torch.zeros((args.num_steps, args.num_envs, 2), dtype=torch.float).to(device) # cwkang: add storage for system parameters
 
     # TRY NOT TO MODIFY: start the game
     global_step = 0
     start_time = time.time()
     next_obs = envs.reset()
     next_done = torch.zeros(args.num_envs, dtype=torch.float).to(device)
+    sys_param_weight = envs.get_sys_param_weight() # cwkang: get system parameters
 
     for iteration in range(1, args.num_iterations + 1):
         # Annealing the rate if instructed to do so.
@@ -284,10 +289,17 @@ if __name__ == "__main__":
             global_step += args.num_envs
             obs[step] = next_obs
             dones[step] = next_done
+            sys_param_weights[step] = sys_param_weight # cwkang: store system parameters
 
             # ALGO LOGIC: action logic
             with torch.no_grad():
-                action, logprob, _, value = agent.get_action_and_value(next_obs)
+                #######
+                # action, logprob, _, value = agent.get_action_and_value(next_obs)
+
+                # cwkang: use system parameters as additional input
+                next_obs_with_sys_param = torch.cat((next_obs, sys_param_weight), dim=-1)
+                action, logprob, _, value = agent.get_action_and_value(next_obs_with_sys_param)
+                #######
                 values[step] = value.flatten()
             actions[step] = action
             logprobs[step] = logprob
@@ -309,7 +321,14 @@ if __name__ == "__main__":
 
         # bootstrap value if not done
         with torch.no_grad():
-            next_value = agent.get_value(next_obs).reshape(1, -1)
+            #######
+            # next_value = agent.get_value(next_obs).reshape(1, -1)
+            
+            # cwkang: use system parameters as additional input
+            sys_param_weight = info['sys_param_weight']
+            next_obs_with_sys_param = torch.cat((next_obs, sys_param_weight), dim=-1)
+            next_value = agent.get_value(next_obs_with_sys_param).reshape(1, -1)
+            #######
             advantages = torch.zeros_like(rewards).to(device)
             lastgaelam = 0
             for t in reversed(range(args.num_steps)):
@@ -330,6 +349,7 @@ if __name__ == "__main__":
         b_advantages = advantages.reshape(-1)
         b_returns = returns.reshape(-1)
         b_values = values.reshape(-1)
+        b_sys_param_weights = sys_param_weights.reshape((-1, NUM_SYS_PARAMS)) # cwkang: add system parameters
 
         # Optimizing the policy and value network
         clipfracs = []
@@ -339,7 +359,13 @@ if __name__ == "__main__":
                 end = start + args.minibatch_size
                 mb_inds = b_inds[start:end]
 
-                _, newlogprob, entropy, newvalue = agent.get_action_and_value(b_obs[mb_inds], b_actions[mb_inds])
+                #######
+                # _, newlogprob, entropy, newvalue = agent.get_action_and_value(b_obs[mb_inds], b_actions[mb_inds])
+                
+                # cwkang: use system parameters as additional input
+                b_obs_with_sys_params = torch.cat((b_obs[mb_inds], b_sys_param_weights[mb_inds]), dim=-1)
+                _, newlogprob, entropy, newvalue = agent.get_action_and_value(b_obs_with_sys_params, b_actions[mb_inds])
+                #######
                 logratio = newlogprob - b_logprobs[mb_inds]
                 ratio = logratio.exp()
 

@@ -454,6 +454,9 @@ class VecTask(Env):
 
         return self.obs_dict, done_env_ids
 
+    def get_sys_param_weight(self):
+        return self.sys_param_weight
+
     def render(self, mode="rgb_array"):
         """Draw the frame to the viewer, and check for keyboard events."""
         if self.viewer:

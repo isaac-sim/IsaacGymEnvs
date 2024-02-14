@@ -152,18 +152,18 @@ class ContextualAnymal(VecTask):
         self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
 
         ###### cwkang: save the original system parameters
-        self.original_sys_params = torch.zeros((self.num_envs, 2), device=self.device, dtype=torch.float)
-        self.sys_param_weights = torch.ones((self.num_envs, 2), device=self.device, dtype=torch.float)
+        self.original_sys_param = torch.zeros((self.num_envs, 2), device=self.device, dtype=torch.float)
+        self.sys_param_weight = torch.ones((self.num_envs, 2), device=self.device, dtype=torch.float)
 
         for i in range(self.num_envs):
             handle = self.gym.find_actor_handle(self.envs[i], 'ant')
             rigid_body_prop = self.gym.get_actor_rigid_body_properties(self.envs[i], handle)
-            self.original_sys_params[i][0] = rigid_body_prop[0].mass
+            self.original_sys_param[i][0] = rigid_body_prop[0].mass
 
             dof_prop = self.gym.get_actor_dof_properties(self.envs[i], handle)
-            self.original_sys_params[i][1] = dof_prop[0][7].item()
+            self.original_sys_param[i][1] = dof_prop[0][7].item()
         # print('ori')
-        # print(self.original_sys_params[0])
+        # print(self.original_sys_param[0])
         ######
 
         # If randomizing, apply once immediately on startup before the fist sim step
@@ -173,12 +173,12 @@ class ContextualAnymal(VecTask):
             for i in range(self.num_envs):
                 handle = self.gym.find_actor_handle(self.envs[i], 'ant')
                 rigid_body_prop = self.gym.get_actor_rigid_body_properties(self.envs[i], handle)
-                self.sys_param_weights[i][0] = rigid_body_prop[0].mass / self.original_sys_params[i][0]
+                self.sys_param_weight[i][0] = rigid_body_prop[0].mass / self.original_sys_param[i][0]
 
                 dof_prop = self.gym.get_actor_dof_properties(self.envs[i], handle)
-                self.sys_param_weights[i][1] = dof_prop[0][7] / self.original_sys_params[i][1]
+                self.sys_param_weight[i][1] = dof_prop[0][7] / self.original_sys_param[i][1]
             # print('sys')
-            # print(self.sys_param_weights[0])
+            # print(self.sys_param_weight[0])
             ######
 
 
@@ -264,7 +264,7 @@ class ContextualAnymal(VecTask):
         self.compute_observations()
         self.compute_reward(self.actions)
 
-        self.extras['system_param_weights'] = self.sys_param_weights # cwkang: put the system param info into extras
+        self.extras['sys_param_weight'] = self.sys_param_weight # cwkang: put the system param info into extras
 
     def compute_reward(self, actions):
         self.rew_buf[:], self.reset_buf[:] = compute_anymal_reward(
@@ -312,10 +312,10 @@ class ContextualAnymal(VecTask):
             for i in randomized_ids:
                 handle = self.gym.find_actor_handle(self.envs[i], 'ant')
                 rigid_body_prop = self.gym.get_actor_rigid_body_properties(self.envs[i], handle)
-                self.sys_param_weights[i][0] = rigid_body_prop[0].mass / self.original_sys_params[i][0]
+                self.sys_param_weight[i][0] = rigid_body_prop[0].mass / self.original_sys_param[i][0]
 
                 dof_prop = self.gym.get_actor_dof_properties(self.envs[i], handle)
-                self.sys_param_weights[i][1] = dof_prop[0][7] / self.original_sys_params[i][1]
+                self.sys_param_weight[i][1] = dof_prop[0][7] / self.original_sys_param[i][1]
             ######
 
         positions_offset = torch_rand_float(0.5, 1.5, (len(env_ids), self.num_dof), device=self.device)
