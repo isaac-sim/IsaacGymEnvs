@@ -12,7 +12,7 @@ do
             --env_id $env_id \
             --seed $test_seed \
             --track \
-            --wandb_project_name anymal_baselines_$env_id \
+            --wandb_project_name Anymal_test_all_checkpoints_$env_id \
             --wandb_entity cw-kang \
             --capture_video
     done
@@ -29,7 +29,7 @@ do
         --env_id $env_id \
         --seed $test_seed \
         --track \
-        --wandb_project_name anymal_baselines_$env_id \
+        --wandb_project_name Anymal_test_all_checkpoints_$env_id \
         --wandb_entity cw-kang \
         --capture_video
 done

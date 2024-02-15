@@ -13,7 +13,7 @@ do
         --total_timesteps 100000000 \
         --anneal_lr \
         --track \
-        --wandb_project_name ant_baselines_training \
+        --wandb_project_name Ant_training \
         --wandb_entity cw-kang \
         --capture_video
 done
@@ -28,6 +28,6 @@ python -m src.train_with_oracle_sys_params \
     --total_timesteps 100000000 \
     --anneal_lr \
     --track \
-    --wandb_project_name ant_baselines_training \
+    --wandb_project_name Ant_training \
     --wandb_entity cw-kang \
     --capture_video
