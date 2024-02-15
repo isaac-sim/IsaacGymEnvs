@@ -156,7 +156,7 @@ class ContextualAnymal(VecTask):
         self.sys_param_weight = torch.ones((self.num_envs, 2), device=self.device, dtype=torch.float)
 
         for i in range(self.num_envs):
-            handle = self.gym.find_actor_handle(self.envs[i], 'ant')
+            handle = self.gym.find_actor_handle(self.envs[i], 'anymal')
             rigid_body_prop = self.gym.get_actor_rigid_body_properties(self.envs[i], handle)
             self.original_sys_param[i][0] = rigid_body_prop[0].mass
 
@@ -171,7 +171,7 @@ class ContextualAnymal(VecTask):
             self.apply_randomizations(self.randomization_params)
             ###### cwkang: update the system parameter weights
             for i in range(self.num_envs):
-                handle = self.gym.find_actor_handle(self.envs[i], 'ant')
+                handle = self.gym.find_actor_handle(self.envs[i], 'anymal')
                 rigid_body_prop = self.gym.get_actor_rigid_body_properties(self.envs[i], handle)
                 self.sys_param_weight[i][0] = rigid_body_prop[0].mass / self.original_sys_param[i][0]
 
@@ -190,7 +190,7 @@ class ContextualAnymal(VecTask):
         self.gym.add_ground(self.sim, plane_params)
 
     def _create_envs(self, num_envs, spacing, num_per_row):
-        asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../assets')
+        asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../assets')
         asset_file = "urdf/anymal_c/urdf/anymal.urdf"
 
         asset_options = gymapi.AssetOptions()
@@ -310,7 +310,7 @@ class ContextualAnymal(VecTask):
             ###### cwkang: update the system parameter weights
             randomized_ids = self.apply_randomizations(self.randomization_params)
             for i in randomized_ids:
-                handle = self.gym.find_actor_handle(self.envs[i], 'ant')
+                handle = self.gym.find_actor_handle(self.envs[i], 'anymal')
                 rigid_body_prop = self.gym.get_actor_rigid_body_properties(self.envs[i], handle)
                 self.sys_param_weight[i][0] = rigid_body_prop[0].mass / self.original_sys_param[i][0]
 

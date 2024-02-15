@@ -36,7 +36,12 @@ def make(
             with initialize(config_path="./cfg/contextual/ant"):
                 cfg = compose(config_name="config", overrides=[f"task={task}"])
                 cfg_dict = omegaconf_to_dict(cfg.task)
-                cfg_dict['env']['numEnvs'] = num_envs    
+                cfg_dict['env']['numEnvs'] = num_envs
+        elif 'ContextualAnymal' in task:
+            with initialize(config_path="./cfg/contextual/anymal"):
+                cfg = compose(config_name="config", overrides=[f"task={task}"])
+                cfg_dict = omegaconf_to_dict(cfg.task)
+                cfg_dict['env']['numEnvs'] = num_envs
         else:
             with initialize(config_path="./cfg"):
                 cfg = compose(config_name="config", overrides=[f"task={task}"])
