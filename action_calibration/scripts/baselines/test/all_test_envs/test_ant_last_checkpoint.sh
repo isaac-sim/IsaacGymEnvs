@@ -8,7 +8,7 @@ for env_id in ContextualAntTestEasy1 ContextualAntTestEasy2 ContextualAntTestEas
 do
     for run_name in Ant ContextualAntTrain $env_id
     do
-        run_dir="runs/Ant/seed_"$train_seed"/"$run_name
+        run_dir="runs/training/seed_"$train_seed"/"$run_name
         checkpoint_path=$run_dir"/checkpoints/99942400.pth"
         python -m src.test \
             --checkpoint_path $checkpoint_path \
@@ -20,7 +20,7 @@ done
 ######################################################
 
 run_name=ContextualAntTrain_with_oracle_sys_params
-run_dir="runs/Ant/seed_"$train_seed"/"$run_name
+run_dir="runs/training/seed_"$train_seed"/"$run_name
 
 for env_id in ContextualAntTestEasy1 ContextualAntTestEasy2 ContextualAntTestEasy3 \
     ContextualAntTestEasy4 ContextualAntTestEasy5 ContextualAntTestEasy6 \

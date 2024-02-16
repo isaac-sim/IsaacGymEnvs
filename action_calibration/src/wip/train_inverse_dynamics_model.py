@@ -89,6 +89,10 @@ class Args:
     device_id: int = 7 # cwkang: set the gpu id
     """the gpu id"""
 
+    # cwkang: Checkpoint path to load the policy
+    checkpoint_path: str = ""
+    """the path to the checkpoint"""
+
     # to be filled in runtime
     batch_size: int = 0
     """the batch size (computed in runtime)"""
@@ -168,6 +172,21 @@ class Agent(nn.Module):
         if action is None:
             action = probs.sample()
         return action, probs.log_prob(action).sum(1), probs.entropy().sum(1), self.critic(x)
+    
+
+class InverseDynamicsModel(nn.Module):
+    def __init__(self, envs):
+        super().__init__()
+        self.nn = nn.Sequential(
+            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod()*2, 256)),
+            nn.Tanh(),
+            layer_init(nn.Linear(256, 256)),
+            nn.Tanh(),
+            layer_init(nn.Linear(256, np.prod(envs.single_action_space.shape)), std=0.01),
+        )
+
+    def forward(self, x):
+        return self.nn(x)
 
 
 class ExtractObsWrapper(gym.ObservationWrapper):
@@ -222,15 +241,16 @@ if __name__ == "__main__":
         virtual_screen_capture=args.capture_video,
         force_render=False,
     )
-    if args.capture_video:
-        envs.is_vector_env = True
-        print(f"record_video_step_frequency={args.record_video_step_frequency}")
-        envs = gym.wrappers.RecordVideo(
-            envs,
-            f"videos/{run_name}",
-            step_trigger=lambda step: step % args.record_video_step_frequency == 0,
-            video_length=100,  # for each video record up to 100 steps
-        )
+    # cwkang: never needs videos when training inverse dynamics
+    # if args.capture_video:
+    #     envs.is_vector_env = True
+    #     print(f"record_video_step_frequency={args.record_video_step_frequency}")
+    #     envs = gym.wrappers.RecordVideo(
+    #         envs,
+    #         f"videos/{run_name}",
+    #         step_trigger=lambda step: step % args.record_video_step_frequency == 0,
+    #         video_length=100,  # for each video record up to 100 steps
+    #     )
     envs = ExtractObsWrapper(envs)
     envs = RecordEpisodeStatisticsTorch(envs, device)
     envs.single_action_space = envs.action_space
@@ -239,16 +259,18 @@ if __name__ == "__main__":
 
     agent = Agent(envs).to(device)
     agent.load_state_dict(torch.load(f'{args.checkpoint_path}'))
+    agent.eval()
     # optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
+
+    # cwkang: initialize the inverse dynamics model
+    idm = InverseDynamicsModel(envs).to(device)
+    optimizer = optim.Adam(idm.parameters(), lr=args.learning_rate, eps=1e-5)
+    mse_loss = nn.MSELoss()
 
     # ALGO Logic: Storage setup
     obs = torch.zeros((args.num_steps, args.num_envs) + envs.single_observation_space.shape, dtype=torch.float).to(device)
     actions = torch.zeros((args.num_steps, args.num_envs) + envs.single_action_space.shape, dtype=torch.float).to(device)
-    logprobs = torch.zeros((args.num_steps, args.num_envs), dtype=torch.float).to(device)
-    rewards = torch.zeros((args.num_steps, args.num_envs), dtype=torch.float).to(device)
     dones = torch.zeros((args.num_steps, args.num_envs), dtype=torch.float).to(device)
-    values = torch.zeros((args.num_steps, args.num_envs), dtype=torch.float).to(device)
-    advantages = torch.zeros_like(rewards, dtype=torch.float).to(device)
 
     # TRY NOT TO MODIFY: start the game
     global_step = 0
@@ -271,116 +293,49 @@ if __name__ == "__main__":
             # ALGO LOGIC: action logic
             with torch.no_grad():
                 action, logprob, _, value = agent.get_action_and_value(next_obs)
-                values[step] = value.flatten()
             actions[step] = action
-            logprobs[step] = logprob
 
             # TRY NOT TO MODIFY: execute the game and log data.
-            next_obs, rewards[step], next_done, info = envs.step(action)
-            if 0 <= step <= 2:
-                for idx, d in enumerate(next_done):
-                    if d:
-                        episodic_return = info["r"][idx].item()
-                        print(f"global_step={global_step}, episodic_return={episodic_return}")
-                        writer.add_scalar("charts/episodic_return", episodic_return, global_step)
-                        writer.add_scalar("charts/episodic_length", info["l"][idx], global_step)
-                        if "consecutive_successes" in info:  # ShadowHand and AllegroHand metric
-                            writer.add_scalar(
-                                "charts/consecutive_successes", info["consecutive_successes"].item(), global_step
-                            )
-                        break
-
-        # bootstrap value if not done
-        with torch.no_grad():
-            next_value = agent.get_value(next_obs).reshape(1, -1)
-            advantages = torch.zeros_like(rewards).to(device)
-            lastgaelam = 0
-            for t in reversed(range(args.num_steps)):
-                if t == args.num_steps - 1:
-                    nextnonterminal = 1.0 - next_done
-                    nextvalues = next_value
-                else:
-                    nextnonterminal = 1.0 - dones[t + 1]
-                    nextvalues = values[t + 1]
-                delta = rewards[t] + args.gamma * nextvalues * nextnonterminal - values[t]
-                advantages[t] = lastgaelam = delta + args.gamma * args.gae_lambda * nextnonterminal * lastgaelam
-            returns = advantages + values
+            next_obs, _, next_done, info = envs.step(action)
 
         # flatten the batch
         b_obs = obs.reshape((-1,) + envs.single_observation_space.shape)
-        b_logprobs = logprobs.reshape(-1)
         b_actions = actions.reshape((-1,) + envs.single_action_space.shape)
-        b_advantages = advantages.reshape(-1)
-        b_returns = returns.reshape(-1)
-        b_values = values.reshape(-1)
+        b_dones = dones.reshape(-1)
 
         # Optimizing the policy and value network
         clipfracs = []
         for epoch in range(args.update_epochs):
-            b_inds = torch.randperm(args.batch_size, device=device)
+            b_inds = torch.randperm(args.batch_size-1, device=device) # cwkang: -1 since the last state does not have next_obs
             for start in range(0, args.batch_size, args.minibatch_size):
                 end = start + args.minibatch_size
                 mb_inds = b_inds[start:end]
 
-                _, newlogprob, entropy, newvalue = agent.get_action_and_value(b_obs[mb_inds], b_actions[mb_inds])
-                logratio = newlogprob - b_logprobs[mb_inds]
-                ratio = logratio.exp()
-
-                with torch.no_grad():
-                    # calculate approx_kl http://joschu.net/blog/kl-approx.html
-                    old_approx_kl = (-logratio).mean()
-                    approx_kl = ((ratio - 1) - logratio).mean()
-                    clipfracs += [((ratio - 1.0).abs() > args.clip_coef).float().mean().item()]
-
-                mb_advantages = b_advantages[mb_inds]
-                if args.norm_adv:
-                    mb_advantages = (mb_advantages - mb_advantages.mean()) / (mb_advantages.std() + 1e-8)
-
-                # Policy loss
-                pg_loss1 = -mb_advantages * ratio
-                pg_loss2 = -mb_advantages * torch.clamp(ratio, 1 - args.clip_coef, 1 + args.clip_coef)
-                pg_loss = torch.max(pg_loss1, pg_loss2).mean()
-
-                # Value loss
-                newvalue = newvalue.view(-1)
-                if args.clip_vloss:
-                    v_loss_unclipped = (newvalue - b_returns[mb_inds]) ** 2
-                    v_clipped = b_values[mb_inds] + torch.clamp(
-                        newvalue - b_values[mb_inds],
-                        -args.clip_coef,
-                        args.clip_coef,
-                    )
-                    v_loss_clipped = (v_clipped - b_returns[mb_inds]) ** 2
-                    v_loss_max = torch.max(v_loss_unclipped, v_loss_clipped)
-                    v_loss = 0.5 * v_loss_max.mean()
-                else:
-                    v_loss = 0.5 * ((newvalue - b_returns[mb_inds]) ** 2).mean()
-
-                entropy_loss = entropy.mean()
-                loss = pg_loss - args.ent_coef * entropy_loss + v_loss * args.vf_coef
+                b_prev_obs = b_obs[mb_inds]
+                b_next_obs = b_obs[mb_inds + 1]
+                idm_input = torch.cat((b_prev_obs, b_next_obs), dim=-1)
+                idm_label = b_actions[mb_inds]
+                predicted_action = idm(idm_input)
+                # cwkang: mask the input and the label when the next_obs is reset
+                mask = (b_dones[mb_inds + 1] < 0.5).reshape((-1, 1))
+                masked_predicted_action = predicted_action*mask
+                masked_idm_label = idm_label*mask
+                idm_loss = mse_loss(masked_predicted_action, masked_idm_label)
 
                 optimizer.zero_grad()
-                loss.backward()
-                nn.utils.clip_grad_norm_(agent.parameters(), args.max_grad_norm)
+                idm_loss.backward()
+                nn.utils.clip_grad_norm_(idm.parameters(), args.max_grad_norm)
                 optimizer.step()
-
-            if args.target_kl is not None and approx_kl > args.target_kl:
-                break
 
         # TRY NOT TO MODIFY: record rewards for plotting purposes
         writer.add_scalar("charts/learning_rate", optimizer.param_groups[0]["lr"], global_step)
-        writer.add_scalar("losses/value_loss", v_loss.item(), global_step)
-        writer.add_scalar("losses/policy_loss", pg_loss.item(), global_step)
-        writer.add_scalar("losses/entropy", entropy_loss.item(), global_step)
-        writer.add_scalar("losses/old_approx_kl", old_approx_kl.item(), global_step)
-        writer.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
-        writer.add_scalar("losses/clipfrac", np.mean(clipfracs), global_step)
+        writer.add_scalar("losses/inverse_dynamics_loss", idm_loss.item(), global_step)
         print("SPS:", int(global_step / (time.time() - start_time)))
         writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
 
         # cwkang: save the model parameters
         if iteration % (args.num_iterations // args.num_checkpoints) == 0 or iteration == args.num_iterations:
-            torch.save(agent.state_dict(), f"runs/{run_name}/checkpoints/{global_step}.pth")
+            torch.save(idm.state_dict(), f"runs/{run_name}/checkpoints/{global_step}.pth")
 
 
     # envs.close()

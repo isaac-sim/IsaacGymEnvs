@@ -168,7 +168,9 @@ if __name__ == "__main__":
     # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
     # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}" # cwkang: use datetime format for readability
     checkpoint_idx=os.path.basename(args.checkpoint_path).replace('.pth', '') # cwkang: add filename_suffix for tensorboard summarywriter
-    run_name = f"{os.path.join(os.path.dirname(args.checkpoint_path), args.env_id, checkpoint_idx)}"
+    seed_id = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(args.checkpoint_path))))
+    source_env_id = os.path.basename(os.path.dirname(os.path.dirname(args.checkpoint_path)))
+    run_name = f"test/{seed_id}/{os.path.join(args.env_id, source_env_id, checkpoint_idx)}"
 
     if args.track:
         import wandb
@@ -182,7 +184,7 @@ if __name__ == "__main__":
             monitor_gym=True,
             save_code=True,
         )
-    writer = SummaryWriter(run_name, filename_suffix=f".seed_{args.seed}")
+    writer = SummaryWriter(f"runs/{run_name}")
     writer.add_text(
         "hyperparameters",
         "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),

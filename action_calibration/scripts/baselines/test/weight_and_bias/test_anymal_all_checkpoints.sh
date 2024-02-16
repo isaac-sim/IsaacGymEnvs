@@ -4,7 +4,7 @@ test_seed=100
 
 for run_name in Anymal ContextualAnymalTrain $env_id
 do
-    run_dir="runs/Anymal/seed_"$train_seed"/"$run_name
+    run_dir="runs/training/seed_"$train_seed"/"$run_name
     for checkpoint_path in $run_dir"/checkpoints/"*.pth
     do
         python -m src.test \
@@ -21,7 +21,7 @@ done
 ######################################################
 
 run_name=ContextualAnymalTrain_with_oracle_sys_params
-run_dir="runs/Anymal/seed_"$train_seed"/"$run_name
+run_dir="runs/training/seed_"$train_seed"/"$run_name
 for checkpoint_path in $run_dir"/checkpoints/"*.pth
 do
     python -m src.test_with_oracle_sys_params \
