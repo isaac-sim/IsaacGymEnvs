@@ -6,7 +6,7 @@ for run_name in Ant ContextualAntTrain $env_id
 do
     run_dir="runs/training/seed_"$train_seed"/"$run_name
     checkpoint_path=$run_dir"/checkpoints/99942400.pth"
-    python -m src.test \
+    python -m src.test_ppo \
         --checkpoint_path $checkpoint_path \
         --env_id $env_id \
         --seed $test_seed \
@@ -18,10 +18,10 @@ done
 
 ######################################################
 
-run_name=ContextualAntTrain_with_oracle_sys_params
+run_name=ContextualAntTrain_osi_true
 run_dir="runs/training/seed_"$train_seed"/"$run_name
 checkpoint_path=$run_dir"/checkpoints/99942400.pth"
-python -m src.test_with_oracle_sys_params \
+python -m src.test_osi_true \
     --checkpoint_path $checkpoint_path \
     --env_id $env_id \
     --seed $test_seed \

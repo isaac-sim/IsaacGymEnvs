@@ -7,7 +7,7 @@ for env_id in Anymal \
     ContextualAnymalTestEasy7 ContextualAnymalTestEasy8 ContextualAnymalTestEasy9 \
     ContextualAnymalTestHard1 ContextualAnymalTestHard2 ContextualAnymalTestHard3 ContextualAnymalTestHard4
 do
-    python -m src.train \
+    python -m src.train_ppo \
         --env_id $env_id \
         --seed $seed \
         --total_timesteps 100000000 \
@@ -22,7 +22,7 @@ done
 
 env_id=ContextualAnymalTrain
 
-python -m src.train_with_oracle_sys_params \
+python -m src.train_osi_true \
     --env_id $env_id \
     --seed $seed \
     --total_timesteps 100000000 \

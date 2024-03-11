@@ -50,7 +50,7 @@ from torch.utils.tensorboard import SummaryWriter
 class Args:
     exp_name: str = os.path.basename(__file__)[: -len(".py")]
     """the name of this experiment"""
-    seed: int = 100
+    seed: int = 0
     """seed of the experiment"""
     torch_deterministic: bool = True
     """if toggled, `torch.backends.cudnn.deterministic=False`"""
@@ -68,20 +68,39 @@ class Args:
     # Algorithm specific arguments
     env_id: str = "Ant"
     """the id of the environment"""
-    num_envs: int = 1024
+    total_timesteps: int = 30000000
+    """total timesteps of the experiments"""
+    learning_rate: float = 0.0026
+    """the learning rate of the optimizer"""
+    num_envs: int = 4096
     """the number of parallel game environments"""
-    record_video_step_frequency: int = 100
-    """the frequency at which to record the videos"""
+    num_steps: int = 16
+    """the number of steps to run in each environment per policy rollout"""
+    anneal_lr: bool = False
+    """Toggle learning rate annealing for policy and value networks"""
+    num_minibatches: int = 2
+    """the number of mini-batches"""
+    update_epochs: int = 4
+    """the K epochs to update the policy"""
+    max_grad_norm: float = 1
+    """the maximum norm for the gradient clipping"""
+    num_checkpoints: int = 10 # cwkang: added to save the model parameters
+    """the number of checkpoints to save the model"""
     device_id: int = 7 # cwkang: set the gpu id
     """the gpu id"""
 
-    # cwkang: Added for evaluation
+    len_history: int = 10
+    # cwkang: Checkpoint path to load the exploration policy
     checkpoint_path: str = ""
     """the path to the checkpoint"""
 
     # to be filled in runtime
-    total_episodes: int = 1024 # cwkang: this value will be set the same as num_envs
-    """total episodes for evaluation"""
+    batch_size: int = 0
+    """the batch size (computed in runtime)"""
+    minibatch_size: int = 0
+    """the mini-batch size (computed in runtime)"""
+    num_iterations: int = 0
+    """the number of iterations (computed in runtime)"""
     
 
 class RecordEpisodeStatisticsTorch(gym.Wrapper):
@@ -155,6 +174,35 @@ class Agent(nn.Module):
         if action is None:
             action = probs.sample()
         return action, probs.log_prob(action).sum(1), probs.entropy().sum(1), self.critic(x)
+    
+
+class InverseDynamicsModel(nn.Module):
+    def __init__(self, envs, len_history):
+        super().__init__()
+        obs_dim = np.array(envs.single_observation_space.shape).prod()
+        action_dim = np.prod(envs.single_action_space.shape)
+        self.context_encoder = nn.Sequential(
+            layer_init(nn.Linear((obs_dim+action_dim)*len_history - action_dim, 256)),
+            nn.Tanh(),
+            layer_init(nn.Linear(256, 128)),
+            nn.Tanh(),
+            layer_init(nn.Linear(128, 64)),
+            nn.Tanh(),
+            layer_init(nn.Linear(64, 10)),
+            nn.Tanh()
+        )
+        self.estimator = nn.Sequential(
+            layer_init(nn.Linear(10 + obs_dim + obs_dim, 10 + obs_dim + obs_dim)),
+            nn.Tanh(),
+            layer_init(nn.Linear(10 + obs_dim + obs_dim, action_dim)),
+        )
+
+    def forward(self, history, x):
+        context = self.context_encoder(history)
+        return self.estimator(torch.cat((context, x), dim=-1))
+    
+    def get_context(self, history):
+        return self.context_encoder(history)
 
 
 class ExtractObsWrapper(gym.ObservationWrapper):
@@ -164,14 +212,13 @@ class ExtractObsWrapper(gym.ObservationWrapper):
 
 if __name__ == "__main__":
     args = tyro.cli(Args)
-    args.total_episodes = args.num_envs
+    args.batch_size = int(args.num_envs * args.num_steps)
+    args.minibatch_size = int(args.batch_size // args.num_minibatches)
+    args.num_iterations = args.total_timesteps // args.batch_size
     # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
-    # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}" # cwkang: use datetime format for readability
-    checkpoint_idx=os.path.basename(args.checkpoint_path).replace('.pth', '') # cwkang: add filename_suffix for tensorboard summarywriter
-    seed_id = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(args.checkpoint_path))))
-    source_env_id = os.path.basename(os.path.dirname(os.path.dirname(args.checkpoint_path)))
-    run_name = f"test/{seed_id}/{os.path.join(args.env_id, source_env_id, checkpoint_idx)}"
-
+    # run_name = f"idm_training/{args.env_id}__{args.exp_name}__{args.seed}__{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}" # cwkang: use datetime format for readability
+    run_name = f"idm_training/seed_{args.seed}/{args.env_id}"
+    os.makedirs(f"runs/{run_name}/checkpoints", exist_ok=True) # cwkang: prepare the directory for saving the model parameters
     if args.track:
         import wandb
 
@@ -211,15 +258,6 @@ if __name__ == "__main__":
         virtual_screen_capture=args.capture_video,
         force_render=False,
     )
-    if args.capture_video:
-        envs.is_vector_env = True
-        print(f"record_video_step_frequency={args.record_video_step_frequency}")
-        envs = gym.wrappers.RecordVideo(
-            envs,
-            f"videos/{run_name}",
-            step_trigger=lambda step: step % args.record_video_step_frequency == 0,
-            video_length=100,  # for each video record up to 100 steps
-        )
     envs = ExtractObsWrapper(envs)
     envs = RecordEpisodeStatisticsTorch(envs, device)
     envs.single_action_space = envs.action_space
@@ -229,6 +267,18 @@ if __name__ == "__main__":
     agent = Agent(envs).to(device)
     agent.load_state_dict(torch.load(f'{args.checkpoint_path}'))
     agent.eval()
+    # optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
+
+    # cwkang: initialize the inverse dynamics model
+    idm = InverseDynamicsModel(envs, args.len_history).to(device)
+    optimizer = optim.Adam(idm.parameters(), lr=args.learning_rate, eps=1e-5)
+    mse_loss = nn.MSELoss()
+
+    # ALGO Logic: Storage setup
+    obs = torch.zeros((args.num_steps, args.num_envs) + envs.single_observation_space.shape, dtype=torch.float).to(device)
+    actions = torch.zeros((args.num_steps, args.num_envs) + envs.single_action_space.shape, dtype=torch.float).to(device)
+    dones = torch.zeros((args.num_steps, args.num_envs), dtype=torch.float).to(device)
+    sys_param_weights = torch.zeros((args.num_steps, args.num_envs, 2), dtype=torch.float).to(device) # cwkang: add storage for system parameters
 
     # TRY NOT TO MODIFY: start the game
     global_step = 0
@@ -237,68 +287,87 @@ if __name__ == "__main__":
     next_done = torch.zeros(args.num_envs, dtype=torch.float).to(device)
     sys_param_weight = envs.get_sys_param_weight() # cwkang: get system parameters
 
-    from collections import defaultdict
-    test_results = defaultdict(dict) # cwkang: record test results
-    num_episodes = 0
+    for iteration in range(1, args.num_iterations + 1):
+        # Annealing the rate if instructed to do so.
+        if args.anneal_lr:
+            frac = 1.0 - (iteration - 1.0) / args.num_iterations
+            lrnow = frac * args.learning_rate
+            optimizer.param_groups[0]["lr"] = lrnow
 
-    while num_episodes < args.total_episodes:
-        global_step += args.num_envs
+        for step in range(0, args.num_steps):
+            global_step += args.num_envs
+            obs[step] = next_obs
+            dones[step] = next_done
+            sys_param_weights[step] = sys_param_weight # cwkang: store system parameters
 
-        # ALGO LOGIC: action logic
-        with torch.no_grad():
-            #######
-            # action, logprob, _, value = agent.get_action_and_value(next_obs)
-            
-            # cwkang: use system parameters as additional input
-            next_obs_with_sys_param = torch.cat((next_obs, sys_param_weight), dim=-1)
-            action, logprob, _, value = agent.get_action_and_value(next_obs_with_sys_param)
-            #######
+            # ALGO LOGIC: action logic
+            with torch.no_grad():
+                #######
+                # action, logprob, _, value = agent.get_action_and_value(next_obs)
 
-        # TRY NOT TO MODIFY: execute the game and log data.
-        next_obs, reward, next_done, info = envs.step(action)
-        
-        for idx, d in enumerate(next_done):
-            if d:
-                if idx in test_results['episodic_return']: # cwkang: one environment produces one result for fair comparison (evaluation is done with the same initial states)
-                    continue
+                # cwkang: use system parameters as additional input
+                next_obs_with_sys_param = torch.cat((next_obs, sys_param_weight), dim=-1)
+                action, logprob, _, value = agent.get_action_and_value(next_obs_with_sys_param)
+                #######
+            actions[step] = action
 
-                episodic_return = info["r"][idx].item()
-                episodic_length = info["l"][idx].item()
-                test_results['episodic_return'][idx] = episodic_return # cwkang: record results
-                test_results['episodic_length'][idx] = episodic_length # cwkang: record results
+            # TRY NOT TO MODIFY: execute the game and log data.
+            next_obs, _, next_done, info = envs.step(action)
 
-                if "consecutive_successes" in info:  # ShadowHand and AllegroHand metric
-                    consecutive_successes = info["consecutive_successes"].item()
-                    test_results['consecutive_successes'][idx] = consecutive_successes # cwkang: record results
+        # flatten the batch
+        b_obs = obs.reshape((-1,) + envs.single_observation_space.shape)
+        b_actions = actions.reshape((-1,) + envs.single_action_space.shape)
+        b_actions = torch.clamp(b_actions, -envs.clip_actions, envs.clip_actions) # cwkang: clip action for accurate prediction without noise
+        b_dones = dones.reshape(-1)
+        b_sys_param_weights = sys_param_weights.reshape((-1, NUM_SYS_PARAMS)) # cwkang: add system parameters
 
-                num_episodes = len(test_results['episodic_return']) # cwkang: count the number of episodes for recording
-                if num_episodes % (args.total_episodes // 10) == 0 or num_episodes == args.total_episodes:
-                    print(f"{num_episodes} episodes done")
+        # Optimizing the policy and value network
+        clipfracs = []
+        for epoch in range(args.update_epochs):
+            b_inds = torch.randperm(args.batch_size-args.len_history, device=device) # cwkang: -len_history since the last states do not have next_obs
+            for start in range(0, args.batch_size, args.minibatch_size):
+                end = start + args.minibatch_size
+                mb_inds = b_inds[start:end]
 
-                if num_episodes == args.total_episodes:
-                    break
-        
-        # print("SPS:", int(global_step / (time.time() - start_time)))
-        writer.add_scalar(f"evaluation_seed_{args.seed}/SPS", int(global_step / (time.time() - start_time)), global_step)
+                # cwkang: prepare history input
+                history_dones = b_dones[mb_inds].reshape((-1, 1))
+                for i in range(1, args.len_history):
+                    history_dones = torch.cat((history_dones, b_dones[mb_inds + i].reshape((-1, 1))), dim=-1)
+                last_done_indices = (history_dones == 1).cumsum(dim=1).max(dim=1).indices
+                timesteps = torch.arange(history_dones.size(1), device=device).expand_as(history_dones)
+                history_input_mask = timesteps >= last_done_indices.unsqueeze(1)
 
-    for key in test_results:
-        for idx in sorted(list(test_results[key].keys())):
-            writer.add_scalar(f"evaluation_seed_{args.seed}/{key}", test_results[key][idx], idx)
+                history_input_obs = b_obs[mb_inds]*history_input_mask[:,0:1]
+                for i in range(1, args.len_history):
+                    history_input_obs = torch.cat((history_input_obs, b_obs[mb_inds + i]*history_input_mask[:,i:i+1]), dim=-1)
+                history_input_action = b_actions[mb_inds]*history_input_mask[:,0:1]
+                for i in range(1, args.len_history-1):
+                    history_input_action = torch.cat((history_input_action, b_actions[mb_inds + i]*history_input_mask[:,i:i+1]), dim=-1)
+                history_input = torch.cat((history_input_obs, history_input_action), dim=-1)
 
-    # TRY NOT TO MODIFY: record rewards for plotting purposes
-    print()
-    for key in test_results:
-        test_results[key] = list(test_results[key].values())
-    print(f"episodic_return: mean={np.mean(test_results['episodic_return'])}, std={np.std(test_results['episodic_return'])}")
-    print(f"episodic_length: mean={np.mean(test_results['episodic_length'])}, std={np.std(test_results['episodic_length'])}")
-    writer.add_scalar(f"evaluation_seed_{args.seed}/episodic_return_mean", np.mean(test_results['episodic_return']), checkpoint_idx)
-    writer.add_scalar(f"evaluation_seed_{args.seed}/episodic_return_std", np.std(test_results['episodic_return']), checkpoint_idx)
-    writer.add_scalar(f"evaluation_seed_{args.seed}/episodic_length_mean", np.mean(test_results['episodic_length']), checkpoint_idx)
-    writer.add_scalar(f"evaluation_seed_{args.seed}/episodic_length_std", np.std(test_results['episodic_length']), checkpoint_idx)
-    if 'consecutive_successes' in test_results:
-        print(f"consecutive_successes: mean={np.mean(test_results['consecutive_successes'])}, std={np.std(test_results['consecutive_successes'])}")
-        writer.add_scalar(f"evaluation_seed_{args.seed}/consecutive_successes_mean", np.mean(test_results['consecutive_successes']), checkpoint_idx)
-        writer.add_scalar(f"evaluation_seed_{args.seed}/consecutive_successes_std", np.std(test_results['consecutive_successes']), checkpoint_idx)
+                idm_input = torch.cat((b_obs[mb_inds + args.len_history - 1], b_obs[mb_inds + args.len_history]), dim=-1)
+                idm_label = b_actions[mb_inds + args.len_history - 1]
+                predicted_action = idm(history_input, idm_input)
+                # cwkang: mask the input and the label when the next_obs is reset
+                output_mask = (b_dones[mb_inds + args.len_history] < 0.5).reshape((-1, 1))
+                masked_predicted_action = predicted_action*output_mask
+                masked_idm_label = idm_label*output_mask
+                idm_loss = torch.sqrt(mse_loss(masked_predicted_action, masked_idm_label) + 1e-8)
+
+                optimizer.zero_grad()
+                idm_loss.backward()
+                nn.utils.clip_grad_norm_(idm.parameters(), args.max_grad_norm)
+                optimizer.step()
+
+        # TRY NOT TO MODIFY: record rewards for plotting purposes
+        writer.add_scalar("charts/learning_rate", optimizer.param_groups[0]["lr"], global_step)
+        writer.add_scalar("losses/idm_loss", idm_loss.item(), global_step)
+        print("SPS:", int(global_step / (time.time() - start_time)))
+        writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
+
+        # cwkang: save the model parameters
+        if iteration % (args.num_iterations // args.num_checkpoints) == 0 or iteration == args.num_iterations:
+            torch.save(idm.state_dict(), f"runs/{run_name}/checkpoints/{global_step}.pth")
 
 
     # envs.close()

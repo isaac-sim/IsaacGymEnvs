@@ -90,7 +90,7 @@ class Args:
     """the gpu id"""
 
     len_history: int = 10
-    # cwkang: Checkpoint path to load the policy
+    # cwkang: Checkpoint path to load the exploration policy
     checkpoint_path: str = ""
     """the path to the checkpoint"""
 
@@ -191,14 +191,18 @@ class OSI(nn.Module):
             layer_init(nn.Linear(64, 10)),
             nn.Tanh()
         )
-        self.estimator = layer_init(nn.Linear(10, NUM_SYS_PARAMS))
+        self.estimator = nn.Sequential(
+            layer_init(nn.Linear(10, 10)),
+            nn.Tanh(),
+            layer_init(nn.Linear(10, NUM_SYS_PARAMS)),
+        )
 
-    def forward(self, x):
-        context = self.context_encoder(x)
+    def forward(self, history):
+        context = self.context_encoder(history)
         return self.estimator(context)
     
-    def get_context(self, x):
-        return self.context_encoder(x)
+    def get_context(self, history):
+        return self.context_encoder(history)
 
 
 class ExtractObsWrapper(gym.ObservationWrapper):
@@ -325,23 +329,23 @@ if __name__ == "__main__":
                 end = start + args.minibatch_size
                 mb_inds = b_inds[start:end]
 
-                # cwkang: prepare osi input
+                # cwkang: prepare history input
                 history_dones = b_dones[mb_inds].reshape((-1, 1))
                 for i in range(1, args.len_history):
                     history_dones = torch.cat((history_dones, b_dones[mb_inds + i].reshape((-1, 1))), dim=-1)
                 last_done_indices = (history_dones == 1).cumsum(dim=1).max(dim=1).indices
                 timesteps = torch.arange(history_dones.size(1), device=device).expand_as(history_dones)
-                osi_input_mask = timesteps >= last_done_indices.unsqueeze(1)
+                history_input_mask = timesteps >= last_done_indices.unsqueeze(1)
 
-                osi_input_obs = b_obs[mb_inds]*osi_input_mask[:,0:1]
+                history_input_obs = b_obs[mb_inds]*history_input_mask[:,0:1]
                 for i in range(1, args.len_history):
-                    osi_input_obs = torch.cat((osi_input_obs, b_obs[mb_inds + i]*osi_input_mask[:,i:i+1]), dim=-1)
-                osi_input_action = b_actions[mb_inds]*osi_input_mask[:,0:1]
+                    history_input_obs = torch.cat((history_input_obs, b_obs[mb_inds + i]*history_input_mask[:,i:i+1]), dim=-1)
+                history_input_action = b_actions[mb_inds]*history_input_mask[:,0:1]
                 for i in range(1, args.len_history-1):
-                    osi_input_action = torch.cat((osi_input_action, b_actions[mb_inds + i]*osi_input_mask[:,i:i+1]), dim=-1)
-                osi_input = torch.cat((osi_input_obs, osi_input_action), dim=-1)
+                    history_input_action = torch.cat((history_input_action, b_actions[mb_inds + i]*history_input_mask[:,i:i+1]), dim=-1)
+                history_input = torch.cat((history_input_obs, history_input_action), dim=-1)
 
-                predicted_system_params = osi(osi_input)
+                predicted_system_params = osi(history_input)
                 # predicted_system_params *= 0
                 # predicted_system_params += b_sys_param_weights.mean(0)[None,:]
                 osi_label = b_sys_param_weights[mb_inds + args.len_history-1]

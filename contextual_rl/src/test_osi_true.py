@@ -45,8 +45,6 @@ import tyro
 from torch.distributions.normal import Normal
 from torch.utils.tensorboard import SummaryWriter
 
-from collections import deque
-
 
 @dataclass
 class Args:
@@ -76,12 +74,9 @@ class Args:
     """the frequency at which to record the videos"""
     device_id: int = 7 # cwkang: set the gpu id
     """the gpu id"""
-    len_history: int = 50
-    """the frequency at which to record the videos"""
 
     # cwkang: Added for evaluation
     checkpoint_path: str = ""
-    idm_checkpoint_path: str = ""
     """the path to the checkpoint"""
 
     # to be filled in runtime
@@ -129,18 +124,26 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     return layer
 
 
+NUM_SYS_PARAMS = 2 # cwkang: add input dim
 class Agent(nn.Module):
     def __init__(self, envs):
         super().__init__()
+
+        self.context_encoder = nn.Sequential(
+            layer_init(nn.Linear(NUM_SYS_PARAMS, 10)),
+            nn.Tanh(),
+            layer_init(nn.Linear(10, 10)),
+            nn.Tanh()
+        )
         self.critic = nn.Sequential(
-            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod(), 256)),
+            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod() + 10, 256)), # cwkang: add input dim
             nn.Tanh(),
             layer_init(nn.Linear(256, 256)),
             nn.Tanh(),
             layer_init(nn.Linear(256, 1), std=1.0),
         )
         self.actor_mean = nn.Sequential(
-            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod(), 256)),
+            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod() + 10, 256)), # cwkang: add input dim
             nn.Tanh(),
             layer_init(nn.Linear(256, 256)),
             nn.Tanh(),
@@ -148,32 +151,22 @@ class Agent(nn.Module):
         )
         self.actor_logstd = nn.Parameter(torch.zeros(1, np.prod(envs.single_action_space.shape)))
 
-    def get_value(self, x):
-        return self.critic(x)
+    def get_value(self, sys_params, x):
+        context = self.context_encoder(sys_params)
+        return self.critic(torch.cat((context, x), dim=-1))
 
-    def get_action_and_value(self, x, action=None):
-        action_mean = self.actor_mean(x)
+    def get_action_and_value(self, sys_params, x, action=None):
+        context = self.context_encoder(sys_params)
+        action_mean = self.actor_mean(torch.cat((context, x), dim=-1))
         action_logstd = self.actor_logstd.expand_as(action_mean)
         action_std = torch.exp(action_logstd)
         probs = Normal(action_mean, action_std)
         if action is None:
             action = probs.sample()
-        return action, probs.log_prob(action).sum(1), probs.entropy().sum(1), self.critic(x)
+        return action, probs.log_prob(action).sum(1), probs.entropy().sum(1), self.critic(torch.cat((context, x), dim=-1))
 
-
-class InverseDynamicsModel(nn.Module):
-    def __init__(self, envs):
-        super().__init__()
-        self.nn = nn.Sequential(
-            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod()*2, 256)),
-            nn.Tanh(),
-            layer_init(nn.Linear(256, 256)),
-            nn.Tanh(),
-            layer_init(nn.Linear(256, np.prod(envs.single_action_space.shape)), std=0.01),
-        )
-
-    def forward(self, x):
-        return self.nn(x)
+    def get_context(self, sys_params):
+        return self.context_encoder(sys_params)
 
 
 class ExtractObsWrapper(gym.ObservationWrapper):
@@ -189,8 +182,7 @@ if __name__ == "__main__":
     checkpoint_idx=os.path.basename(args.checkpoint_path).replace('.pth', '') # cwkang: add filename_suffix for tensorboard summarywriter
     seed_id = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(args.checkpoint_path))))
     source_env_id = os.path.basename(os.path.dirname(os.path.dirname(args.checkpoint_path)))
-    run_name = f"test/{seed_id}/{os.path.join(args.env_id, 'idm_ac', checkpoint_idx)}"
-    print(run_name)
+    run_name = f"test/{seed_id}/{os.path.join(args.env_id, source_env_id, checkpoint_idx)}"
 
     if args.track:
         import wandb
@@ -250,23 +242,12 @@ if __name__ == "__main__":
     agent.load_state_dict(torch.load(f'{args.checkpoint_path}'))
     agent.eval()
 
-    # cwkang: load the inverse dynamics model
-    idm = InverseDynamicsModel(envs).to(device)
-    idm.load_state_dict(torch.load(f'{args.idm_checkpoint_path}'))
-    idm.eval()
-    mse_loss = nn.MSELoss()
-    from sklearn.linear_model import LinearRegression
-    # state_history = deque(maxlen=args.len_history)
-    # next_state_history = deque(maxlen=args.len_history)
-    action_history = deque(maxlen=args.len_history)
-    predicted_action_history = deque(maxlen=args.len_history)
-    compensation_matrix, compensation_bias = {}, {}
-
     # TRY NOT TO MODIFY: start the game
     global_step = 0
     start_time = time.time()
     next_obs = envs.reset()
     next_done = torch.zeros(args.num_envs, dtype=torch.float).to(device)
+    sys_param_weight = envs.get_sys_param_weight() # cwkang: get system parameters
 
     from collections import defaultdict
     test_results = defaultdict(dict) # cwkang: record test results
@@ -277,42 +258,15 @@ if __name__ == "__main__":
 
         # ALGO LOGIC: action logic
         with torch.no_grad():
-            action, logprob, _, value = agent.get_action_and_value(next_obs)
-            action = torch.clamp(action, -envs.clip_actions, envs.clip_actions) # cwkang: clip action for accurate prediction without noise
-            # TODO: do something here (action compensation) before history append
-            if len(compensation_matrix) > 0:
-                # print(action[0])
-                for i in compensation_matrix:
-                    compensation_weight = 0.2
-                    compensated_action = action[i] @ compensation_matrix[i].T + compensation_bias[i]
-                    action[i] = (1-compensation_weight)*action[i] + compensation_weight*compensated_action
-                action = torch.clamp(action, -envs.clip_actions, envs.clip_actions)
-                # print(compensation_matrix[i].T)
-                # print(compensation_bias[i])
-                # print(action[0])
-                # print()
-            current_state = next_obs.clone() # cwkang: save current state
-            action_history.append(action.detach().cpu().numpy())
+            #######
+            # action, logprob, _, value = agent.get_action_and_value(next_obs)
+            
+            # cwkang: use system parameters as additional input
+            action, logprob, _, value = agent.get_action_and_value(sys_param_weight, next_obs)
+            #######
 
         # TRY NOT TO MODIFY: execute the game and log data.
         next_obs, reward, next_done, info = envs.step(action)
-        idm_input = torch.cat((current_state, next_obs), dim=-1)
-        predicted_action = idm(idm_input)
-        predicted_action_history.append(predicted_action.detach().cpu().numpy())
-
-        X = np.array(predicted_action_history, dtype=np.float32)
-        Y = np.array(action_history, dtype=np.float32)
-        for i in range(args.num_envs):
-            X_i = X[:,i,:]
-            Y_i = Y[:,i,:]
-            X_augmented = np.hstack([X_i, np.ones((X_i.shape[0], 1))])
-            params, residuals, rank, s = np.linalg.lstsq(X_augmented, Y_i, rcond=None)
-            A, b = params[:-1], params[-1]
-            # reg = LinearRegression()
-            # reg.fit(X_i, Y_i)
-            # A, b = reg.coef_, reg.intercept_
-            compensation_matrix[i] = torch.FloatTensor(A).cuda(args.device_id)
-            compensation_bias[i] = torch.FloatTensor(b).cuda(args.device_id)
         
         for idx, d in enumerate(next_done):
             if d:

@@ -7,7 +7,7 @@ for env_id in Ant \
     ContextualAntTestEasy7 ContextualAntTestEasy8 ContextualAntTestEasy9 \
     ContextualAntTestHard1 ContextualAntTestHard2 ContextualAntTestHard3 ContextualAntTestHard4
 do
-    python -m src.train \
+    python -m src.train_ppo \
         --env_id $env_id \
         --seed $seed \
         --total_timesteps 100000000 \
@@ -22,7 +22,7 @@ done
 
 env_id=ContextualAntTrain
 
-python -m src.train_with_oracle_sys_params \
+python -m src.train_osi_true \
     --env_id $env_id \
     --seed $seed \
     --total_timesteps 100000000 \

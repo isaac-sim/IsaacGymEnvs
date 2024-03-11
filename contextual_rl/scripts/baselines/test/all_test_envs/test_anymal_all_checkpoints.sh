@@ -11,7 +11,7 @@ do
         run_dir="runs/training/seed_"$train_seed"/"$run_name
         for checkpoint_path in $run_dir"/checkpoints/"*.pth
         do
-            python -m src.test \
+            python -m src.test_ppo \
                 --checkpoint_path $checkpoint_path \
                 --env_id $env_id \
                 --seed $test_seed
@@ -21,7 +21,7 @@ done
 
 ######################################################
 
-run_name=ContextualAnymalTrain_with_oracle_sys_params
+run_name=ContextualAnymalTrain_osi_true
 run_dir="runs/training/seed_"$train_seed"/"$run_name
 
 for env_id in ContextualAnymalTestEasy1 ContextualAnymalTestEasy2 ContextualAnymalTestEasy3 \
@@ -31,7 +31,7 @@ for env_id in ContextualAnymalTestEasy1 ContextualAnymalTestEasy2 ContextualAnym
 do
     for checkpoint_path in $run_dir"/checkpoints/"*.pth
     do
-        python -m src.test_with_oracle_sys_params \
+        python -m src.test_osi_true \
             --checkpoint_path $checkpoint_path \
             --env_id $env_id \
             --seed $test_seed
