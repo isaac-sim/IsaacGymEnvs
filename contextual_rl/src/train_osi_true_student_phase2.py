@@ -45,6 +45,8 @@ import tyro
 from torch.distributions.normal import Normal
 from torch.utils.tensorboard import SummaryWriter
 
+from collections import deque
+
 
 @dataclass
 class Args:
@@ -109,6 +111,11 @@ class Args:
     device_id: int = 7 # cwkang: set the gpu id
     """the gpu id"""
 
+    len_history: int = 10
+    # cwkang: Checkpoint path to load the context encoder
+    checkpoint_path: str = ""
+    """the path to the checkpoint"""
+
     # to be filled in runtime
     batch_size: int = 0
     """the batch size (computed in runtime)"""
@@ -162,13 +169,6 @@ NUM_SYS_PARAMS = 2 # cwkang: add input dim
 class Agent(nn.Module):
     def __init__(self, envs):
         super().__init__()
-
-        self.context_encoder = nn.Sequential(
-            layer_init(nn.Linear(NUM_SYS_PARAMS, 10)),
-            nn.Tanh(),
-            layer_init(nn.Linear(10, 10)),
-            nn.Tanh()
-        )
         self.critic = nn.Sequential(
             layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod() + 10, 256)), # cwkang: add input dim
             nn.Tanh(),
@@ -185,12 +185,10 @@ class Agent(nn.Module):
         )
         self.actor_logstd = nn.Parameter(torch.zeros(1, np.prod(envs.single_action_space.shape)))
 
-    def get_value(self, sys_params, x):
-        context = self.context_encoder(sys_params)
+    def get_value(self, context, x):
         return self.critic(torch.cat((context, x), dim=-1))
 
-    def get_action_and_value(self, sys_params, x, action=None):
-        context = self.context_encoder(sys_params)
+    def get_action_and_value(self, context, x, action=None):
         action_mean = self.actor_mean(torch.cat((context, x), dim=-1))
         action_logstd = self.actor_logstd.expand_as(action_mean)
         action_std = torch.exp(action_logstd)
@@ -198,10 +196,30 @@ class Agent(nn.Module):
         if action is None:
             action = probs.sample()
         return action, probs.log_prob(action).sum(1), probs.entropy().sum(1), self.critic(torch.cat((context, x), dim=-1))
+    
 
-    def get_context(self, sys_params):
+class Student(nn.Module):
+    def __init__(self, envs, len_history):
+        super().__init__()
+        obs_dim = np.array(envs.single_observation_space.shape).prod()
+        action_dim = np.prod(envs.single_action_space.shape)
+        self.context_encoder = nn.Sequential(
+            layer_init(nn.Linear((obs_dim+action_dim)*len_history, 256)),
+            nn.Tanh(),
+            layer_init(nn.Linear(256, 128)),
+            nn.Tanh(),
+            layer_init(nn.Linear(128, 64)),
+            nn.Tanh(),
+            layer_init(nn.Linear(64, 10)),
+            nn.Tanh()
+        )
+
+    def forward(self, history):
+        return self.context_encoder(history)
+    
+    def get_context(self, history):
         with torch.no_grad():
-            return self.context_encoder(sys_params)
+            return self.context_encoder(history)
 
 
 class ExtractObsWrapper(gym.ObservationWrapper):
@@ -216,7 +234,7 @@ if __name__ == "__main__":
     args.num_iterations = args.total_timesteps // args.batch_size
     # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
     # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}" # cwkang: use datetime format for readability
-    run_name = f"training/seed_{args.seed}/{args.env_id}_osi_true"
+    run_name = f"training/seed_{args.seed}/{args.env_id}_osi_true_student"
     os.makedirs(f"runs/{run_name}/checkpoints", exist_ok=True) # cwkang: prepare the directory for saving the model parameters
     if args.track:
         import wandb
@@ -257,20 +275,16 @@ if __name__ == "__main__":
         virtual_screen_capture=args.capture_video,
         force_render=False,
     )
-    if args.capture_video:
-        envs.is_vector_env = True
-        print(f"record_video_step_frequency={args.record_video_step_frequency}")
-        envs = gym.wrappers.RecordVideo(
-            envs,
-            f"videos/{run_name}",
-            step_trigger=lambda step: step % args.record_video_step_frequency == 0,
-            video_length=100,  # for each video record up to 100 steps
-        )
     envs = ExtractObsWrapper(envs)
     envs = RecordEpisodeStatisticsTorch(envs, device)
     envs.single_action_space = envs.action_space
     envs.single_observation_space = envs.observation_space
     assert isinstance(envs.single_action_space, gym.spaces.Box), "only continuous action space is supported"
+
+    # cwkang: initialize the student context encoder
+    student = Student(envs, args.len_history).to(device)
+    student.load_state_dict(torch.load(f'{args.checkpoint_path}'))
+    student.eval()
 
     agent = Agent(envs).to(device)
     optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
@@ -283,7 +297,21 @@ if __name__ == "__main__":
     dones = torch.zeros((args.num_steps, args.num_envs), dtype=torch.float).to(device)
     values = torch.zeros((args.num_steps, args.num_envs), dtype=torch.float).to(device)
     advantages = torch.zeros_like(rewards, dtype=torch.float).to(device)
+
+    history_obses = torch.zeros((args.num_steps, args.num_envs, args.len_history) + envs.single_observation_space.shape, dtype=torch.float).to(device)
+    history_actions = torch.zeros((args.num_steps, args.num_envs, args.len_history) + envs.single_action_space.shape, dtype=torch.float).to(device)
+    history_dones = torch.zeros((args.num_steps, args.num_envs, args.len_history), dtype=torch.float).to(device)
+    history_obs = deque(maxlen=args.len_history)
+    history_action = deque(maxlen=args.len_history)
+    history_done = deque(maxlen=args.len_history)
+
+    for _ in range(args.len_history):
+        history_obs.append(torch.zeros((args.num_envs,) + envs.single_observation_space.shape, dtype=torch.float).to(device))
+        history_action.append(torch.zeros((args.num_envs,) + envs.single_action_space.shape, dtype=torch.float).to(device))
+        history_done.append(torch.zeros((args.num_envs,), dtype=torch.float).to(device))
+
     sys_param_weights = torch.zeros((args.num_steps, args.num_envs, 2), dtype=torch.float).to(device) # cwkang: add storage for system parameters
+    contexts = torch.zeros((args.num_steps, args.num_envs, 10), dtype=torch.float).to(device) # cwkang: add storage for contexts
 
     # TRY NOT TO MODIFY: start the game
     global_step = 0
@@ -303,19 +331,36 @@ if __name__ == "__main__":
             global_step += args.num_envs
             obs[step] = next_obs
             dones[step] = next_done
+            # cwkang: store history obs and dones
+            history_obs.append(next_obs)
+            history_obses[step] = torch.stack(list(history_obs), dim=1)
+            history_done.append(next_done)
+            history_dones[step] = torch.stack(list(history_done), dim=1)
             sys_param_weights[step] = sys_param_weight # cwkang: store system parameters
 
             # ALGO LOGIC: action logic
             with torch.no_grad():
                 #######
                 # action, logprob, _, value = agent.get_action_and_value(next_obs)
+                last_done_indices = (history_dones[step] == 1).cumsum(dim=1).max(dim=1).indices
+                timesteps = torch.arange(history_dones[step].size(1), device=device).expand_as(history_dones[step])
+                history_input_mask = timesteps >= last_done_indices.unsqueeze(-1)
 
-                # cwkang: use system parameters as additional input
-                action, logprob, _, value = agent.get_action_and_value(sys_param_weight, next_obs)
+                history_input_obs = history_obses[step]*history_input_mask.unsqueeze(-1)
+                history_input_action = history_actions[step]*history_input_mask.unsqueeze(-1)
+                history_input = torch.cat((history_input_obs, history_input_action), dim=-1)
+
+                history_input = history_input.reshape((history_input.shape[0], -1))
+                context = student.get_context(history_input)
+                contexts[step] = context
+                action, logprob, _, value = agent.get_action_and_value(context, next_obs)
                 #######
                 values[step] = value.flatten()
             actions[step] = action
             logprobs[step] = logprob
+            # cwkang: store history action
+            history_action.append(action)
+            history_actions[step] = torch.stack(list(history_action), dim=1)
 
             # TRY NOT TO MODIFY: execute the game and log data.
             next_obs, rewards[step], next_done, info = envs.step(action)
@@ -337,9 +382,8 @@ if __name__ == "__main__":
             #######
             # next_value = agent.get_value(next_obs).reshape(1, -1)
             
-            # cwkang: use system parameters as additional input
-            sys_param_weight = info['sys_param_weight']
-            next_value = agent.get_value(sys_param_weight, next_obs).reshape(1, -1)
+            # cwkang: use contexts as additional input
+            next_value = agent.get_value(contexts[step], next_obs).reshape(1, -1)
             #######
             advantages = torch.zeros_like(rewards).to(device)
             lastgaelam = 0
@@ -362,6 +406,7 @@ if __name__ == "__main__":
         b_returns = returns.reshape(-1)
         b_values = values.reshape(-1)
         b_sys_param_weights = sys_param_weights.reshape((-1, NUM_SYS_PARAMS)) # cwkang: add system parameters
+        b_contexts = contexts.reshape((-1, 10)) # cwkang: add contexts
 
         # Optimizing the policy and value network
         clipfracs = []
@@ -374,8 +419,8 @@ if __name__ == "__main__":
                 #######
                 # _, newlogprob, entropy, newvalue = agent.get_action_and_value(b_obs[mb_inds], b_actions[mb_inds])
                 
-                # cwkang: use system parameters as additional input
-                _, newlogprob, entropy, newvalue = agent.get_action_and_value(b_sys_param_weights[mb_inds], b_obs[mb_inds], b_actions[mb_inds])
+                # cwkang: use contexts as additional input
+                _, newlogprob, entropy, newvalue = agent.get_action_and_value(b_contexts[mb_inds], b_obs[mb_inds], b_actions[mb_inds])
                 #######
                 logratio = newlogprob - b_logprobs[mb_inds]
                 ratio = logratio.exp()
@@ -430,11 +475,11 @@ if __name__ == "__main__":
         writer.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
         writer.add_scalar("losses/clipfrac", np.mean(clipfracs), global_step)
         print("SPS:", int(global_step / (time.time() - start_time)))
-        writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
+        writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)            
 
         # cwkang: save the model parameters
         if iteration % (args.num_iterations // args.num_checkpoints) == 0 or iteration == args.num_iterations:
-            torch.save(agent.state_dict(), f"runs/{run_name}/checkpoints/{global_step}.pth")
+            torch.save(agent.state_dict(), f"runs/{run_name}/checkpoints/{global_step}_phase2.pth")
 
 
     # envs.close()

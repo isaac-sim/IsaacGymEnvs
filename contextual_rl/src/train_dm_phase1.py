@@ -187,7 +187,8 @@ class Agent(nn.Module):
         return action, probs.log_prob(action).sum(1), probs.entropy().sum(1), self.critic(torch.cat((context, x), dim=-1))
 
     def get_context(self, sys_params):
-        return self.context_encoder(sys_params)
+        with torch.no_grad():
+            return self.context_encoder(sys_params)
     
 
 class DynamicsModel(nn.Module):

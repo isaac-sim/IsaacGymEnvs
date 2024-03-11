@@ -187,7 +187,8 @@ class Agent(nn.Module):
         return action, probs.log_prob(action).sum(1), probs.entropy().sum(1), self.critic(torch.cat((context, x), dim=-1))
 
     def get_context(self, sys_params):
-        return self.context_encoder(sys_params)
+        with torch.no_grad():
+            return self.context_encoder(sys_params)
     
 
 class Student(nn.Module):
@@ -226,7 +227,7 @@ if __name__ == "__main__":
     args.num_iterations = args.total_timesteps // args.batch_size
     # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
     # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}" # cwkang: use datetime format for readability
-    run_name = f"training/seed_{args.seed}/{args.env_id}_osi"
+    run_name = f"training/seed_{args.seed}/{args.env_id}_osi_true_student"
     os.makedirs(f"runs/{run_name}/checkpoints", exist_ok=True) # cwkang: prepare the directory for saving the model parameters
     if args.track:
         import wandb
@@ -373,8 +374,7 @@ if __name__ == "__main__":
 
                 history_input = history_input.reshape((history_input.shape[0], -1))
                 student_context = student(history_input)
-                context_label = agent.get_context(history_input)
-                b_sys_param_weights[mb_inds]
+                context_label = agent.get_context(b_sys_param_weights[mb_inds])
                 context_loss = torch.sqrt(mse_loss(student_context, context_label) + 1e-8)
 
                 optimizer.zero_grad()
