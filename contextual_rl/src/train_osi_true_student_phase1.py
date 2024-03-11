@@ -378,19 +378,19 @@ if __name__ == "__main__":
                 context_loss = torch.sqrt(mse_loss(student_context, context_label) + 1e-8)
 
                 optimizer.zero_grad()
-                osi_loss.backward()
-                nn.utils.clip_grad_norm_(osi.parameters(), args.max_grad_norm)
+                context_loss.backward()
+                nn.utils.clip_grad_norm_(student.parameters(), args.max_grad_norm)
                 optimizer.step()
 
         # TRY NOT TO MODIFY: record rewards for plotting purposes
         writer.add_scalar("charts/phase1_learning_rate", optimizer.param_groups[0]["lr"], global_step)
-        writer.add_scalar("losses/osi_loss", osi_loss.item(), global_step)
+        writer.add_scalar("losses/context_loss", context_loss.item(), global_step)
         print("SPS:", int(global_step / (time.time() - start_time)))
         writer.add_scalar("charts/phase1_SPS", int(global_step / (time.time() - start_time)), global_step)
 
         # cwkang: save the model parameters
         if iteration % (args.num_iterations // args.num_checkpoints) == 0 or iteration == args.num_iterations:
-            torch.save(osi.state_dict(), f"runs/{run_name}/checkpoints/{global_step}_phase1.pth")
+            torch.save(student.state_dict(), f"runs/{run_name}/checkpoints/{global_step}_phase1.pth")
 
 
     # envs.close()

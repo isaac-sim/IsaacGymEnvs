@@ -334,6 +334,7 @@ if __name__ == "__main__":
 
                 history_input_obs = history_obses[step]*history_input_mask.unsqueeze(-1)
                 history_input_action = history_actions[step]*history_input_mask.unsqueeze(-1)
+                history_input_action = torch.clamp(history_input_action, -envs.clip_actions, envs.clip_actions)
                 history_input = torch.cat((history_input_obs, history_input_action), dim=-1)
 
                 history_input = history_input.reshape((history_input.shape[0], -1))
@@ -391,6 +392,7 @@ if __name__ == "__main__":
         b_values = values.reshape(-1)
         b_history_obses = history_obses.reshape((-1, args.len_history) + envs.single_observation_space.shape)
         b_history_actions = history_actions.reshape((-1, args.len_history) + envs.single_action_space.shape)
+        b_history_actions = torch.clamp(b_history_actions, -envs.clip_actions, envs.clip_actions)
         b_history_dones = history_dones.reshape((-1, args.len_history))
         b_sys_param_weights = sys_param_weights.reshape((-1, NUM_SYS_PARAMS)) # cwkang: add system parameters
 
