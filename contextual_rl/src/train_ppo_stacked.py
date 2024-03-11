@@ -273,7 +273,7 @@ if __name__ == "__main__":
     envs.single_observation_space = envs.observation_space
     assert isinstance(envs.single_action_space, gym.spaces.Box), "only continuous action space is supported"
 
-    agent = Agent(envs).to(device)
+    agent = Agent(envs, args.len_history).to(device)
     optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
 
     # ALGO Logic: Storage setup
@@ -337,8 +337,7 @@ if __name__ == "__main__":
                 history_input = torch.cat((history_input_obs, history_input_action), dim=-1)
 
                 history_input = history_input.reshape((history_input.shape[0], -1))
-                context = agent.get_context(history_input)
-                action, logprob, _, value = agent.get_action_and_value(context, next_obs)
+                action, logprob, _, value = agent.get_action_and_value(history_input, next_obs)
                 #######
                 values[step] = value.flatten()
             actions[step] = action
@@ -368,7 +367,7 @@ if __name__ == "__main__":
             # next_value = agent.get_value(next_obs).reshape(1, -1)
             
             # cwkang: use contexts as additional input
-            next_value = agent.get_value(contexts[step], next_obs).reshape(1, -1)
+            next_value = agent.get_value(history_input, next_obs).reshape(1, -1)
             #######
             advantages = torch.zeros_like(rewards).to(device)
             lastgaelam = 0
@@ -390,13 +389,15 @@ if __name__ == "__main__":
         b_advantages = advantages.reshape(-1)
         b_returns = returns.reshape(-1)
         b_values = values.reshape(-1)
+        b_history_obses = history_obses.reshape((-1, args.len_history) + envs.single_observation_space.shape)
+        b_history_actions = history_actions.reshape((-1, args.len_history) + envs.single_action_space.shape)
+        b_history_dones = history_dones.reshape((-1, args.len_history))
         b_sys_param_weights = sys_param_weights.reshape((-1, NUM_SYS_PARAMS)) # cwkang: add system parameters
-        b_contexts = contexts.reshape((-1, 10)) # cwkang: add contexts
 
         # Optimizing the policy and value network
         clipfracs = []
         for epoch in range(args.update_epochs):
-            b_inds = torch.randperm(args.batch_size-args.len_history, device=device) # cwkang: -len_history since the last states do not have next_obs
+            b_inds = torch.randperm(args.batch_size, device=device)
             for start in range(0, args.batch_size, args.minibatch_size):
                 end = start + args.minibatch_size
                 mb_inds = b_inds[start:end]
@@ -405,7 +406,16 @@ if __name__ == "__main__":
                 # _, newlogprob, entropy, newvalue = agent.get_action_and_value(b_obs[mb_inds], b_actions[mb_inds])
                 
                 # cwkang: use contexts as additional input
-                _, newlogprob, entropy, newvalue = agent.get_action_and_value(b_contexts[mb_inds], b_obs[mb_inds], b_actions[mb_inds])
+                last_done_indices = (b_history_dones[mb_inds] == 1).cumsum(dim=1).max(dim=1).indices
+                timesteps = torch.arange(b_history_dones[mb_inds].size(1), device=device).expand_as(b_history_dones[mb_inds])
+                history_input_mask = timesteps >= last_done_indices.unsqueeze(-1)
+
+                history_input_obs = b_history_obses[mb_inds]*history_input_mask.unsqueeze(-1)
+                history_input_action = b_history_actions[mb_inds]*history_input_mask.unsqueeze(-1)
+                history_input = torch.cat((history_input_obs, history_input_action), dim=-1)
+
+                history_input = history_input.reshape((history_input.shape[0], -1))
+                _, newlogprob, entropy, newvalue = agent.get_action_and_value(history_input, b_obs[mb_inds], b_actions[mb_inds])
                 #######
                 logratio = newlogprob - b_logprobs[mb_inds]
                 ratio = logratio.exp()

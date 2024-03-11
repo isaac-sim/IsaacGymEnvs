@@ -351,7 +351,7 @@ if __name__ == "__main__":
         # Optimizing the policy and value network
         clipfracs = []
         for epoch in range(args.update_epochs):
-            b_inds = torch.randperm(args.batch_size, device=device) # cwkang: -len_history since the last states do not have next_obs
+            b_inds = torch.randperm(args.batch_size, device=device)
             for start in range(0, args.batch_size, args.minibatch_size):
                 end = start + args.minibatch_size
                 mb_inds = b_inds[start:end]
