@@ -149,15 +149,22 @@ NUM_SYS_PARAMS = 2 # cwkang: add input dim
 class Agent(nn.Module):
     def __init__(self, envs):
         super().__init__()
+
+        self.context_encoder = nn.Sequential(
+            layer_init(nn.Linear(NUM_SYS_PARAMS, 10)),
+            nn.Tanh(),
+            layer_init(nn.Linear(10, 10)),
+            nn.Tanh()
+        )
         self.critic = nn.Sequential(
-            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod() + NUM_SYS_PARAMS, 256)), # cwkang: add input dim
+            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod() + 10, 256)), # cwkang: add input dim
             nn.Tanh(),
             layer_init(nn.Linear(256, 256)),
             nn.Tanh(),
             layer_init(nn.Linear(256, 1), std=1.0),
         )
         self.actor_mean = nn.Sequential(
-            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod() + NUM_SYS_PARAMS, 256)), # cwkang: add input dim
+            layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod() + 10, 256)), # cwkang: add input dim
             nn.Tanh(),
             layer_init(nn.Linear(256, 256)),
             nn.Tanh(),
@@ -165,17 +172,22 @@ class Agent(nn.Module):
         )
         self.actor_logstd = nn.Parameter(torch.zeros(1, np.prod(envs.single_action_space.shape)))
 
-    def get_value(self, x):
-        return self.critic(x)
+    def get_value(self, sys_params, x):
+        context = self.context_encoder(sys_params)
+        return self.critic(torch.cat((context, x), dim=-1))
 
-    def get_action_and_value(self, x, action=None):
-        action_mean = self.actor_mean(x)
+    def get_action_and_value(self, sys_params, x, action=None):
+        context = self.context_encoder(sys_params)
+        action_mean = self.actor_mean(torch.cat((context, x), dim=-1))
         action_logstd = self.actor_logstd.expand_as(action_mean)
         action_std = torch.exp(action_logstd)
         probs = Normal(action_mean, action_std)
         if action is None:
             action = probs.sample()
-        return action, probs.log_prob(action).sum(1), probs.entropy().sum(1), self.critic(x)
+        return action, probs.log_prob(action).sum(1), probs.entropy().sum(1), self.critic(torch.cat((context, x), dim=-1))
+
+    def get_context(self, sys_params):
+        return self.context_encoder(sys_params)
     
 
 class DynamicsModel(nn.Module):

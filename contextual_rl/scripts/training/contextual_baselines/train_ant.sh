@@ -21,7 +21,7 @@ do
             --seed $seed \
             --total_timesteps 100000000 \
             --anneal_lr \
-            --checkpoint_path "runs/training_seed_"$seed"/"$env_id"_osi_true/checkpoint/99942400.pth"
+            --checkpoint_path "runs/training/seed_"$seed"/"$env_id"_osi_true/checkpoint/99942400.pth"
     done
 
     python -m src.train_osi_phase2 \
@@ -29,19 +29,19 @@ do
         --seed $seed \
         --total_timesteps 100000000 \
         --anneal_lr \
-        --checkpoint_path "runs/training_seed_"$seed"/"$env_id"_osi/checkpoint/99942400_phase1.pth"
+        --checkpoint_path "runs/training/seed_"$seed"/"$env_id"_osi/checkpoint/99942400_phase1.pth"
     
     python -m src.train_osi_phase2_raw \
         --env_id $env_id \
         --seed $seed \
         --total_timesteps 100000000 \
         --anneal_lr \
-        --checkpoint_path "runs/training_seed_"$seed"/"$env_id"_osi/checkpoint/99942400_phase1.pth"
+        --checkpoint_path "runs/training/seed_"$seed"/"$env_id"_osi/checkpoint/99942400_phase1.pth"
 
     python -m src.train_dm_phase2 \
         --env_id $env_id \
         --seed $seed \
         --total_timesteps 100000000 \
         --anneal_lr \
-        --checkpoint_path "runs/training_seed_"$seed"/"$env_id"_dm/checkpoint/99942400_phase1.pth"
+        --checkpoint_path "runs/training/seed_"$seed"/"$env_id"_dm/checkpoint/99942400_phase1.pth"
 done

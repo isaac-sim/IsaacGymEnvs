@@ -190,7 +190,7 @@ class Agent(nn.Module):
         return self.context_encoder(sys_params)
     
 
-class OSI(nn.Module):
+class Student(nn.Module):
     def __init__(self, envs, len_history):
         super().__init__()
         obs_dim = np.array(envs.single_observation_space.shape).prod()
@@ -205,15 +205,9 @@ class OSI(nn.Module):
             layer_init(nn.Linear(64, 10)),
             nn.Tanh()
         )
-        self.estimator = nn.Sequential(
-            layer_init(nn.Linear(10, 10)),
-            nn.Tanh(),
-            layer_init(nn.Linear(10, NUM_SYS_PARAMS)),
-        )
 
     def forward(self, history):
-        context = self.context_encoder(history)
-        return self.estimator(context)
+        return self.context_encoder(history)
     
     def get_context(self, history):
         with torch.no_grad():
@@ -283,9 +277,9 @@ if __name__ == "__main__":
     agent.load_state_dict(torch.load(f'{args.checkpoint_path}'))
     agent.eval()
 
-    # cwkang: initialize the osi model
-    osi = OSI(envs, args.len_history).to(device)
-    optimizer = optim.Adam(osi.parameters(), lr=args.learning_rate, eps=1e-5)
+    # cwkang: initialize the student model
+    student = Student(envs, args.len_history).to(device)
+    optimizer = optim.Adam(student.parameters(), lr=args.learning_rate, eps=1e-5)
     mse_loss = nn.MSELoss()
 
     # ALGO Logic: Storage setup
@@ -378,9 +372,10 @@ if __name__ == "__main__":
                 history_input = torch.cat((history_input_obs, history_input_action), dim=-1)
 
                 history_input = history_input.reshape((history_input.shape[0], -1))
-                predicted_system_params = osi(history_input)
-                osi_label = b_sys_param_weights[mb_inds]
-                osi_loss = torch.sqrt(mse_loss(predicted_system_params, osi_label) + 1e-8)
+                student_context = student(history_input)
+                context_label = agent.get_context(history_input)
+                b_sys_param_weights[mb_inds]
+                context_loss = torch.sqrt(mse_loss(student_context, context_label) + 1e-8)
 
                 optimizer.zero_grad()
                 osi_loss.backward()
