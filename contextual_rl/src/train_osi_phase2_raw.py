@@ -365,6 +365,9 @@ if __name__ == "__main__":
                 values[step] = value.flatten()
             actions[step] = action
             logprobs[step] = logprob
+            # cwkang: store history action
+            history_action.append(action)
+            history_actions[step] = torch.stack(list(history_action), dim=1)
 
             # TRY NOT TO MODIFY: execute the game and log data.
             next_obs, rewards[step], next_done, info = envs.step(action)

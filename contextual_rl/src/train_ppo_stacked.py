@@ -112,9 +112,6 @@ class Args:
     """the gpu id"""
 
     len_history: int = 10
-    # cwkang: Checkpoint path to load the context encoder
-    checkpoint_path: str = ""
-    """the path to the checkpoint"""
 
     # to be filled in runtime
     batch_size: int = 0
@@ -167,8 +164,21 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
 
 NUM_SYS_PARAMS = 2 # cwkang: add input dim
 class Agent(nn.Module):
-    def __init__(self, envs):
+    def __init__(self, envs, len_history):
         super().__init__()
+        obs_dim = np.array(envs.single_observation_space.shape).prod()
+        action_dim = np.prod(envs.single_action_space.shape)
+        self.context_encoder = nn.Sequential(
+            layer_init(nn.Linear((obs_dim+action_dim)*len_history, 256)),
+            nn.Tanh(),
+            layer_init(nn.Linear(256, 128)),
+            nn.Tanh(),
+            layer_init(nn.Linear(128, 64)),
+            nn.Tanh(),
+            layer_init(nn.Linear(64, 10)),
+            nn.Tanh()
+        )
+
         self.critic = nn.Sequential(
             layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod() + 10, 256)), # cwkang: add input dim
             nn.Tanh(),
@@ -185,10 +195,12 @@ class Agent(nn.Module):
         )
         self.actor_logstd = nn.Parameter(torch.zeros(1, np.prod(envs.single_action_space.shape)))
 
-    def get_value(self, context, x):
+    def get_value(self, history, x):
+        context = self.context_encoder(history)
         return self.critic(torch.cat((context, x), dim=-1))
 
-    def get_action_and_value(self, context, x, action=None):
+    def get_action_and_value(self, history, x, action=None):
+        context = self.context_encoder(history)
         action_mean = self.actor_mean(torch.cat((context, x), dim=-1))
         action_logstd = self.actor_logstd.expand_as(action_mean)
         action_std = torch.exp(action_logstd)
@@ -196,32 +208,6 @@ class Agent(nn.Module):
         if action is None:
             action = probs.sample()
         return action, probs.log_prob(action).sum(1), probs.entropy().sum(1), self.critic(torch.cat((context, x), dim=-1))
-    
-
-class OSI(nn.Module):
-    def __init__(self, envs, len_history):
-        super().__init__()
-        obs_dim = np.array(envs.single_observation_space.shape).prod()
-        action_dim = np.prod(envs.single_action_space.shape)
-        self.context_encoder = nn.Sequential(
-            layer_init(nn.Linear((obs_dim+action_dim)*len_history, 256)),
-            nn.Tanh(),
-            layer_init(nn.Linear(256, 128)),
-            nn.Tanh(),
-            layer_init(nn.Linear(128, 64)),
-            nn.Tanh(),
-            layer_init(nn.Linear(64, 10)),
-            nn.Tanh()
-        )
-        self.estimator = nn.Sequential(
-            layer_init(nn.Linear(10, 10)),
-            nn.Tanh(),
-            layer_init(nn.Linear(10, NUM_SYS_PARAMS)),
-        )
-
-    def forward(self, history):
-        context = self.context_encoder(history)
-        return self.estimator(context)
     
     def get_context(self, history):
         with torch.no_grad():
@@ -240,7 +226,7 @@ if __name__ == "__main__":
     args.num_iterations = args.total_timesteps // args.batch_size
     # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
     # run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}" # cwkang: use datetime format for readability
-    run_name = f"training/seed_{args.seed}/{args.env_id}_osi"
+    run_name = f"training/seed_{args.seed}/{args.env_id}_stacked"
     os.makedirs(f"runs/{run_name}/checkpoints", exist_ok=True) # cwkang: prepare the directory for saving the model parameters
     if args.track:
         import wandb
@@ -287,11 +273,6 @@ if __name__ == "__main__":
     envs.single_observation_space = envs.observation_space
     assert isinstance(envs.single_action_space, gym.spaces.Box), "only continuous action space is supported"
 
-    # cwkang: initialize the osi model
-    osi = OSI(envs, args.len_history).to(device)
-    osi.load_state_dict(torch.load(f'{args.checkpoint_path}'))
-    osi.eval()
-
     agent = Agent(envs).to(device)
     optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
 
@@ -317,7 +298,6 @@ if __name__ == "__main__":
         history_done.append(torch.zeros((args.num_envs,), dtype=torch.float).to(device))
 
     sys_param_weights = torch.zeros((args.num_steps, args.num_envs, 2), dtype=torch.float).to(device) # cwkang: add storage for system parameters
-    contexts = torch.zeros((args.num_steps, args.num_envs, 10), dtype=torch.float).to(device) # cwkang: add storage for contexts
 
     # TRY NOT TO MODIFY: start the game
     global_step = 0
@@ -357,8 +337,7 @@ if __name__ == "__main__":
                 history_input = torch.cat((history_input_obs, history_input_action), dim=-1)
 
                 history_input = history_input.reshape((history_input.shape[0], -1))
-                context = osi.get_context(history_input)
-                contexts[step] = context
+                context = agent.get_context(history_input)
                 action, logprob, _, value = agent.get_action_and_value(context, next_obs)
                 #######
                 values[step] = value.flatten()
@@ -485,7 +464,7 @@ if __name__ == "__main__":
 
         # cwkang: save the model parameters
         if iteration % (args.num_iterations // args.num_checkpoints) == 0 or iteration == args.num_iterations:
-            torch.save(agent.state_dict(), f"runs/{run_name}/checkpoints/{global_step}_phase2.pth")
+            torch.save(agent.state_dict(), f"runs/{run_name}/checkpoints/{global_step}.pth")
 
 
     # envs.close()
