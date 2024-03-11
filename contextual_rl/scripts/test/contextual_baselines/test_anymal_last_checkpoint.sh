@@ -3,9 +3,6 @@ test_seed=100
 
 train_env_id=ContextualAnymalTrain
 
-run_name=ContextualAnymalTrain_osi_true
-run_dir="runs/training/seed_"$train_seed"/"$run_name
-
 for env_id in ContextualAnymalTestEasy1 ContextualAnymalTestEasy2 ContextualAnymalTestEasy3 \
     ContextualAnymalTestEasy4 ContextualAnymalTestEasy5 ContextualAnymalTestEasy6 \
     ContextualAnymalTestEasy7 ContextualAnymalTestEasy8 ContextualAnymalTestEasy9 \
