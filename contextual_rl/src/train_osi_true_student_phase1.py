@@ -333,8 +333,7 @@ if __name__ == "__main__":
                 # action, logprob, _, value = agent.get_action_and_value(next_obs)
 
                 # cwkang: use system parameters as additional input
-                next_obs_with_sys_param = torch.cat((next_obs, sys_param_weight), dim=-1)
-                action, logprob, _, value = agent.get_action_and_value(next_obs_with_sys_param)
+                action, logprob, _, value = agent.get_action_and_value(sys_param_weight, next_obs)
                 #######
             actions[step] = action
             # cwkang: store history action
