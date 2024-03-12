@@ -258,7 +258,7 @@ if __name__ == "__main__":
 
     # cwkang: initialize the student context encoder
     student = Student(envs, args.len_history).to(device)
-    student.load_state_dict(torch.load(f'{args.checkpoint_path}'))
+    student.load_state_dict(torch.load(f'{args.student_checkpoint_path}'))
     student.eval()
 
     agent = Agent(envs).to(device)
