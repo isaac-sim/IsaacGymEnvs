@@ -8,7 +8,7 @@ for env_id in ContextualAntTestEasy1 ContextualAntTestEasy2 ContextualAntTestEas
     ContextualAntTestEasy7 ContextualAntTestEasy8 ContextualAntTestEasy9 \
     ContextualAntTestHard1 ContextualAntTestHard2 ContextualAntTestHard3 ContextualAntTestHard4
 do
-    run_name=$train_env_id"_ppo_stacked"
+    run_name=$train_env_id"_stacked"
     run_dir="runs/training/seed_"$train_seed"/"$run_name
 
     checkpoint_path=$run_dir"/checkpoints/99942400.pth"
