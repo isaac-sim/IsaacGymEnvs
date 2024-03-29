@@ -369,7 +369,7 @@ class xarmCubeStack(VecTask):
         franka_handle = 0
         self.handles = {
             # Franka
-            "hand": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "Grip_site"),
+            "hand": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "Link_hand"),
             "leftfinger_tip": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "F1_tip"),
             "rightfinger_tip": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "F2_tip"),
             "grip_site": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "Grip_site"),
