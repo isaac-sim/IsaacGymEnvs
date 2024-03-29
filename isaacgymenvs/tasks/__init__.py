@@ -46,6 +46,7 @@ from .shadow_hand import ShadowHand
 from .allegro_hand import AllegroHand
 from .dextreme.allegro_hand_dextreme import AllegroHandDextremeManualDR, AllegroHandDextremeADR
 from .trifinger import Trifinger
+from .xarm_cube_stack import xarmCubeStack
 
 from .allegro_kuka.allegro_kuka_reorientation import AllegroKukaReorientation
 from .allegro_kuka.allegro_kuka_regrasping import AllegroKukaRegrasping
@@ -105,6 +106,7 @@ isaacgym_task_map = {
     "IndustRealTaskGearsInsert": IndustRealTaskGearsInsert,
     "FrankaCabinet": FrankaCabinet,
     "FrankaCubeStack": FrankaCubeStack,
+    "xarmCubeStack": xarmCubeStack,
     "Humanoid": Humanoid,
     "HumanoidAMP": HumanoidAMP,
     "Ingenuity": Ingenuity,
