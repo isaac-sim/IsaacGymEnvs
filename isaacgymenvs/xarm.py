@@ -45,7 +45,10 @@ def preprocess_train_config(cfg, config_dict):
 
 # 环境初始化参数
 rl_device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 sim_device = "cuda:0" if torch.cuda.is_available() else "cpu"
+rl_device="cpu"
+sim_device="cpu"
 graphics_device_id = 0
 headless = False
 
