@@ -188,7 +188,7 @@ class xarmCubeStack(VecTask):
         upper = gymapi.Vec3(spacing, spacing, spacing)
 
         asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../assets")
-        franka_asset_file = "urdf/xArm6/urdf/xArm6.urdf"
+        franka_asset_file = "urdf/Lite6_/urdf/Lite6_.urdf"
 
         if "asset" in self.cfg["env"]:
             asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -213,16 +213,16 @@ class xarmCubeStack(VecTask):
         table_thickness = 0.05
         table_opts = gymapi.AssetOptions()
         table_opts.fix_base_link = True
-        table_asset = self.gym.create_box(self.sim, *[1.2, 1.2, table_thickness], table_opts)
+        table_asset = self.gym.create_box(self.sim, *[1, 1, table_thickness], table_opts)
 
         # Create table stand asset
-        table_stand_height = 0.1
+        table_stand_height = 0.05
         table_stand_pos = [-0.5, 0.0, 1.0 + table_thickness / 2 + table_stand_height / 2]
         table_stand_opts = gymapi.AssetOptions()
         table_stand_opts.fix_base_link = True
         table_stand_asset = self.gym.create_box(self.sim, *[0.2, 0.2, table_stand_height], table_opts)
 
-        self.cubeA_size = 0.050
+        self.cubeA_size = 0.040
         self.cubeB_size = 0.070
 
         # Create cubeA asset
@@ -269,7 +269,7 @@ class xarmCubeStack(VecTask):
 
         # Define start pose for franka
         franka_start_pose = gymapi.Transform()
-        franka_start_pose.p = gymapi.Vec3(-0.45, 0.0, 1.0 + table_thickness / 2 + table_stand_height)
+        franka_start_pose.p = gymapi.Vec3(-0.5, 0.0, 1.0 + 0.07 +table_thickness / 2 + table_stand_height)
         franka_start_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
 
         # Define start pose for table
@@ -326,7 +326,7 @@ class xarmCubeStack(VecTask):
                                                   1.0 + table_thickness / 2 + table_stand_height)
             if self.xarm_rotation_noise > 0:
                 rand_rot = torch.zeros(1, 3)
-                rand_rot[:, -1] = self.xaarm_rotation_noise * (-1. + np.random.rand() * 2.0)
+                rand_rot[:, -1] = self.xarm_rotation_noise * (-1. + np.random.rand() * 2.0)
                 new_quat = axisangle2quat(rand_rot).squeeze().numpy().tolist()
                 franka_start_pose.r = gymapi.Quat(*new_quat)
             franka_actor = self.gym.create_actor(env_ptr, franka_asset, franka_start_pose, "franka", i, 0, 0)
@@ -396,7 +396,7 @@ class xarmCubeStack(VecTask):
         self._eef_rf_state = self._rigid_body_state[:, self.handles["rightfinger_tip"], :]
         _jacobian = self.gym.acquire_jacobian_tensor(self.sim, "franka")
         jacobian = gymtorch.wrap_tensor(_jacobian)
-        hand_joint_index = self.gym.get_actor_joint_dict(env_ptr, franka_handle)['Joint_hand']
+        hand_joint_index = self.gym.get_actor_joint_dict(env_ptr, franka_handle)['Jointhand']
         self._j_eef = jacobian[:, hand_joint_index, :, :6]
         _massmatrix = self.gym.acquire_mass_matrix_tensor(self.sim, "franka")
         mm = gymtorch.wrap_tensor(_massmatrix)
