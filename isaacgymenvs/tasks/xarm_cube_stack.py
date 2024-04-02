@@ -216,7 +216,7 @@ class xarmCubeStack(VecTask):
         table_asset = self.gym.create_box(self.sim, *[1, 1, table_thickness], table_opts)
 
         # Create table stand asset
-        table_stand_height = 0.05
+        table_stand_height = 0.1
         table_stand_pos = [-0.5, 0.0, 1.0 + table_thickness / 2 + table_stand_height / 2]
         table_stand_opts = gymapi.AssetOptions()
         table_stand_opts.fix_base_link = True
@@ -371,9 +371,9 @@ class xarmCubeStack(VecTask):
         self.handles = {
             # Franka
             "hand": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "Link_hand"),
-            "leftfinger_tip": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "F1_tip"),
-            "rightfinger_tip": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "F2_tip"),
-            "grip_site": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "Grip_site"),
+            "leftfinger_tip": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "F1point"),
+            "rightfinger_tip": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "F2point"),
+            "grip_site": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "GripSite"),
             # Cubes
             "cubeA_body_handle": self.gym.find_actor_rigid_body_handle(self.envs[0], self._cubeA_id, "box"),
             "cubeB_body_handle": self.gym.find_actor_rigid_body_handle(self.envs[0], self._cubeB_id, "box"),
