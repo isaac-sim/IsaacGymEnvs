@@ -188,7 +188,7 @@ class xarmCubeStack(VecTask):
         upper = gymapi.Vec3(spacing, spacing, spacing)
 
         asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../assets")
-        franka_asset_file = "urdf/Lite6_/urdf/Lite6_.urdf"
+        franka_asset_file = "urdf/Lite6SW3/urdf/Lite6SW3.urdf"
 
         if "asset" in self.cfg["env"]:
             asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -217,7 +217,7 @@ class xarmCubeStack(VecTask):
 
         # Create table stand asset
         table_stand_height = 0.1
-        table_stand_pos = [-0.5, 0.0, 1.0 + table_thickness / 2 + table_stand_height / 2]
+        table_stand_pos = [-0.4, 0.0, 1.0 + table_thickness / 2 + table_stand_height / 2]
         table_stand_opts = gymapi.AssetOptions()
         table_stand_opts.fix_base_link = True
         table_stand_asset = self.gym.create_box(self.sim, *[0.2, 0.2, table_stand_height], table_opts)
@@ -269,7 +269,7 @@ class xarmCubeStack(VecTask):
 
         # Define start pose for franka
         franka_start_pose = gymapi.Transform()
-        franka_start_pose.p = gymapi.Vec3(-0.5, 0.0, 1.0 + 0.07 +table_thickness / 2 + table_stand_height)
+        franka_start_pose.p = gymapi.Vec3(-0.4, 0.0, 1.0 + 0.07 +table_thickness / 2 + table_stand_height)
         franka_start_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
 
         # Define start pose for table

@@ -538,12 +538,8 @@
       </material>
     </visual>
     <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
       <geometry>
-        <mesh
-          filename="package://Lite6SW_/meshes/F1point.STL" />
+        <box size="0.013 0.004 0.013"/>
       </geometry>
     </collision>
   </link>
@@ -652,15 +648,13 @@
           rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
       </material>
     </visual>
+
     <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
       <geometry>
-        <mesh
-          filename="package://Lite6SW_/meshes/F2point.STL" />
+        <box size="0.013 0.004 0.013"/>
       </geometry>
     </collision>
+
   </link>
   <joint
     name="f2_pjoint"
@@ -705,15 +699,6 @@
           rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
       </material>
     </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://Lite6SW_/meshes/GripSite.STL" />
-      </geometry>
-    </collision>
   </link>
   <joint
     name="gripjoint"

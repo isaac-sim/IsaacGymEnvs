@@ -24,7 +24,7 @@ env:
   actionScale: 1.0
   distRewardScale: 0.1
   liftRewardScale: 1.5
-  alignRewardScale: 2.0
+  alignRewardScale: 4.0
   stackRewardScale: 16.0
 
   controlType: osc  # options are {joint_tor, osc}

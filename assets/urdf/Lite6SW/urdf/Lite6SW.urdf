@@ -1,0 +1,717 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="Lite6SW">
+  <link
+    name="Link0">
+    <inertial>
+      <origin
+        xyz="0.018732 -0.0018327 6.5627E-05"
+        rpy="0 0 0" />
+      <mass
+        value="1.652" />
+      <inertia
+        ixx="0.0054078"
+        ixy="-8.1686E-08"
+        ixz="1.7243E-07"
+        iyy="0.0033448"
+        iyz="0.000338"
+        izz="0.0050429" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link0.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link0.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="Link1">
+    <inertial>
+      <origin
+        xyz="0.0151275932232116 0.0579204493545037 2.19551603120993E-06"
+        rpy="0 0 0" />
+      <mass
+        value="0.768991147574951" />
+      <inertia
+        ixx="0.000943626498667008"
+        ixy="-0.000157292714284292"
+        ixz="2.15996612594016E-07"
+        iyy="0.00109494607083285"
+        iyz="-2.22121831784589E-07"
+        izz="0.00140822699612182" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint1"
+    type="revolute">
+    <origin
+      xyz="0.018734 0.0081421 0.10801"
+      rpy="1.5708 0 0.44466" />
+    <parent
+      link="Link0" />
+    <child
+      link="Link1" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="87"
+      velocity="1" />
+  </joint>
+  <link
+    name="Link2">
+    <inertial>
+      <origin
+        xyz="0.0393674312053038 0.114689083475917 -1.16049367768212E-07"
+        rpy="0 0 0" />
+      <mass
+        value="1.07641986433026" />
+      <inertia
+        ixx="0.0074647521466109"
+        ixy="0.000698701711095757"
+        ixz="1.87680188772944E-09"
+        iyy="0.0010141666624239"
+        iyz="2.16807495933928E-08"
+        izz="0.00762588067564787" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint2"
+    type="revolute">
+    <origin
+      xyz="0.063402 0.070003 0"
+      rpy="0.16685 0 0" />
+    <parent
+      link="Link1" />
+    <child
+      link="Link2" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="87"
+      velocity="1" />
+  </joint>
+  <link
+    name="Link3">
+    <inertial>
+      <origin
+        xyz="-0.0609958253913071 -0.0374546185537631 -0.000573223605539297"
+        rpy="0 0 0" />
+      <mass
+        value="0.765154145695372" />
+      <inertia
+        ixx="0.00178429532394685"
+        ixy="-9.39526519655782E-05"
+        ixz="4.19002986063285E-06"
+        iyy="0.000627175631060909"
+        iyz="-6.64736337229171E-05"
+        izz="0.00183654230766257" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint3"
+    type="revolute">
+    <origin
+      xyz="0 0.2 0"
+      rpy="-1.7923 0 0" />
+    <parent
+      link="Link2" />
+    <child
+      link="Link3" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="87"
+      velocity="1" />
+  </joint>
+  <link
+    name="Link4">
+    <inertial>
+      <origin
+        xyz="0.025192 -7.5846E-07 -0.095945"
+        rpy="0 0 0" />
+      <mass
+        value="1.1995" />
+      <inertia
+        ixx="0.0024225"
+        ixy="-2.9204E-08"
+        ixz="0.00075851"
+        iyy="0.0031521"
+        iyz="6.4901E-10"
+        izz="0.0017277" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint4"
+    type="revolute">
+    <origin
+      xyz="-0.063102 -0.087 -0.036764"
+      rpy="0 0 0.82181" />
+    <parent
+      link="Link3" />
+    <child
+      link="Link4" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="87"
+      velocity="1" />
+  </joint>
+  <link
+    name="Link5">
+    <inertial>
+      <origin
+        xyz="0.00343463284444397 -1.9672289705841E-06 -0.00164401924666242"
+        rpy="0 0 0" />
+      <mass
+        value="0.407452698954146" />
+      <inertia
+        ixx="0.00035868067049016"
+        ixy="-1.01003224755686E-08"
+        ixz="-6.27683321989722E-06"
+        iyy="0.000380454304803847"
+        iyz="9.57907967908569E-09"
+        izz="0.000334589885147441" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link5.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link5.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint5"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.19035"
+      rpy="-0.67025 0 0" />
+    <parent
+      link="Link4" />
+    <child
+      link="Link5" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="12"
+      velocity="1" />
+  </joint>
+  <link
+    name="Link6">
+    <inertial>
+      <origin
+        xyz="-0.000205287528767653 -0.000431985584020661 -0.0521159158328704"
+        rpy="0 0 0" />
+      <mass
+        value="0.0844258078209593" />
+      <inertia
+        ixx="3.65814863001815E-05"
+        ixy="-2.96217183969797E-08"
+        ixz="3.62773534330124E-08"
+        iyy="3.631438997443E-05"
+        iyz="-6.16706110817238E-08"
+        izz="6.56234046220339E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link6.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link6.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint6"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 2.3052" />
+    <parent
+      link="Link5" />
+    <child
+      link="Link6" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="12"
+      velocity="1" />
+  </joint>
+  <link
+    name="Link_hand">
+    <inertial>
+      <origin
+        xyz="0.010871 0.12475 0.16132"
+        rpy="0 0 0" />
+      <mass
+        value="2.8324E-05" />
+      <inertia
+        ixx="2.6243E-08"
+        ixy="2.4446E-10"
+        ixz="-1.9336E-10"
+        iyy="3.2697E-08"
+        iyz="1.5561E-09"
+        izz="5.6367E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link_hand.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.77647 0.75686 0.73725 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/Link_hand.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Jointhand"
+    type="fixed">
+    <origin
+      xyz="-0.143994889254642 -0.110620539565209 -0.000920598520901636"
+      rpy="-1.5707963267949 0 -0.857039475880045" />
+    <parent
+      link="Link6" />
+    <child
+      link="Link_hand" />
+    <axis
+      xyz="0 0 0" />
+    <limit
+      lower="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="F1">
+    <inertial>
+      <origin
+        xyz="-0.0518421897983745 0.197400558115342 0.180271445605294"
+        rpy="0 0 0" />
+      <mass
+        value="1.65931130070178E-05" />
+      <inertia
+        ixx="5.21306882008169E-09"
+        ixy="-1.07359635431317E-09"
+        ixz="-4.77637982894656E-15"
+        iyy="1.51225273040482E-09"
+        iyz="-4.17550068176153E-15"
+        izz="4.97041362456223E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/F1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.776470588235294 0.756862745098039 0.737254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/F1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint_f1"
+    type="prismatic">
+    <origin
+      xyz="0.01 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="Link_hand" />
+    <child
+      link="F1" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="0"
+      upper="0.04"
+      effort="20"
+      velocity="0.1" />
+  </joint>
+  <link
+    name="F1point">
+    <inertial>
+      <origin
+        xyz="2.77555756156289E-17 1.38777878078145E-17 0.000999999999999973"
+        rpy="0 0 0" />
+      <mass
+        value="0.0001" />
+      <inertia
+        ixx="2.41666666666667E-10"
+        ixy="-4.13590306276514E-25"
+        ixz="4.11974719142621E-25"
+        iyy="8.66666666666666E-10"
+        iyz="0"
+        izz="1.04166666666667E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/F1point.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.02 0.02 0.008"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="f1_pjoint"
+    type="fixed">
+    <origin
+      xyz="-0.043749 0.20872 0.18027"
+      rpy="1.5708 0 -1.5708" />
+    <parent
+      link="F1" />
+    <child
+      link="F1point" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="F2">
+    <inertial>
+      <origin
+        xyz="0.052983 0.1974 0.18027"
+        rpy="0 0 0" />
+      <mass
+        value="1.6593E-05" />
+      <inertia
+        ixx="5.213E-09"
+        ixy="1.0735E-09"
+        ixz="4.1217E-15"
+        iyy="1.5123E-09"
+        iyz="-6.8823E-16"
+        izz="4.9704E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/F2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.77647 0.75686 0.73725 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/F2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint_f2"
+    type="prismatic">
+    <origin
+      xyz="0.01 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="Link_hand" />
+    <child
+      link="F2" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="0"
+      upper="0.04"
+      effort="20"
+      velocity="0.1" />
+    <mimic
+      joint="Joint_f1"
+      multiplier="1"
+      offset="0" />
+  </joint>
+  <link
+    name="F2point">
+    <inertial>
+      <origin
+        xyz="-2.77555756156289E-17 2.77555756156289E-17 0.001"
+        rpy="0 0 0" />
+      <mass
+        value="0.0001" />
+      <inertia
+        ixx="2.41666666666667E-10"
+        ixy="-1.06628750836914E-25"
+        ixz="-8.88572923640948E-26"
+        iyy="8.66666666666667E-10"
+        iyz="1.55096364853693E-25"
+        izz="1.04166666666667E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/F2point.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <origin
+        xyz="0 0 -0.008"
+        rpy="0 0 0" />
+    <collision>
+      <geometry>
+        <box size="0.02 0.02 0.008"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="f2_pjoint"
+    type="fixed">
+    <origin
+      xyz="0.0448895317964781 0.208719338742198 0.180271456819914"
+      rpy="-1.5707963267949 0 -1.57079632679494" />
+    <parent
+      link="F2" />
+    <child
+      link="F2point" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="GripSite">
+    <inertial>
+      <origin
+        xyz="2.7756E-17 -3.4694E-18 2.7756E-17"
+        rpy="0 0 0" />
+      <mass
+        value="4.1888E-06" />
+      <inertia
+        ixx="1.6755E-12"
+        ixy="5.2065E-29"
+        ixz="3.7865E-29"
+        iyy="1.6755E-12"
+        iyz="-1.8933E-29"
+        izz="1.6755E-12" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://Lite6SW/meshes/GripSite.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+  </link>
+  <joint
+    name="gripjoint"
+    type="fixed">
+    <origin
+      xyz="0.010713 0.21358 0.18077"
+      rpy="-0.12166 0.51995 2.3544" />
+    <parent
+      link="Link_hand" />
+    <child
+      link="GripSite" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+</robot>
