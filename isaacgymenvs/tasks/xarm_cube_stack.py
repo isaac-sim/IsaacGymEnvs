@@ -148,7 +148,7 @@ class xarmCubeStack(VecTask):
 
         # Franka defaults
         self.franka_default_dof_pos = to_torch(
-            [0, 0.1727, 0, -0.045, 0.555, 0, 0.3822, 0], device=self.device
+            [1.28, 0.09, -0.93, -0.84, 0.92, -0.36, 0, 0], device=self.device
         )
 
         # OSC Gains
@@ -213,17 +213,17 @@ class xarmCubeStack(VecTask):
         table_thickness = 0.05
         table_opts = gymapi.AssetOptions()
         table_opts.fix_base_link = True
-        table_asset = self.gym.create_box(self.sim, *[1, 1, table_thickness], table_opts)
+        table_asset = self.gym.create_box(self.sim, *[0.8, 0.8, table_thickness], table_opts)
 
         # Create table stand asset
         table_stand_height = 0.1
-        table_stand_pos = [-0.4, 0.0, 1.0 + table_thickness / 2 + table_stand_height / 2]
+        table_stand_pos = [-0.25, 0.0, 1.0 + table_thickness / 2 + table_stand_height / 2]
         table_stand_opts = gymapi.AssetOptions()
         table_stand_opts.fix_base_link = True
         table_stand_asset = self.gym.create_box(self.sim, *[0.2, 0.2, table_stand_height], table_opts)
 
-        self.cubeA_size = 0.040
-        self.cubeB_size = 0.070
+        self.cubeA_size = 0.030
+        self.cubeB_size = 0.060
 
         # Create cubeA asset
         cubeA_opts = gymapi.AssetOptions()
@@ -269,7 +269,7 @@ class xarmCubeStack(VecTask):
 
         # Define start pose for franka
         franka_start_pose = gymapi.Transform()
-        franka_start_pose.p = gymapi.Vec3(-0.4, 0.0, 1.0 + 0.07 +table_thickness / 2 + table_stand_height)
+        franka_start_pose.p = gymapi.Vec3(-0.25, 0.0, 1.0 + 0.07 +table_thickness / 2 + table_stand_height)
         franka_start_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
 
         # Define start pose for table
@@ -559,7 +559,7 @@ class xarmCubeStack(VecTask):
         min_dists = (self.states["cubeA_size"] + self.states["cubeB_size"])[env_ids] * np.sqrt(2) / 2.0
 
         # We scale the min dist by 2 so that the cubes aren't too close together
-        min_dists = min_dists * 2.0
+        min_dists = min_dists * 1.0
 
         # Sampling is "centered" around middle of table
         centered_cube_xy_state = torch.tensor(self._table_surface_pos[:2], device=self.device, dtype=torch.float32)
