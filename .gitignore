@@ -31,3 +31,4 @@ runs/
 outputs/
 *.hydra*
 /isaacgymenvs/wandb
+/assets/urdf/LiteParallelGriper9/

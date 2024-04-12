@@ -1,0 +1,738 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="LiteParallelGriper11">
+  <link
+    name="Link0">
+    <inertial>
+      <origin
+        xyz="0.0187322287468848 -6.56268388412889E-05 -0.00183270076678829"
+        rpy="0 0 0" />
+      <mass
+        value="1.65199774001772" />
+      <inertia
+        ixx="0.00540779041066965"
+        ixy="-1.72431674672113E-07"
+        ixz="-8.16857492341042E-08"
+        iyy="0.0050429459667963"
+        iyz="-0.000338002907863305"
+        izz="0.00334480903849763" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link0.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link0.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="Link1">
+    <inertial>
+      <origin
+        xyz="0.0151275877640529 0.0579204989758781 2.29070547088858E-06"
+        rpy="0 0 0" />
+      <mass
+        value="0.768987424503121" />
+      <inertia
+        ixx="0.000943620166744112"
+        ixy="-0.000157292469488381"
+        ixz="2.16151675811599E-07"
+        iyy="0.00109494955205421"
+        iyz="-2.22385109435551E-07"
+        izz="0.00140822543505756" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint1"
+    type="revolute">
+    <origin
+      xyz="0.018734 0.0081421 0.10801"
+      rpy="1.5708 0 0.53457" />
+    <parent
+      link="Link0" />
+    <child
+      link="Link1" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="87"
+      velocity="0.5" />
+  </joint>
+  <link
+    name="Link2">
+    <inertial>
+      <origin
+        xyz="0.0319552717724408 0.114689324870806 -2.34165415988197E-07"
+        rpy="0 0 0" />
+      <mass
+        value="1.07641455840455" />
+      <inertia
+        ixx="0.00746471638775654"
+        ixy="0.000698716686025042"
+        ixz="2.91962998048845E-10"
+        iyy="0.00101418449701484"
+        iyz="2.23314209243965E-08"
+        izz="0.00762585101007418" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint2"
+    type="revolute">
+    <origin
+      xyz="0.070815 0.070003 0"
+      rpy="0.29308 0 0" />
+    <parent
+      link="Link1" />
+    <child
+      link="Link2" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="87"
+      velocity="0.5" />
+    <dynamics
+      damping="10" />
+  </joint>
+  <link
+    name="Link3">
+    <inertial>
+      <origin
+        xyz="-0.0684079283974973 -0.0374546242809208 -0.000573223448648075"
+        rpy="0 0 0" />
+      <mass
+        value="0.765154206506972" />
+      <inertia
+        ixx="0.00178431293310252"
+        ixy="-9.39620212904799E-05"
+        ixz="4.18851807630257E-06"
+        iyy="0.000627171541037176"
+        iyz="-6.64756261159853E-05"
+        izz="0.00183655460550802" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint3"
+    type="revolute">
+    <origin
+      xyz="0 0.2 0"
+      rpy="-1.9166 0 0" />
+    <parent
+      link="Link2" />
+    <child
+      link="Link3" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="87"
+      velocity="0.5" />
+    <dynamics
+      damping="10" />
+  </joint>
+  <link
+    name="Link4">
+    <inertial>
+      <origin
+        xyz="0.0251920450883915 -6.67161865766652E-07 -0.0963887898740919"
+        rpy="0 0 0" />
+      <mass
+        value="1.19946345498765" />
+      <inertia
+        ixx="0.00242244328367107"
+        ixy="-2.35680673096731E-08"
+        ixz="0.000758522353835606"
+        iyy="0.00315207302827081"
+        iyz="3.85905844182044E-09"
+        izz="0.0017276308082087" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint4"
+    type="revolute">
+    <origin
+      xyz="-0.070515 -0.087 -0.03632"
+      rpy="0 0 0.86979" />
+    <parent
+      link="Link3" />
+    <child
+      link="Link4" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="87"
+      velocity="0.5" />
+    <dynamics
+      damping="10" />
+  </joint>
+  <link
+    name="Link5">
+    <inertial>
+      <origin
+        xyz="0.00343403155541079 -2.36616388929467E-06 -0.00164486461105556"
+        rpy="0 0 0" />
+      <mass
+        value="0.407437629747687" />
+      <inertia
+        ixx="0.000358679363012641"
+        ixy="-9.48497692082498E-09"
+        ixz="-6.27720628913371E-06"
+        iyy="0.000380453387598683"
+        iyz="9.95827271113768E-09"
+        izz="0.000334587682435985" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link5.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link5.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint5"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.19079"
+      rpy="-0.66694 0 0" />
+    <parent
+      link="Link4" />
+    <child
+      link="Link5" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="12"
+      velocity="1" />
+    <dynamics
+      damping="10" />
+  </joint>
+  <link
+    name="Link6">
+    <inertial>
+      <origin
+        xyz="0.000274183128530059 0.000417792805571776 -0.052115923574328"
+        rpy="0 0 0" />
+      <mass
+        value="0.0844259193061574" />
+      <inertia
+        ixx="3.65815393489732E-05"
+        ixy="-2.96693328041663E-08"
+        ixz="3.6264522907487E-08"
+        iyy="3.63144343347604E-05"
+        iyz="-6.16831241202295E-08"
+        izz="6.56235022074534E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link6.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link6.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint6"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 -1.2778" />
+    <parent
+      link="Link5" />
+    <child
+      link="Link6" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="12"
+      velocity="1" />
+    <dynamics
+      damping="10" />
+  </joint>
+  <link
+    name="Link_hand">
+    <inertial>
+      <origin
+        xyz="-0.00577010131192066 -6.6336772686082E-07 -0.00204494270410499"
+        rpy="0 0 0" />
+      <mass
+        value="0.0615360469944411" />
+      <inertia
+        ixx="3.70361303346528E-05"
+        ixy="4.66409878559863E-09"
+        ixz="-2.12198750977721E-07"
+        iyy="6.46528304039921E-05"
+        iyz="6.05357565832722E-11"
+        izz="7.92466350125761E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link_hand.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/Link_hand.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Jointhand"
+    type="fixed">
+    <origin
+      xyz="-0.0057852 -0.00043744 -0.115"
+      rpy="-3.1416 0 -2.9883" />
+    <parent
+      link="Link6" />
+    <child
+      link="Link_hand" />
+    <axis
+      xyz="0 0 0" />
+    <limit
+      lower="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="F1">
+    <inertial>
+      <origin
+        xyz="3.88578058618805E-16 -0.0363190407693235 -0.0253893461314669"
+        rpy="0 0 0" />
+      <mass
+        value="0.0353073426547682" />
+      <inertia
+        ixx="1.04657503943408E-05"
+        ixy="-8.99972506457694E-22"
+        ixz="-8.470329472543E-22"
+        iyy="1.04221536500833E-06"
+        iyz="7.07521891798716E-07"
+        izz="1.0957633530281E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/F1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.529411764705882 0.549019607843137 0.549019607843137 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/F1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint_f1"
+    type="prismatic">
+    <origin
+      xyz="0.014764 2.8968E-05 0.024562"
+      rpy="-1.5708 0 1.5708" />
+    <parent
+      link="Link_hand" />
+    <child
+      link="F1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="0"
+      upper="0.03"
+      effort="200"
+      velocity="0.1" />
+    <dynamics
+      damping="100"
+      friction="0" />
+  </joint>
+  <link
+    name="F1point">
+    <inertial>
+      <origin
+        xyz="8.32667268468867E-16 3.60822483003176E-16 0.000999999999993673"
+        rpy="0 0 0" />
+      <mass
+        value="0.00013" />
+      <inertia
+        ixx="3.14166666666666E-10"
+        ixy="4.9113848870336E-25"
+        ixz="-4.48325429655205E-25"
+        iyy="1.12666666666667E-09"
+        iyz="8.78879400837592E-25"
+        izz="1.35416666666667E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/F1point.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.498039215686275 0.498039215686275 0.498039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/F1point.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="f1_pjoint"
+    type="fixed">
+    <origin
+      xyz="0 -0.053 -0.022236"
+      rpy="3.1416 0 1.5708" />
+    <parent
+      link="F1" />
+    <child
+      link="F1point" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="F2">
+    <inertial>
+      <origin
+        xyz="-4.44089209850063E-16 -0.0363190407693236 -0.0253893461314767"
+        rpy="0 0 0" />
+      <mass
+        value="0.0353073426547683" />
+      <inertia
+        ixx="1.04657503943408E-05"
+        ixy="2.24993126614424E-22"
+        ixz="-2.11758236813575E-22"
+        iyy="1.04221536500834E-06"
+        iyz="7.07521891798721E-07"
+        izz="1.0957633530281E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/F2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.529411764705882 0.549019607843137 0.549019607843137 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/F2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Joint_f2"
+    type="prismatic">
+    <origin
+      xyz="-0.026764 0 0.024562"
+      rpy="-1.5708 0 -1.5708" />
+    <parent
+      link="Link_hand" />
+    <child
+      link="F2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="0"
+      upper="0.03"
+      effort="200"
+      velocity="0.1" />
+    <dynamics
+      damping="100"
+      friction="0" />
+    <mimic
+      joint="Joint_f1"
+      multiplier="1"
+      offset="0" />
+  </joint>
+  <link
+    name="F2point">
+    <inertial>
+      <origin
+        xyz="9.43689570931383E-16 -4.71844785465692E-16 0.00100000000000389"
+        rpy="0 0 0" />
+      <mass
+        value="0.00013" />
+      <inertia
+        ixx="3.14166666666667E-10"
+        ixy="-9.37040537657727E-25"
+        ixz="6.906634997391E-25"
+        iyy="1.12666666666666E-09"
+        iyz="5.42837276987924E-25"
+        izz="1.35416666666666E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/F2point.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.498039215686275 0.498039215686275 0.498039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/F2point.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="f2_pjoint"
+    type="fixed">
+    <origin
+      xyz="0 -0.053 -0.022236"
+      rpy="3.1416 0 1.5708" />
+    <parent
+      link="F2" />
+    <child
+      link="F2point" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="GripSite">
+    <inertial>
+      <origin
+        xyz="1.77635683940025E-15 3.2612801348364E-16 -3.24740234702858E-15"
+        rpy="0 0 0" />
+      <mass
+        value="0.000523598775598299" />
+      <inertia
+        ixx="5.23598775598299E-09"
+        ixy="4.65289094561078E-25"
+        ixz="0"
+        iyy="5.23598775598299E-09"
+        iyz="-5.16987882845642E-25"
+        izz="5.23598775598299E-09" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://LiteParallelGriper11/meshes/GripSite.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+  </link>
+  <joint
+    name="gripjoint"
+    type="fixed">
+    <origin
+      xyz="-0.006 0 0.077562"
+      rpy="-1.1646 -0.33468 -2.3203" />
+    <parent
+      link="Link_hand" />
+    <child
+      link="GripSite" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+</robot>
