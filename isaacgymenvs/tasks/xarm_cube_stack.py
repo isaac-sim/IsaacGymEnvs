@@ -247,7 +247,7 @@ class xarmCubeStack(VecTask):
         self.franka_dof_upper_limits = []
         self._franka_effort_limits = []
         for i in range(self.num_franka_dofs):
-            franka_dof_props['driveMode'][i] = gymapi.DOF_MODE_POS if i > 5 else gymapi.DOF_MODE_EFFORT
+            franka_dof_props['driveMode'][i] = gymapi.DOF_MODE_POS
             if self.physics_engine == gymapi.SIM_PHYSX:
                 franka_dof_props['stiffness'][i] = franka_dof_stiffness[i]
                 franka_dof_props['damping'][i] = franka_dof_damping[i]
@@ -742,7 +742,7 @@ def compute_franka_reward(
     # final reward for stacking successfully (only if cubeA is close to target height and corresponding location, and gripper is not grasping)
     cubeA_align_cubeB = (torch.norm(states["cubeA_to_cubeB_pos"][:, :2], dim=-1) < 0.01)
     cubeA_on_cubeB = torch.abs(cubeA_height - target_height) < 0.015
-    gripper_away_from_cubeA = (d > 0.03)
+    gripper_away_from_cubeA = (d > 0.05)
     stack_reward = cubeA_align_cubeB & cubeA_on_cubeB & gripper_away_from_cubeA
 
     # Compose rewards
