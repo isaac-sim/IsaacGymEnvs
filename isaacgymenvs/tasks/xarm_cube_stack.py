@@ -269,7 +269,7 @@ class xarmCubeStack(VecTask):
 
         # Define start pose for franka
         franka_start_pose = gymapi.Transform()
-        franka_start_pose.p = gymapi.Vec3(-0.25, 0.0, 1.0 + 0.07 +table_thickness / 2 + table_stand_height)
+        franka_start_pose.p = gymapi.Vec3(-0.25, 0.0, 1.0 + 0.07 + table_thickness / 2 + table_stand_height)
         franka_start_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
 
         # Define start pose for table
@@ -727,7 +727,7 @@ def compute_franka_reward(
 
     # reward for lifting cubeA
     cubeA_height = states["cubeA_pos"][:, 2] - reward_settings["table_height"]
-    cubeA_lifted = (cubeA_height - cubeA_size) > 0.04
+    cubeA_lifted = (cubeA_height - cubeA_size) > 0.03
     lift_reward = cubeA_lifted
 
     # how closely aligned cubeA is to cubeB (only provided if cubeA is lifted)
@@ -740,9 +740,9 @@ def compute_franka_reward(
     dist_reward = torch.max(dist_reward, align_reward)
 
     # final reward for stacking successfully (only if cubeA is close to target height and corresponding location, and gripper is not grasping)
-    cubeA_align_cubeB = (torch.norm(states["cubeA_to_cubeB_pos"][:, :2], dim=-1) < 0.02)
+    cubeA_align_cubeB = (torch.norm(states["cubeA_to_cubeB_pos"][:, :2], dim=-1) < 0.01)
     cubeA_on_cubeB = torch.abs(cubeA_height - target_height) < 0.015
-    gripper_away_from_cubeA = (d > 0.04)
+    gripper_away_from_cubeA = (d > 0.03)
     stack_reward = cubeA_align_cubeB & cubeA_on_cubeB & gripper_away_from_cubeA
 
     # Compose rewards

@@ -25,13 +25,13 @@ env:
   distRewardScale: 0.1
   liftRewardScale: 1.5
   alignRewardScale: 2.0
-  stackRewardScale: 32.0
+  stackRewardScale: 16.0
 
   controlType: osc  # options are {joint_tor, osc}
 
-  asset:
-    assetRoot: "../../assets"
-    assetFileNamexarm: "urdf/xArm6/urdf/xArm6.urdf"
+#  asset:
+#    assetRoot: "../../assets"
+#    assetFileNamexarm: "urdf/xArm6/urdf/xArm6.urdf"
 
   # set to True if you use camera sensors in the environment
   enableCameraSensors: False
