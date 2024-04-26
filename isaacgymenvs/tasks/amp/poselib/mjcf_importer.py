@@ -26,15 +26,20 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import os
+from pathlib import Path
 
 from poselib.skeleton.skeleton3d import SkeletonTree, SkeletonState
 from poselib.visualization.common import plot_skeleton_state
 
+
 # load in XML mjcf file and save zero rotation pose in npy format
-xml_path = "../../../../assets/mjcf/nv_humanoid.xml"
+xml_path = Path(os.environ.get("MODEL_DIR")) / "robot.xml"
 skeleton = SkeletonTree.from_mjcf(xml_path)
+print(skeleton)
+
 zero_pose = SkeletonState.zero_pose(skeleton)
 zero_pose.to_file("data/nv_humanoid.npy")
 
-# visualize zero rotation pose
+# # visualize zero rotation pose
 plot_skeleton_state(zero_pose)
