@@ -1,0 +1,484 @@
+<mujoco model="robot">
+  <compiler angle="radian"/>
+  <asset>
+    <mesh name="torso_1_top_torso_1" file="torso_1_top_torso_1.stl" />
+    <mesh name="head_1_x4_1_pcb_1" file="head_1_x4_1_pcb_1.stl" />
+    <mesh name="right_arm_1_x8_1_outer_1" file="right_arm_1_x8_1_outer_1.stl" />
+    <mesh name="left_arm_2_x8_1_outer_1" file="left_arm_2_x8_1_outer_1.stl" />
+    <mesh name="torso_1_bottom_torso_1" file="torso_1_bottom_torso_1.stl" />
+    <mesh name="torso_1_top_back_1" file="torso_1_top_back_1.stl" />
+    <mesh name="head_1_x4_1_outer_1" file="head_1_x4_1_outer_1.stl" />
+    <mesh name="right_arm_1_x8_1_inner_1" file="right_arm_1_x8_1_inner_1.stl" />
+    <mesh name="right_arm_1_x8_1_pcb_1" file="right_arm_1_x8_1_pcb_1.stl" />
+    <mesh name="left_arm_2_x8_1_inner_1" file="left_arm_2_x8_1_inner_1.stl" />
+    <mesh name="left_arm_2_x8_1_pcb_1" file="left_arm_2_x8_1_pcb_1.stl" />
+    <mesh name="torso_1_bottom_back_1" file="torso_1_bottom_back_1.stl" />
+    <mesh name="torso_1_x8_1_outer_1" file="torso_1_x8_1_outer_1.stl" />
+    <mesh name="torso_1_mock_agx_orin_1" file="torso_1_mock_agx_orin_1.stl" />
+    <mesh name="torso_1_breadboard_1" file="torso_1_breadboard_1.stl" />
+    <mesh name="torso_1_battery_mount_1" file="torso_1_battery_mount_1.stl" />
+    <mesh name="head_1_x4_1_inner_1" file="head_1_x4_1_inner_1.stl" />
+    <mesh name="right_arm_1_shoulder_inner_1" file="right_arm_1_shoulder_inner_1.stl" />
+    <mesh name="left_arm_2_shoulder_inner_1" file="left_arm_2_shoulder_inner_1.stl" />
+    <mesh name="torso_1_x8_1_inner_1" file="torso_1_x8_1_inner_1.stl" />
+    <mesh name="torso_1_x8_1_pcb_1" file="torso_1_x8_1_pcb_1.stl" />
+    <mesh name="torso_1_accelerometer_1" file="torso_1_accelerometer_1.stl" />
+    <mesh name="torso_1_battery_1" file="torso_1_battery_1.stl" />
+    <mesh name="head_1_neck_1" file="head_1_neck_1.stl" />
+    <mesh name="right_arm_1_x8_2_outer_1" file="right_arm_1_x8_2_outer_1.stl" />
+    <mesh name="left_arm_2_x8_2_outer_1" file="left_arm_2_x8_2_outer_1.stl" />
+    <mesh name="legs_1_hips_1" file="legs_1_hips_1.stl" />
+    <mesh name="head_1_x4_2_pcb_1" file="head_1_x4_2_pcb_1.stl" />
+    <mesh name="right_arm_1_x8_2_inner_1" file="right_arm_1_x8_2_inner_1.stl" />
+    <mesh name="right_arm_1_x8_2_pcb_1" file="right_arm_1_x8_2_pcb_1.stl" />
+    <mesh name="left_arm_2_x8_2_inner_1" file="left_arm_2_x8_2_inner_1.stl" />
+    <mesh name="left_arm_2_x8_2_pcb_1" file="left_arm_2_x8_2_pcb_1.stl" />
+    <mesh name="legs_1_x8_1_outer_1" file="legs_1_x8_1_outer_1.stl" />
+    <mesh name="legs_1_x8_2_outer_1" file="legs_1_x8_2_outer_1.stl" />
+    <mesh name="head_1_x4_2_outer_1" file="head_1_x4_2_outer_1.stl" />
+    <mesh name="right_arm_1_shoulder_nontorso_1" file="right_arm_1_shoulder_nontorso_1.stl" />
+    <mesh name="left_arm_2_shoulder_nontorso_1" file="left_arm_2_shoulder_nontorso_1.stl" />
+    <mesh name="legs_1_x8_1_inner_1" file="legs_1_x8_1_inner_1.stl" />
+    <mesh name="legs_1_x8_1_pcb_1" file="legs_1_x8_1_pcb_1.stl" />
+    <mesh name="legs_1_x8_2_inner_1" file="legs_1_x8_2_inner_1.stl" />
+    <mesh name="legs_1_x8_2_pcb_1" file="legs_1_x8_2_pcb_1.stl" />
+    <mesh name="head_1_x4_2_inner_1" file="head_1_x4_2_inner_1.stl" />
+    <mesh name="right_arm_1_x6_1_outer_1" file="right_arm_1_x6_1_outer_1.stl" />
+    <mesh name="left_arm_2_x6_1_outer_1" file="left_arm_2_x6_1_outer_1.stl" />
+    <mesh name="legs_1_right_leg_1_hip_rotate_1" file="legs_1_right_leg_1_hip_rotate_1.stl" />
+    <mesh name="legs_1_left_leg_1_hip_rotate_1" file="legs_1_left_leg_1_hip_rotate_1.stl" />
+    <mesh name="head_1_head_1" file="head_1_head_1.stl" />
+    <mesh name="right_arm_1_x6_1_inner_1" file="right_arm_1_x6_1_inner_1.stl" />
+    <mesh name="right_arm_1_x6_1_pcb_1" file="right_arm_1_x6_1_pcb_1.stl" />
+    <mesh name="left_arm_2_x6_1_inner_1" file="left_arm_2_x6_1_inner_1.stl" />
+    <mesh name="left_arm_2_x6_1_pcb_1" file="left_arm_2_x6_1_pcb_1.stl" />
+    <mesh name="legs_1_right_leg_1_x8_1_outer_1" file="legs_1_right_leg_1_x8_1_outer_1.stl" />
+    <mesh name="legs_1_left_leg_1_x8_1_outer_1" file="legs_1_left_leg_1_x8_1_outer_1.stl" />
+    <mesh name="head_1_eye_1" file="head_1_eye_1.stl" />
+    <mesh name="head_1_eye_2" file="head_1_eye_2.stl" />
+    <mesh name="head_1_backplate_1" file="head_1_backplate_1.stl" />
+    <mesh name="right_arm_1_elbow_1" file="right_arm_1_elbow_1.stl" />
+    <mesh name="left_arm_2_elbow_1" file="left_arm_2_elbow_1.stl" />
+    <mesh name="legs_1_right_leg_1_x8_1_inner_1" file="legs_1_right_leg_1_x8_1_inner_1.stl" />
+    <mesh name="legs_1_right_leg_1_x8_1_pcb_1" file="legs_1_right_leg_1_x8_1_pcb_1.stl" />
+    <mesh name="legs_1_left_leg_1_x8_1_inner_1" file="legs_1_left_leg_1_x8_1_inner_1.stl" />
+    <mesh name="legs_1_left_leg_1_x8_1_pcb_1" file="legs_1_left_leg_1_x8_1_pcb_1.stl" />
+    <mesh name="head_1_ardu_cam_mount_1" file="head_1_ardu_cam_mount_1.stl" />
+    <mesh name="head_1_ardu_cam_mount_2" file="head_1_ardu_cam_mount_2.stl" />
+    <mesh name="head_1_arducam_case_1" file="head_1_arducam_case_1.stl" />
+    <mesh name="head_1_xpt2046_touch_1" file="head_1_xpt2046_touch_1.stl" />
+    <mesh name="right_arm_1_x6_2_outer_1" file="right_arm_1_x6_2_outer_1.stl" />
+    <mesh name="left_arm_2_x6_2_outer_1" file="left_arm_2_x6_2_outer_1.stl" />
+    <mesh name="legs_1_right_leg_1_thigh_rotate_right_1" file="legs_1_right_leg_1_thigh_rotate_right_1.stl" />
+    <mesh name="legs_1_left_leg_1_thigh_rotate_left_1" file="legs_1_left_leg_1_thigh_rotate_left_1.stl" />
+    <mesh name="head_1_arducam_no_case_1" file="head_1_arducam_no_case_1.stl" />
+    <mesh name="head_1_lcd_2" file="head_1_lcd_2.stl" />
+    <mesh name="head_1_arducam_no_case_2" file="head_1_arducam_no_case_2.stl" />
+    <mesh name="head_1_lcd_1" file="head_1_lcd_1.stl" />
+    <mesh name="right_arm_1_x6_2_inner_1" file="right_arm_1_x6_2_inner_1.stl" />
+    <mesh name="right_arm_1_x6_2_pcb_1" file="right_arm_1_x6_2_pcb_1.stl" />
+    <mesh name="left_arm_2_x6_2_inner_1" file="left_arm_2_x6_2_inner_1.stl" />
+    <mesh name="left_arm_2_x6_2_pcb_1" file="left_arm_2_x6_2_pcb_1.stl" />
+    <mesh name="legs_1_right_leg_1_x10_2_outer_1" file="legs_1_right_leg_1_x10_2_outer_1.stl" />
+    <mesh name="legs_1_left_leg_1_x10_1_outer_1" file="legs_1_left_leg_1_x10_1_outer_1.stl" />
+    <mesh name="right_arm_1_forearm_1" file="right_arm_1_forearm_1.stl" />
+    <mesh name="left_arm_2_forearm_1" file="left_arm_2_forearm_1.stl" />
+    <mesh name="legs_1_right_leg_1_x10_2_inner_1" file="legs_1_right_leg_1_x10_2_inner_1.stl" />
+    <mesh name="legs_1_right_leg_1_x10_2_pcb_1" file="legs_1_right_leg_1_x10_2_pcb_1.stl" />
+    <mesh name="legs_1_left_leg_1_x10_1_inner_1" file="legs_1_left_leg_1_x10_1_inner_1.stl" />
+    <mesh name="legs_1_left_leg_1_x10_1_pcb_1" file="legs_1_left_leg_1_x10_1_pcb_1.stl" />
+    <mesh name="right_arm_1_x4_1_pcb_1" file="right_arm_1_x4_1_pcb_1.stl" />
+    <mesh name="left_arm_2_x4_1_pcb_1" file="left_arm_2_x4_1_pcb_1.stl" />
+    <mesh name="legs_1_right_leg_1_belt_thigh_right_1" file="legs_1_right_leg_1_belt_thigh_right_1.stl" />
+    <mesh name="legs_1_left_leg_1_belt_thigh_left_1" file="legs_1_left_leg_1_belt_thigh_left_1.stl" />
+    <mesh name="right_arm_1_x4_1_outer_1" file="right_arm_1_x4_1_outer_1.stl" />
+    <mesh name="left_arm_2_x4_1_outer_1" file="left_arm_2_x4_1_outer_1.stl" />
+    <mesh name="legs_1_right_leg_1_x10_1_outer_1" file="legs_1_right_leg_1_x10_1_outer_1.stl" />
+    <mesh name="legs_1_right_leg_1_51t_hdt5_15mm_belt_knee_right_1" file="legs_1_right_leg_1_51t_hdt5_15mm_belt_knee_right_1.stl" />
+    <mesh name="legs_1_left_leg_1_x10_2_outer_1" file="legs_1_left_leg_1_x10_2_outer_1.stl" />
+    <mesh name="legs_1_left_leg_1_51t_hdt5_15mm_belt_knee_left_1" file="legs_1_left_leg_1_51t_hdt5_15mm_belt_knee_left_1.stl" />
+    <mesh name="right_arm_1_x4_1_inner_1" file="right_arm_1_x4_1_inner_1.stl" />
+    <mesh name="left_arm_2_x4_1_inner_1" file="left_arm_2_x4_1_inner_1.stl" />
+    <mesh name="legs_1_right_leg_1_x10_1_inner_1" file="legs_1_right_leg_1_x10_1_inner_1.stl" />
+    <mesh name="legs_1_right_leg_1_x10_1_pcb_1" file="legs_1_right_leg_1_x10_1_pcb_1.stl" />
+    <mesh name="legs_1_right_leg_1_x6_1_outer_1" file="legs_1_right_leg_1_x6_1_outer_1.stl" />
+    <mesh name="legs_1_right_leg_1_ankle_pulley_48t_1" file="legs_1_right_leg_1_ankle_pulley_48t_1.stl" />
+    <mesh name="legs_1_left_leg_1_x10_2_inner_1" file="legs_1_left_leg_1_x10_2_inner_1.stl" />
+    <mesh name="legs_1_left_leg_1_x10_2_pcb_1" file="legs_1_left_leg_1_x10_2_pcb_1.stl" />
+    <mesh name="legs_1_left_leg_1_ankle_pulley_48t_1" file="legs_1_left_leg_1_ankle_pulley_48t_1.stl" />
+    <mesh name="legs_1_left_leg_1_x6_1_outer_1" file="legs_1_left_leg_1_x6_1_outer_1.stl" />
+    <mesh name="right_arm_1_hand_1_wrist_1" file="right_arm_1_hand_1_wrist_1.stl" />
+    <mesh name="left_arm_2_hand_1_wrist_1" file="left_arm_2_hand_1_wrist_1.stl" />
+    <mesh name="legs_1_right_leg_1_thigh_htd_5mm_44t_pulley_1" file="legs_1_right_leg_1_thigh_htd_5mm_44t_pulley_1.stl" />
+    <mesh name="legs_1_right_leg_1_x6_1_inner_1" file="legs_1_right_leg_1_x6_1_inner_1.stl" />
+    <mesh name="legs_1_right_leg_1_x6_1_pcb_1" file="legs_1_right_leg_1_x6_1_pcb_1.stl" />
+    <mesh name="legs_1_right_leg_1_ankle_1" file="legs_1_right_leg_1_ankle_1.stl" />
+    <mesh name="legs_1_left_leg_1_thigh_htd_5mm_44t_pulley_1" file="legs_1_left_leg_1_thigh_htd_5mm_44t_pulley_1.stl" />
+    <mesh name="legs_1_left_leg_1_ankle_1" file="legs_1_left_leg_1_ankle_1.stl" />
+    <mesh name="legs_1_left_leg_1_x6_1_inner_1" file="legs_1_left_leg_1_x6_1_inner_1.stl" />
+    <mesh name="legs_1_left_leg_1_x6_1_pcb_1" file="legs_1_left_leg_1_x6_1_pcb_1.stl" />
+    <mesh name="right_arm_1_hand_1_x4_1_pcb_1" file="right_arm_1_hand_1_x4_1_pcb_1.stl" />
+    <mesh name="left_arm_2_hand_1_x4_1_pcb_1" file="left_arm_2_hand_1_x4_1_pcb_1.stl" />
+    <mesh name="legs_1_right_leg_1_calf_pulley_24t_1" file="legs_1_right_leg_1_calf_pulley_24t_1.stl" />
+    <mesh name="legs_1_right_leg_1_x4_1_inner_1" file="legs_1_right_leg_1_x4_1_inner_1.stl" />
+    <mesh name="legs_1_left_leg_1_x4_1_inner_1" file="legs_1_left_leg_1_x4_1_inner_1.stl" />
+    <mesh name="legs_1_left_leg_1_calf_pulley_24t_1" file="legs_1_left_leg_1_calf_pulley_24t_1.stl" />
+    <mesh name="right_arm_1_hand_1_x4_1_outer_1" file="right_arm_1_hand_1_x4_1_outer_1.stl" />
+    <mesh name="left_arm_2_hand_1_x4_1_outer_1" file="left_arm_2_hand_1_x4_1_outer_1.stl" />
+    <mesh name="legs_1_right_leg_1_x4_1_outer_1" file="legs_1_right_leg_1_x4_1_outer_1.stl" />
+    <mesh name="legs_1_left_leg_1_x4_1_outer_1" file="legs_1_left_leg_1_x4_1_outer_1.stl" />
+    <mesh name="right_arm_1_hand_1_x4_1_inner_1" file="right_arm_1_hand_1_x4_1_inner_1.stl" />
+    <mesh name="left_arm_2_hand_1_x4_1_inner_1" file="left_arm_2_hand_1_x4_1_inner_1.stl" />
+    <mesh name="legs_1_right_leg_1_x4_1_pcb_1" file="legs_1_right_leg_1_x4_1_pcb_1.stl" />
+    <mesh name="legs_1_left_leg_1_x4_1_pcb_1" file="legs_1_left_leg_1_x4_1_pcb_1.stl" />
+    <mesh name="right_arm_1_hand_1_mount_1" file="right_arm_1_hand_1_mount_1.stl" />
+    <mesh name="left_arm_2_hand_1_mount_1" file="left_arm_2_hand_1_mount_1.stl" />
+    <mesh name="legs_1_right_leg_1_foot_1" file="legs_1_right_leg_1_foot_1.stl" />
+    <mesh name="legs_1_left_leg_1_foot_1" file="legs_1_left_leg_1_foot_1.stl" />
+    <mesh name="right_arm_1_hand_1_base_1" file="right_arm_1_hand_1_base_1.stl" />
+    <mesh name="right_arm_1_hand_1_x4_2_pcb_1" file="right_arm_1_hand_1_x4_2_pcb_1.stl" />
+    <mesh name="left_arm_2_hand_1_base_1" file="left_arm_2_hand_1_base_1.stl" />
+    <mesh name="left_arm_2_hand_1_x4_2_pcb_1" file="left_arm_2_hand_1_x4_2_pcb_1.stl" />
+    <mesh name="legs_1_right_leg_1_rubber_1" file="legs_1_right_leg_1_rubber_1.stl" />
+    <mesh name="legs_1_left_leg_1_rubber_1" file="legs_1_left_leg_1_rubber_1.stl" />
+    <mesh name="right_arm_1_hand_1_slide_rail_1" file="right_arm_1_hand_1_slide_rail_1.stl" />
+    <mesh name="right_arm_1_hand_1_slide_1" file="right_arm_1_hand_1_slide_1.stl" />
+    <mesh name="right_arm_1_hand_1_slide_2" file="right_arm_1_hand_1_slide_2.stl" />
+    <mesh name="right_arm_1_hand_1_camera_mount_1" file="right_arm_1_hand_1_camera_mount_1.stl" />
+    <mesh name="right_arm_1_hand_1_x4_2_outer_1" file="right_arm_1_hand_1_x4_2_outer_1.stl" />
+    <mesh name="left_arm_2_hand_1_slide_rail_1" file="left_arm_2_hand_1_slide_rail_1.stl" />
+    <mesh name="left_arm_2_hand_1_slide_1" file="left_arm_2_hand_1_slide_1.stl" />
+    <mesh name="left_arm_2_hand_1_slide_2" file="left_arm_2_hand_1_slide_2.stl" />
+    <mesh name="left_arm_2_hand_1_camera_mount_1" file="left_arm_2_hand_1_camera_mount_1.stl" />
+    <mesh name="left_arm_2_hand_1_x4_2_outer_1" file="left_arm_2_hand_1_x4_2_outer_1.stl" />
+    <mesh name="right_arm_1_hand_1_rack_2" file="right_arm_1_hand_1_rack_2.stl" />
+    <mesh name="right_arm_1_hand_1_rack_1" file="right_arm_1_hand_1_rack_1.stl" />
+    <mesh name="right_arm_1_hand_1_arducam_case_1" file="right_arm_1_hand_1_arducam_case_1.stl" />
+    <mesh name="right_arm_1_hand_1_x4_2_inner_1" file="right_arm_1_hand_1_x4_2_inner_1.stl" />
+    <mesh name="left_arm_2_hand_1_rack_2" file="left_arm_2_hand_1_rack_2.stl" />
+    <mesh name="left_arm_2_hand_1_rack_1" file="left_arm_2_hand_1_rack_1.stl" />
+    <mesh name="left_arm_2_hand_1_arducam_case_1" file="left_arm_2_hand_1_arducam_case_1.stl" />
+    <mesh name="left_arm_2_hand_1_x4_2_inner_1" file="left_arm_2_hand_1_x4_2_inner_1.stl" />
+    <mesh name="right_arm_1_hand_1_gripper_1" file="right_arm_1_hand_1_gripper_1.stl" />
+    <mesh name="right_arm_1_hand_1_gripper_2" file="right_arm_1_hand_1_gripper_2.stl" />
+    <mesh name="right_arm_1_hand_1_spur_gear_(26_teeth)_1" file="right_arm_1_hand_1_spur_gear_(26_teeth)_1.stl" />
+    <mesh name="left_arm_2_hand_1_gripper_1" file="left_arm_2_hand_1_gripper_1.stl" />
+    <mesh name="left_arm_2_hand_1_gripper_2" file="left_arm_2_hand_1_gripper_2.stl" />
+    <mesh name="left_arm_2_hand_1_spur_gear_(26_teeth)_1" file="left_arm_2_hand_1_spur_gear_(26_teeth)_1.stl" />
+  </asset>
+  <worldbody>
+    <body name="root" pos="-1.4 0 -0.3" quat="1 0 0 1"><light cutoff="100" diffuse="1 1 1" dir="-0 0 -1.3" directional="true" exponent="1" pos="0 0 1.3" specular=".1 .1 .1" /><geom conaffinity="1" condim="3" name="floor" pos="0 0 -1.5" rgba="0.8 0.9 0.8 1" size="40 40 40" type="plane" material="MatPlane" /><geom type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="torso_1_top_torso_1" />
+    <geom pos="0.0160579 0.0593235 0.0498109" quat="0 -2.32051e-08 1 -2.32051e-08" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="head_1_x4_1_pcb_1" />
+    <geom pos="0.000148008 0.0434136 0.0633109" quat="2.32051e-08 0 -4.64102e-08 -1" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="head_1_x4_1_outer_1" />
+    <geom pos="-0.0870555 0.0664737 -0.0301332" quat="0.379928 -0.596368 0.596368 -0.379928" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="right_arm_1_x8_1_outer_1" />
+    <geom pos="-0.0766223 0.032495 -0.00775921" quat="0.596368 0.379928 -0.379928 -0.596368" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="right_arm_1_x8_1_pcb_1" />
+    <geom pos="0.0870988 0.0664737 -0.0302898" quat="0.379928 -0.596368 -0.596368 0.379928" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="left_arm_2_x8_1_outer_1" />
+    <geom pos="0.0766657 0.032495 -0.00791584" quat="0.596368 0.379928 0.379928 0.596368" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="left_arm_2_x8_1_pcb_1" />
+    <geom pos="-0.0521972 0.0576546 -0.0517891" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="torso_1_bottom_torso_1" />
+    <geom pos="0.101188 0.070595 -0.0581391" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="torso_1_bottom_back_1" />
+    <geom pos="0.0339639 0.0573548 -0.267689" quat="-1 -4.64102e-08 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="torso_1_x8_1_outer_1" />
+    <geom pos="-1.4862e-05 0.0326678 -0.267689" quat="6.96153e-08 -1 0 0" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="torso_1_x8_1_pcb_1" />
+    <geom pos="5.1468e-05 -0.0190049 -0.184989" quat="0 -2.32051e-08 -1 -2.32051e-08" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="torso_1_mock_agx_orin_1" />
+    <geom pos="0.0419851 0.0326678 -0.252689" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="torso_1_breadboard_1" />
+    <geom pos="0.0419851 0.0326678 -0.243689" quat="0 -2.32051e-08 -1 -2.32051e-08" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="torso_1_accelerometer_1" />
+    <geom pos="0.0457081 0.070595 0.0448109" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="torso_1_top_back_1" />
+    <geom pos="-1.4862e-05 0.095595 0.00363456" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="torso_1_battery_mount_1" />
+    <geom pos="-1.4862e-05 0.101945 -0.0860179" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.654902 0.584314 0.823529 0.501961" mesh="torso_1_battery_1" />
+    <body name="link_head_1_x4_1_inner_1" pos="0.000148008 0.0434136 0.0633109" quat="0 2.32051e-08 -1 6.96153e-08">
+      <inertial pos="-0.00744646 -0.0108504 -0.0772508" quat="0.905183 -0.0421173 0.0927194 0.412642" mass="0.378625" diaginertia="0.00116591 0.00114367 0.000133468" />
+      <joint name="joint_head_1_x4_1_dof_x4" pos="0 0 0" axis="0 0 1" limited="true" range="-2.51327 0.628319" />
+      <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="head_1_x4_1_inner_1" />
+      <geom pos="0.0105058 0.00467747 -0.0345" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.980392 0.713726 0.00392157 0.501961" mesh="head_1_neck_1" />
+      <geom pos="-0.0153423 -0.0481844 -0.10559" quat="0.672498 0.672499 -0.218508 -0.218508" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="head_1_x4_2_pcb_1" />
+      <geom pos="-0.0202786 -0.0279111 -0.1215" quat="-0.672499 0.672498 -0.218508 0.218508" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="head_1_x4_2_outer_1" />
+      <body name="link_head_1_x4_2_inner_1" pos="-0.0202786 -0.0279111 -0.1215" quat="-0.672498 -0.672499 0.218508 0.218508">
+        <inertial pos="-0.00294031 -0.00206493 -0.0315543" quat="0.593624 0.496169 0.519075 0.363302" mass="0.678587" diaginertia="0.00384323 0.00330846 0.00186859" />
+        <joint name="joint_head_1_x4_2_dof_x4" pos="0 0 0" axis="0 0 1" limited="true" range="-1.5708 0.261799" />
+        <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="head_1_x4_2_inner_1" />
+        <geom pos="-0.0093037 0.00675953 -0.0345" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="head_1_head_1" />
+        <geom pos="0.0977128 -0.027002 -0.0818784" quat="-0.706138 0.0370071 0.706138 0.0370071" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="head_1_eye_1" />
+        <geom pos="0.05159 -0.0353264 -0.0818784" quat="-0.0370071 0.706138 -0.0370071 -0.706138" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="head_1_ardu_cam_mount_1" />
+        <geom pos="0.0799288 -0.0146755 -0.0892784" quat="-0.0370071 0.706138 -0.0370071 -0.706138" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="head_1_arducam_no_case_1" />
+        <geom pos="0.0831924 -0.0314586 -0.0612784" quat="0.706138 -0.0370071 -0.706138 -0.0370071" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="head_1_lcd_2" />
+        <geom pos="0.0977128 -0.027002 0.0128784" quat="-0.706138 0.0370071 0.706138 0.0370071" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="head_1_eye_2" />
+        <geom pos="0.05159 -0.0353264 0.0128784" quat="-0.706138 0.0370071 0.706138 0.0370071" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="head_1_ardu_cam_mount_2" />
+        <geom pos="0.0799288 -0.0146755 0.0202784" quat="-0.706138 0.0370071 0.706138 0.0370071" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="head_1_arducam_no_case_2" />
+        <geom pos="0.0831924 -0.0314586 -0.00772164" quat="-0.706138 0.0370071 0.706138 0.0370071" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="head_1_lcd_1" />
+        <geom pos="-0.059234 0.0177891 -0.116459" quat="0.0370071 0.706138 -0.0370071 0.706138" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="head_1_backplate_1" />
+        <geom pos="-0.0648867 -0.0168591 -0.01775" quat="0.0370071 0.706138 -0.0370071 0.706138" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="head_1_arducam_case_1" />
+        <geom pos="-0.0639982 -0.00840571 0.0208608" quat="0.0370071 0.706138 -0.0370071 0.706138" type="mesh" rgba="0.505882 0.533333 0.54902 0.501961" mesh="head_1_xpt2046_touch_1" />
+      </body>
+    </body>
+    <body name="link_right_arm_1_x8_1_inner_1" pos="-0.0766223 0.032495 -0.00775921" quat="0.379928 -0.596368 0.596368 -0.379928">
+      <inertial pos="5.6875e-05 -0.0156509 -0.0934333" quat="0.705014 -0.0523495 0.0517105 0.705366" mass="0.927269" diaginertia="0.0023796 0.00191691 0.000738158" />
+      <joint name="joint_right_arm_1_x8_1_dof_x8" pos="0 0 0" axis="0 0 1" limited="true" range="-2.0944 2.0944" />
+      <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="right_arm_1_x8_1_inner_1" />
+      <geom pos="0 0.0155 -0.033" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="right_arm_1_shoulder_inner_1" />
+      <geom pos="-0.0339787 -0.033 -0.085313" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="right_arm_1_x8_2_outer_1" />
+      <geom pos="0 -0.033 -0.11" quat="-0.707107 0.707107 0 0" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="right_arm_1_x8_2_pcb_1" />
+      <body name="link_right_arm_1_x8_2_inner_1" pos="0 -0.033 -0.11" quat="0.707107 0.707107 0 0">
+        <inertial pos="-4.95464e-07 0.0135947 -0.0709113" quat="0.698822 0.108239 -0.108214 0.698729" mass="0.525949" diaginertia="0.000959132 0.000928453 0.000385347" />
+        <joint name="joint_right_arm_1_x8_2_dof_x8" pos="0 0 0" axis="0 0 1" limited="true" range="0 1.91986" />
+        <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="right_arm_1_x8_2_inner_1" />
+        <geom pos="0 0.0155 -0.033" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="right_arm_1_shoulder_nontorso_1" />
+        <geom pos="-0.036 0.0325 -0.0945" quat="0.5 -0.5 -0.5 -0.5" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="right_arm_1_x6_1_outer_1" />
+        <geom pos="0 0.0325 -0.0945" quat="0.5 0.5 -0.5 0.5" type="mesh" rgba="0.980392 0.713726 0.00392157 0.501961" mesh="right_arm_1_x6_1_pcb_1" />
+        <body name="link_right_arm_1_x6_1_inner_1" pos="0 0.0325 -0.0945" quat="0.5 -0.5 -0.5 -0.5">
+          <inertial pos="-0.00900558 -0.015576 -0.174314" quat="0.968563 -0.0434445 0.0119484 -0.244653" mass="0.481271" diaginertia="0.00280138 0.00235646 0.00076385" />
+          <joint name="joint_right_arm_1_x6_1_dof_x6" pos="0 0 0" axis="0 0 1" limited="true" range="-1.0472 3.66519" />
+          <geom type="mesh" rgba="0.498039 0.498039 0.498039 0.501961" mesh="right_arm_1_x6_1_inner_1" />
+          <geom pos="0.00575 0.00995929 -0.0325" quat="0.5 0 0 -0.866025" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="right_arm_1_elbow_1" />
+          <geom pos="-0.000661543 -0.0371458 -0.182823" quat="-0.612372 -0.353553 0.612372 -0.353553" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="right_arm_1_x6_2_outer_1" />
+          <geom pos="-0.01625 -0.0281458 -0.214" quat="0.353553 -0.612372 -0.353553 -0.612372" type="mesh" rgba="0.980392 0.713726 0.00392157 0.501961" mesh="right_arm_1_x6_2_pcb_1" />
+          <body name="link_right_arm_1_x6_2_inner_1" pos="-0.01625 -0.0281458 -0.214" quat="-0.612372 -0.353553 0.612372 -0.353553">
+            <inertial pos="-0.066633 1.63984e-09 -0.0331133" quat="0.00228192 0.622899 0.00588145 0.782277" mass="0.287287" diaginertia="0.000546419 0.000504579 0.000192551" />
+            <joint name="joint_right_arm_1_x6_2_dof_x6" pos="0 0 0" axis="0 0 1" limited="true" range="-1.5708 1.5708" />
+            <geom type="mesh" rgba="0.498039 0.498039 0.498039 0.501961" mesh="right_arm_1_x6_2_inner_1" />
+            <geom pos="0.0115 0 -0.0325" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="right_arm_1_forearm_1" />
+            <geom pos="-0.0645 -0.0159099 -0.0534099" quat="-0.5 0.5 -0.5 0.5" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="right_arm_1_x4_1_pcb_1" />
+            <geom pos="-0.078 2.87032e-09 -0.0375" quat="-0.5 -0.5 0.5 0.5" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="right_arm_1_x4_1_outer_1" />
+            <body name="link_right_arm_1_x4_1_inner_1" pos="-0.078 2.87032e-09 -0.0375" quat="0.5 -0.5 0.5 -0.5">
+              <inertial pos="-0.000199967 -0.00190306 -0.0548463" quat="0.742887 -0.0177669 0.0197312 0.66889" mass="0.368674" diaginertia="0.000515408 0.000498453 0.000130639" />
+              <joint name="joint_right_arm_1_x4_1_dof_x4" pos="0 0 0" axis="0 0 1" limited="true" range="-3.14159 3.14159" />
+              <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="right_arm_1_x4_1_inner_1" />
+              <geom pos="-0.0093037 0.00675953 -0.0345" quat="0.99863 0 0 -0.052336" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="right_arm_1_hand_1_wrist_1" />
+              <geom pos="-0.0187495 -0.0261836 -0.0660901" quat="0.706138 0.706138 -0.0370071 -0.0370071" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="right_arm_1_hand_1_x4_1_pcb_1" />
+              <geom pos="-0.00151566 -0.0144206 -0.082" quat="-0.706138 0.706138 -0.0370071 0.0370071" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="right_arm_1_hand_1_x4_1_outer_1" />
+              <body name="link_right_arm_1_hand_1_x4_1_inner_1" pos="-0.00151566 -0.0144206 -0.082" quat="-0.706138 -0.706138 0.0370071 0.0370071">
+                <inertial pos="0.0531528 -0.0386178 -0.0151982" quat="0.218587 0.654705 -0.224851 0.687766" mass="0.564728" diaginertia="0.00166757 0.00132462 0.000547252" />
+                <joint name="joint_right_arm_1_hand_1_x4_1_dof_x4" pos="0 0 0" axis="0 0 1" limited="true" range="-2.61799 0.523599" />
+                <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="right_arm_1_hand_1_x4_1_inner_1" />
+                <geom pos="-0.0093037 0.00675953 -0.0345" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="right_arm_1_hand_1_mount_1" />
+                <geom pos="0.0440795 -0.0839405 -4.20941e-09" quat="-0.32102 0.32102 -0.630037 0.630037" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="right_arm_1_hand_1_base_1" />
+                <geom pos="0.0490192 -0.112869 -0.014" quat="-0.32102 -0.32102 0.630037 0.630037" type="mesh" rgba="0.231373 0.380392 0.705882 0.501961" mesh="right_arm_1_hand_1_slide_rail_1" />
+                <geom pos="0.0922279 -0.0670075 0.0212308" quat="-0.32102 -0.32102 0.630037 0.630037" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="right_arm_1_hand_1_camera_mount_1" />
+                <geom pos="0.119872 -0.0663878 0.000249996" quat="-0.630037 0.630037 0.32102 -0.32102" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="right_arm_1_hand_1_arducam_case_1" />
+                <geom pos="0.0473754 -0.0147545 0.0019099" quat="0.32102 0.32102 -0.630037 -0.630037" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="right_arm_1_hand_1_x4_2_pcb_1" />
+                <geom pos="0.0489455 -0.035561 -0.014" quat="-0.32102 0.32102 -0.630037 0.630037" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="right_arm_1_hand_1_x4_2_outer_1" />
+                <body name="link_right_arm_1_hand_1_slide_1" pos="0.139251 -0.00228616 -0.014" quat="-0.218508 -0.218508 -0.672498 -0.672499">
+                  <inertial pos="-0.0494432 -0.00299367 -0.0227442" quat="0.0925743 0.665193 0.0377182 0.739949" mass="0.0723649" diaginertia="0.000136368 0.000116177 5.14731e-05" />
+                  <joint name="joint_right_arm_1_hand_1_slider_1" pos="0 0 0" axis="0 0 1" type="slide" limited="true" range="-0.034 0" />
+                  <geom type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="right_arm_1_hand_1_slide_1" />
+                  <geom pos="-0.00499 0.01 -0.033" quat="-1.64085e-08 -0.707107 1.64085e-08 -0.707107" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="right_arm_1_hand_1_rack_2" />
+                  <geom pos="-0.04949 0.01 -0.033" quat="-1.64085e-08 -0.707107 1.64085e-08 -0.707107" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="right_arm_1_hand_1_gripper_1" />
+                </body>
+                <body name="link_right_arm_1_hand_1_slide_2" pos="0.0452051 -0.131729 -0.014" quat="0.218508 -0.218508 -0.672499 0.672498">
+                  <inertial pos="-0.0494432 -0.00299367 -0.0227442" quat="0.0925743 0.665193 0.0377181 0.739949" mass="0.0723649" diaginertia="0.000136368 0.000116177 5.14731e-05" />
+                  <joint name="joint_right_arm_1_hand_1_slider_2" pos="0 0 0" axis="0 0 1" type="slide" limited="true" range="-0.034 0" />
+                  <geom type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="right_arm_1_hand_1_slide_2" />
+                  <geom pos="-0.00499 -0.01 -0.033" quat="-1.64085e-08 -0.707107 1.64085e-08 -0.707107" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="right_arm_1_hand_1_rack_1" />
+                  <geom pos="-0.04949 0.01 -0.033" quat="-1.64085e-08 -0.707107 1.64085e-08 -0.707107" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="right_arm_1_hand_1_gripper_2" />
+                </body>
+                <body name="link_right_arm_1_hand_1_x4_2_inner_1" pos="0.0489455 -0.035561 -0.014" quat="-0.32102 -0.32102 0.630037 0.630037">
+                  <inertial pos="0 1.21014e-11 -0.0177819" mass="0.153348" diaginertia="2.94698e-05 2.94698e-05 2.57455e-05" />
+                  <joint name="joint_right_arm_1_hand_1_x4_2_dof_x4" pos="0 0 0" axis="0 0 1" limited="true" range="-3.14159 3.14159" />
+                  <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="right_arm_1_hand_1_x4_2_inner_1" />
+                  <geom pos="0.0105058 0.00467747 -0.0345" quat="0.544639 0 0 0.838671" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="right_arm_1_hand_1_spur_gear_(26_teeth)_1" />
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="link_left_arm_2_x8_1_inner_1" pos="0.0766657 0.032495 -0.00791584" quat="0.379928 -0.596368 -0.596368 0.379928">
+      <inertial pos="5.6875e-05 -0.0156509 -0.0934333" quat="0.705014 -0.0523495 0.0517105 0.705366" mass="0.927269" diaginertia="0.0023796 0.00191691 0.000738158" />
+      <joint name="joint_left_arm_2_x8_1_dof_x8" pos="0 0 0" axis="0 0 1" limited="true" range="-1.5708 1.5708" />
+      <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="left_arm_2_x8_1_inner_1" />
+      <geom pos="0 0.0155 -0.033" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="left_arm_2_shoulder_inner_1" />
+      <geom pos="-0.0339787 -0.033 -0.085313" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="left_arm_2_x8_2_outer_1" />
+      <geom pos="0 -0.033 -0.11" quat="-0.707107 0.707107 0 0" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="left_arm_2_x8_2_pcb_1" />
+      <body name="link_left_arm_2_x8_2_inner_1" pos="0 -0.033 -0.11" quat="0.707107 0.707107 0 0">
+        <inertial pos="-4.95464e-07 0.0135947 -0.0709113" quat="0.698822 0.108239 -0.108214 0.698729" mass="0.525949" diaginertia="0.000959132 0.000928453 0.000385347" />
+        <joint name="joint_left_arm_2_x8_2_dof_x8" pos="0 0 0" axis="0 0 1" limited="true" range="-1.91986 0" />
+        <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="left_arm_2_x8_2_inner_1" />
+        <geom pos="0 0.0155 -0.033" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="left_arm_2_shoulder_nontorso_1" />
+        <geom pos="-0.036 0.0325 -0.0945" quat="0.5 -0.5 -0.5 -0.5" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="left_arm_2_x6_1_outer_1" />
+        <geom pos="0 0.0325 -0.0945" quat="0.5 0.5 -0.5 0.5" type="mesh" rgba="0.980392 0.713726 0.00392157 0.501961" mesh="left_arm_2_x6_1_pcb_1" />
+        <body name="link_left_arm_2_x6_1_inner_1" pos="0 0.0325 -0.0945" quat="0.5 -0.5 -0.5 -0.5">
+          <inertial pos="-0.00898641 0.0155871 -0.174314" quat="0.960723 0.0436085 0.0113387 0.273828" mass="0.481271" diaginertia="0.00280146 0.00235638 0.00076385" />
+          <joint name="joint_left_arm_2_x6_1_dof_x6" pos="0 0 0" axis="0 0 1" limited="true" range="-3.66519 1.0472" />
+          <geom type="mesh" rgba="0.498039 0.498039 0.498039 0.501961" mesh="left_arm_2_x6_1_inner_1" />
+          <geom pos="0.00575 -0.00995929 -0.0325" quat="0.5 0 0 0.866025" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="left_arm_2_elbow_1" />
+          <geom pos="-0.0318385 0.0191458 -0.182823" quat="0.612372 -0.353553 -0.612372 -0.353553" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="left_arm_2_x6_2_outer_1" />
+          <geom pos="-0.01625 0.0281458 -0.214" quat="0.353553 0.612372 -0.353553 0.612372" type="mesh" rgba="0.980392 0.713726 0.00392157 0.501961" mesh="left_arm_2_x6_2_pcb_1" />
+          <body name="link_left_arm_2_x6_2_inner_1" pos="-0.01625 0.0281458 -0.214" quat="0.612372 -0.353553 -0.612372 -0.353553">
+            <inertial pos="-0.066633 1.63984e-09 -0.0331133" quat="0.00228192 0.622899 0.00588145 0.782277" mass="0.287287" diaginertia="0.000546419 0.000504579 0.000192551" />
+            <joint name="joint_left_arm_2_x6_2_dof_x6" pos="0 0 0" axis="0 0 1" limited="true" range="-1.5708 1.5708" />
+            <geom type="mesh" rgba="0.498039 0.498039 0.498039 0.501961" mesh="left_arm_2_x6_2_inner_1" />
+            <geom pos="0.0115 0 -0.0325" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="left_arm_2_forearm_1" />
+            <geom pos="-0.0645 -0.0159099 -0.0534099" quat="-0.5 0.5 -0.5 0.5" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="left_arm_2_x4_1_pcb_1" />
+            <geom pos="-0.078 2.87032e-09 -0.0375" quat="-0.5 -0.5 0.5 0.5" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="left_arm_2_x4_1_outer_1" />
+            <body name="link_left_arm_2_x4_1_inner_1" pos="-0.078 2.87032e-09 -0.0375" quat="0.5 -0.5 0.5 -0.5">
+              <inertial pos="-0.000199967 -0.00190306 -0.0548463" quat="0.742887 -0.0177669 0.0197312 0.66889" mass="0.368674" diaginertia="0.000515408 0.000498453 0.000130639" />
+              <joint name="joint_left_arm_2_x4_1_dof_x4" pos="0 0 0" axis="0 0 1" limited="true" range="-3.14159 3.14159" />
+              <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="left_arm_2_x4_1_inner_1" />
+              <geom pos="-0.0093037 0.00675953 -0.0345" quat="0.99863 0 0 -0.052336" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="left_arm_2_hand_1_wrist_1" />
+              <geom pos="-0.0187495 -0.0261836 -0.0660901" quat="0.706138 0.706138 -0.0370071 -0.0370071" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="left_arm_2_hand_1_x4_1_pcb_1" />
+              <geom pos="-0.00151566 -0.0144206 -0.082" quat="-0.706138 0.706138 -0.0370071 0.0370071" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="left_arm_2_hand_1_x4_1_outer_1" />
+              <body name="link_left_arm_2_hand_1_x4_1_inner_1" pos="-0.00151566 -0.0144206 -0.082" quat="-0.706138 -0.706138 0.0370071 0.0370071">
+                <inertial pos="0.0531528 -0.0386178 -0.0151982" quat="0.218587 0.654705 -0.224851 0.687766" mass="0.564728" diaginertia="0.00166757 0.00132462 0.000547252" />
+                <joint name="joint_left_arm_2_hand_1_x4_1_dof_x4" pos="0 0 0" axis="0 0 1" limited="true" range="-2.61799 0.523599" />
+                <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="left_arm_2_hand_1_x4_1_inner_1" />
+                <geom pos="-0.0093037 0.00675953 -0.0345" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="left_arm_2_hand_1_mount_1" />
+                <geom pos="0.0440795 -0.0839405 -4.20941e-09" quat="-0.32102 0.32102 -0.630037 0.630037" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="left_arm_2_hand_1_base_1" />
+                <geom pos="0.0490192 -0.112869 -0.014" quat="-0.32102 -0.32102 0.630037 0.630037" type="mesh" rgba="0.231373 0.380392 0.705882 0.501961" mesh="left_arm_2_hand_1_slide_rail_1" />
+                <geom pos="0.0922279 -0.0670075 0.0212308" quat="-0.32102 -0.32102 0.630037 0.630037" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="left_arm_2_hand_1_camera_mount_1" />
+                <geom pos="0.119872 -0.0663878 0.000249996" quat="-0.630037 0.630037 0.32102 -0.32102" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="left_arm_2_hand_1_arducam_case_1" />
+                <geom pos="0.0473754 -0.0147545 0.0019099" quat="0.32102 0.32102 -0.630037 -0.630037" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="left_arm_2_hand_1_x4_2_pcb_1" />
+                <geom pos="0.0489455 -0.035561 -0.014" quat="-0.32102 0.32102 -0.630037 0.630037" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="left_arm_2_hand_1_x4_2_outer_1" />
+                <body name="link_left_arm_2_hand_1_slide_1" pos="0.139251 -0.00228616 -0.014" quat="-0.218508 -0.218508 -0.672498 -0.672499">
+                  <inertial pos="-0.0494432 -0.00299367 -0.0227442" quat="0.0925743 0.665193 0.0377182 0.739949" mass="0.0723649" diaginertia="0.000136368 0.000116177 5.14731e-05" />
+                  <joint name="joint_left_arm_2_hand_1_slider_1" pos="0 0 0" axis="0 0 1" type="slide" limited="true" range="-0.034 0" />
+                  <geom type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="left_arm_2_hand_1_slide_1" />
+                  <geom pos="-0.00499 0.01 -0.033" quat="-1.64085e-08 -0.707107 1.64085e-08 -0.707107" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="left_arm_2_hand_1_rack_2" />
+                  <geom pos="-0.04949 0.01 -0.033" quat="-1.64085e-08 -0.707107 1.64085e-08 -0.707107" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="left_arm_2_hand_1_gripper_1" />
+                </body>
+                <body name="link_left_arm_2_hand_1_slide_2" pos="0.0452051 -0.131729 -0.014" quat="0.218508 -0.218508 -0.672499 0.672498">
+                  <inertial pos="-0.0494432 -0.00299367 -0.0227442" quat="0.0925743 0.665193 0.0377181 0.739949" mass="0.0723649" diaginertia="0.000136368 0.000116177 5.14731e-05" />
+                  <joint name="joint_left_arm_2_hand_1_slider_2" pos="0 0 0" axis="0 0 1" type="slide" limited="true" range="-0.034 0" />
+                  <geom type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="left_arm_2_hand_1_slide_2" />
+                  <geom pos="-0.00499 -0.01 -0.033" quat="-1.64085e-08 -0.707107 1.64085e-08 -0.707107" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="left_arm_2_hand_1_rack_1" />
+                  <geom pos="-0.04949 0.01 -0.033" quat="-1.64085e-08 -0.707107 1.64085e-08 -0.707107" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="left_arm_2_hand_1_gripper_2" />
+                </body>
+                <body name="link_left_arm_2_hand_1_x4_2_inner_1" pos="0.0489455 -0.035561 -0.014" quat="-0.32102 -0.32102 0.630037 0.630037">
+                  <inertial pos="0 1.21014e-11 -0.0177819" mass="0.153348" diaginertia="2.94698e-05 2.94698e-05 2.57455e-05" />
+                  <joint name="joint_left_arm_2_hand_1_x4_2_dof_x4" pos="0 0 0" axis="0 0 1" limited="true" range="-3.14159 3.14159" />
+                  <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="left_arm_2_hand_1_x4_2_inner_1" />
+                  <geom pos="0.0105058 0.00467747 -0.0345" quat="0.544639 0 0 0.838671" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="left_arm_2_hand_1_spur_gear_(26_teeth)_1" />
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="link_torso_1_x8_1_inner_1" pos="-1.4862e-05 0.0326678 -0.267689" quat="-1 -4.64102e-08 0 0">
+      <inertial pos="7.43922e-05 0.102853 -0.0987697" quat="0.275647 0.651261 0.275233 0.651248" mass="1.80198" diaginertia="0.0162077 0.0128062 0.00514217" />
+      <joint name="joint_torso_1_x8_1_dof_x8" pos="0 0 0" axis="0 0 1" limited="true" range="-0.785398 0.785398" />
+      <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="torso_1_x8_1_inner_1" />
+      <geom pos="0 -0.0155 -0.033" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="legs_1_hips_1" />
+      <geom pos="-0.0608313 0.1301 -0.0768637" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="legs_1_x8_1_outer_1" />
+      <geom pos="-0.0855183 0.1301 -0.110842" quat="0.5 0.5 -0.5 0.5" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="legs_1_x8_1_pcb_1" />
+      <geom pos="0.0608313 0.1301 -0.144821" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="legs_1_x8_2_outer_1" />
+      <geom pos="0.0855183 0.1301 -0.110842" quat="0.5 0.5 0.5 -0.5" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="legs_1_x8_2_pcb_1" />
+      <body name="link_legs_1_x8_1_inner_1" pos="-0.0855183 0.1301 -0.110842" quat="-0.5 0.5 0.5 0.5">
+        <inertial pos="0.0139998 0.00808292 -0.0841937" quat="0.943166 0.00202137 -0.0739885 0.323976" mass="0.908437" diaginertia="0.00193362 0.00160564 0.000735385" />
+        <joint name="joint_legs_1_x8_1_dof_x8" pos="0 0 0" axis="0 0 1" limited="true" range="-1.0472 1.0472" />
+        <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_x8_1_inner_1" />
+        <geom pos="0 -0.0155 -0.033" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="legs_1_right_leg_1_hip_rotate_1" />
+        <geom pos="0.0115895 0.0459264 -0.073313" quat="0.353553 0.353553 0.612372 0.612372" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="legs_1_right_leg_1_x8_1_outer_1" />
+        <geom pos="0.0285788 0.0165 -0.098" quat="-0.353553 0.353553 0.612372 -0.612372" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="legs_1_right_leg_1_x8_1_pcb_1" />
+        <body name="link_legs_1_right_leg_1_x8_1_inner_1" pos="0.0285788 0.0165 -0.098" quat="0.353553 0.353553 0.612372 0.612372">
+          <inertial pos="-0.038115 -0.0221013 -0.136279" quat="0.943006 -0.0491745 0.116939 0.307647" mass="1.31358" diaginertia="0.00555408 0.00475214 0.00164336" />
+          <joint name="joint_legs_1_right_leg_1_x8_1_dof_x8" pos="0 0 0" axis="0 0 1" limited="true" range="-1.5708 0.593412" />
+          <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_right_leg_1_x8_1_inner_1" />
+          <geom pos="0.0134234 -0.00775 -0.033" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="legs_1_right_leg_1_thigh_rotate_right_1" />
+          <geom pos="-0.0670253 -0.0199089 -0.104594" quat="-0.612372 0.612372 -0.353553 0.353553" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_right_leg_1_x10_2_outer_1" />
+          <geom pos="-0.0588363 -0.0340925 -0.155" quat="-0.683013 0.183013 -0.683013 -0.183013" type="mesh" rgba="0.498039 0.498039 0.498039 0.501961" mesh="legs_1_right_leg_1_x10_2_pcb_1" />
+          <body name="link_legs_1_right_leg_1_x10_2_inner_1" pos="-0.0588363 -0.0340925 -0.155" quat="-0.183013 -0.683013 -0.183013 0.683013">
+            <inertial pos="0.000763747 0.00776887 -0.086012" quat="-0.25167 0.671147 0.0292373 0.696684" mass="1.44314" diaginertia="0.00385024 0.00340834 0.00314757" />
+            <joint name="joint_legs_1_right_leg_1_x10_2_dof_x10" pos="0 0 0" axis="0 0 1" limited="true" range="-2.35619 0.785398" />
+            <geom type="mesh" rgba="0.980392 0.713726 0.00392157 0.501961" mesh="legs_1_right_leg_1_x10_2_inner_1" />
+            <geom pos="0 -0.018 -0.0405" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="legs_1_right_leg_1_belt_thigh_right_1" />
+            <geom pos="0.00554001 -0.0527097 -0.118" quat="-0.866025 -4.01924e-08 0 -0.5" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_right_leg_1_x10_1_outer_1" />
+            <geom pos="-2.0548e-09 3.85337e-09 -0.118" quat="-0.258819 -2.84203e-08 2.84203e-08 -0.965926" type="mesh" rgba="0.498039 0.498039 0.498039 0.501961" mesh="legs_1_right_leg_1_x10_1_pcb_1" />
+            <body name="link_legs_1_right_leg_1_x10_1_inner_1" pos="-2.0548e-09 3.85337e-09 -0.118" quat="3.44263e-08 -0.258819 -0.965926 -6.00592e-09">
+              <inertial pos="0 4.86565e-11 -0.023577" mass="0.202574" diaginertia="7.56752e-05 7.56752e-05 6.53659e-05" />
+              <joint name="joint_legs_1_right_leg_1_x10_1_dof_x10" pos="0 0 0" axis="0 0 1" limited="true" range="0 1.5708" />
+              <geom type="mesh" rgba="0.980392 0.713726 0.00392157 0.501961" mesh="legs_1_right_leg_1_x10_1_inner_1" />
+              <geom pos="0 0.018 -0.0405" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="legs_1_right_leg_1_thigh_htd_5mm_44t_pulley_1" />
+            </body>
+            <body name="link_legs_1_right_leg_1_51t_hdt5_15mm_belt_knee_right_1" pos="0.0906636 0.157034 -0.0795" quat="-0.866025 -4.01924e-08 0 -0.5">
+              <inertial pos="0.0679452 -0.0350218 0.0362612" quat="0.988759 -0.105129 0.0389199 0.0989351" mass="0.559579" diaginertia="0.00184003 0.0017105 0.00052417" />
+              <joint name="joint_legs_1_right_leg_1_knee_revolute" pos="0 0 0" axis="0 0 -1" limited="true" range="-0.785398 1.5708" />
+              <geom type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="legs_1_right_leg_1_51t_hdt5_15mm_belt_knee_right_1" />
+              <geom pos="0.0393231 -0.032 0.0535" quat="-1.64085e-08 0.707107 0.707107 -1.64085e-08" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_right_leg_1_x6_1_outer_1" />
+              <geom pos="0.0705 -0.05 0.0535" quat="-2.00962e-08 -0.5 0.866025 1.16026e-08" type="mesh" rgba="0.980392 0.713726 0.00392157 0.501961" mesh="legs_1_right_leg_1_x6_1_pcb_1" />
+              <body name="link_legs_1_right_leg_1_x6_1_inner_1" pos="0.0705 -0.05 0.0535" quat="0.5 -8.49366e-09 -8.49366e-09 -0.866025">
+                <inertial pos="2.1991e-11 1.89419e-10 -0.0254599" quat="0.707107 0 0 0.707107" mass="0.0835872" diaginertia="2.42239e-05 2.26952e-05 1.313e-05" />
+                <joint name="joint_legs_1_right_leg_1_x6_1_dof_x6" pos="0 0 0" axis="0 0 1" limited="true" range="-1.5708 1.5708" />
+                <geom type="mesh" rgba="0.498039 0.498039 0.498039 0.501961" mesh="legs_1_right_leg_1_x6_1_inner_1" />
+                <geom pos="0.00575 -0.00995929 -0.0325" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_right_leg_1_calf_pulley_24t_1" />
+              </body>
+              <body name="link_legs_1_right_leg_1_ankle_pulley_48t_1" pos="0.24 -0.05 0" quat="0.707107 0 0 0.707107">
+                <inertial pos="0.0583897 -0.0586158 0.011872" quat="0.190983 0.678427 -0.192074 0.682912" mass="0.219424" diaginertia="0.000467205 0.000423937 8.61629e-05" />
+                <joint name="joint_legs_1_right_leg_1_ankle_revolute" pos="0 0 0" axis="0 0 -1" limited="true" range="-0.785398 0.785398" />
+                <geom type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="legs_1_right_leg_1_ankle_pulley_48t_1" />
+                <geom pos="0 -0.0270536 0.002" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="legs_1_right_leg_1_ankle_1" />
+                <geom pos="0.0645536 -0.0663036 0.00154071" quat="0.5 0.5 0.5 0.5" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_right_leg_1_x4_1_inner_1" />
+                <body name="link_legs_1_right_leg_1_x4_1_outer_1" pos="0.0990536 -0.070981 0.0120465" quat="0.707107 3.53553e-08 0.707107 1.64085e-08">
+                  <inertial pos="1.40239e-09 -0.0149273 -0.046385" quat="0.924887 -0.380242 0 0" mass="0.390442" diaginertia="0.00139916 0.00114182 0.000664788" />
+                  <joint name="joint_legs_1_right_leg_1_x4_1_dof_x4" pos="0 0 0" axis="0 0 -1" limited="true" range="-0.785398 0.785398" />
+                  <geom type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="legs_1_right_leg_1_x4_1_outer_1" />
+                  <geom quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_right_leg_1_x4_1_pcb_1" />
+                  <geom pos="-0.0159099 0.0159099 0.0135" quat="-1 -4.64102e-08 0 0" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="legs_1_right_leg_1_foot_1" />
+                  <geom pos="2e-09 -0.037 -0.0853793" quat="1.64085e-08 1.64085e-08 -0.707107 -0.707107" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="legs_1_right_leg_1_rubber_1" />
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="link_legs_1_x8_2_inner_1" pos="0.0855183 0.1301 -0.110842" quat="-0.5 0.5 -0.5 -0.5">
+        <inertial pos="-0.0139999 0.00808276 -0.0841937" quat="0.943165 0.00202151 0.0739885 -0.323977" mass="0.908437" diaginertia="0.00193362 0.00160564 0.000735385" />
+        <joint name="joint_legs_1_x8_2_dof_x8" pos="0 0 0" axis="0 0 1" limited="true" range="-1.0472 1.0472" />
+        <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_x8_2_inner_1" />
+        <geom pos="0 -0.0155 -0.033" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="legs_1_left_leg_1_hip_rotate_1" />
+        <geom pos="-0.0455682 -0.0129264 -0.073313" quat="-0.353553 0.353553 -0.612372 0.612372" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="legs_1_left_leg_1_x8_1_outer_1" />
+        <geom pos="-0.0285788 0.0165 -0.098" quat="-0.353553 0.353553 -0.612372 0.612372" type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="legs_1_left_leg_1_x8_1_pcb_1" />
+        <body name="link_legs_1_left_leg_1_x8_1_inner_1" pos="-0.0285788 0.0165 -0.098" quat="-0.353553 -0.353553 0.612372 0.612372">
+          <inertial pos="0.0381978 0.0219579 -0.136279" quat="0.943012 0.0485 -0.117101 0.307673" mass="1.31359" diaginertia="0.00555412 0.0047517 0.00164376" />
+          <joint name="joint_legs_1_left_leg_1_x8_1_dof_x8" pos="0 0 0" axis="0 0 1" limited="true" range="-1.5708 1.0472" />
+          <geom type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_left_leg_1_x8_1_inner_1" />
+          <geom pos="0 -0.0155 -0.033" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="legs_1_left_leg_1_thigh_rotate_left_1" />
+          <geom pos="0.0671321 0.0197238 -0.104594" quat="0.612372 0.612372 -0.353553 -0.353553" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_left_leg_1_x10_1_outer_1" />
+          <geom pos="0.0589432 0.0339075 -0.155" quat="0.183013 0.683013 0.183013 -0.683013" type="mesh" rgba="0.498039 0.498039 0.498039 0.501961" mesh="legs_1_left_leg_1_x10_1_pcb_1" />
+          <body name="link_legs_1_left_leg_1_x10_1_inner_1" pos="0.0589432 0.0339075 -0.155" quat="-0.683013 0.183013 -0.683013 -0.183013">
+            <inertial pos="0.000763746 -0.0077689 -0.086012" quat="0.251674 0.671144 -0.0292431 0.696686" mass="1.44314" diaginertia="0.00385024 0.00340834 0.00314757" />
+            <joint name="joint_legs_1_left_leg_1_x10_1_dof_x10" pos="0 0 0" axis="0 0 1" limited="true" range="-0.785398 2.35619" />
+            <geom type="mesh" rgba="0.980392 0.713726 0.00392157 0.501961" mesh="legs_1_left_leg_1_x10_1_inner_1" />
+            <geom pos="0.0155885 -0.009 -0.0405" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="legs_1_left_leg_1_belt_thigh_left_1" />
+            <geom pos="0.00554001 0.0527097 -0.118" quat="-0.866025 -4.01924e-08 0 0.5" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_left_leg_1_x10_2_outer_1" />
+            <geom pos="-2.6548e-09 3.34021e-09 -0.118" quat="-0.258819 -2.84203e-08 -2.84203e-08 0.965926" type="mesh" rgba="0.498039 0.498039 0.498039 0.501961" mesh="legs_1_left_leg_1_x10_2_pcb_1" />
+            <body name="link_legs_1_left_leg_1_x10_2_inner_1" pos="-2.6548e-09 3.34021e-09 -0.118" quat="3.44263e-08 -0.258819 0.965926 6.00592e-09">
+              <inertial pos="0 4.86565e-11 -0.023577" mass="0.202574" diaginertia="7.56752e-05 7.56752e-05 6.53659e-05" />
+              <joint name="joint_legs_1_left_leg_1_x10_2_dof_x10" pos="0 0 0" axis="0 0 1" limited="true" range="0 1.5708" />
+              <geom type="mesh" rgba="0.980392 0.713726 0.00392157 0.501961" mesh="legs_1_left_leg_1_x10_2_inner_1" />
+              <geom pos="-0.0155885 -0.009 -0.0405" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.917647 0.917647 0.917647 0.501961" mesh="legs_1_left_leg_1_thigh_htd_5mm_44t_pulley_1" />
+            </body>
+            <body name="link_legs_1_left_leg_1_51t_hdt5_15mm_belt_knee_left_1" pos="0.0906636 -0.157034 -0.0795" quat="-0.866025 -4.01924e-08 0 0.5">
+              <inertial pos="0.067946 0.0350222 0.0362612" quat="0.979027 -0.13582 -0.0408049 -0.146263" mass="0.559579" diaginertia="0.00184063 0.00175103 0.000483065" />
+              <joint name="joint_legs_1_left_leg_1_knee_revolute" pos="0 0 0" axis="0 0 -1" limited="true" range="-1.5708 0.785398" />
+              <geom type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="legs_1_left_leg_1_51t_hdt5_15mm_belt_knee_left_1" />
+              <geom pos="0.0705 0.014 0.0535" quat="-1.64085e-08 0.707107 -0.707107 1.64085e-08" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_left_leg_1_x6_1_outer_1" />
+              <geom pos="0.0705 0.05 0.0535" quat="-2.00962e-08 -0.5 -0.866025 -1.16026e-08" type="mesh" rgba="0.980392 0.713726 0.00392157 0.501961" mesh="legs_1_left_leg_1_x6_1_pcb_1" />
+              <body name="link_legs_1_left_leg_1_ankle_pulley_48t_1" pos="0.24 0.05 0" quat="0.707107 0 0 -0.707107">
+                <inertial pos="0.0583897 0.0586158 0.011128" quat="-0.192074 0.682912 0.190983 0.678427" mass="0.219424" diaginertia="0.000467205 0.000423937 8.61629e-05" />
+                <joint name="joint_legs_1_left_leg_1_ankle_revolute" pos="0 0 0" axis="0 0 -1" limited="true" range="-0.785398 0.785398" />
+                <geom type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="legs_1_left_leg_1_ankle_pulley_48t_1" />
+                <geom pos="0 0.0270536 0.021" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="legs_1_left_leg_1_ankle_1" />
+                <geom pos="0.0645536 0.0663036 0.0214593" quat="0.5 -0.5 0.5 -0.5" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_left_leg_1_x4_1_inner_1" />
+                <body name="link_legs_1_left_leg_1_x4_1_outer_1" pos="0.0990536 0.070981 0.0109535" quat="1.89469e-08 -0.707107 0 -0.707107">
+                  <inertial pos="1.40239e-09 -0.0149273 -0.046385" quat="0.924887 -0.380242 0 0" mass="0.390442" diaginertia="0.00139916 0.00114182 0.000664788" />
+                  <joint name="joint_legs_1_left_leg_1_x4_1_dof_x4" pos="0 0 0" axis="0 0 -1" limited="true" range="-0.785398 0.785398" />
+                  <geom type="mesh" rgba="0.768627 0.886275 0.952941 0.501961" mesh="legs_1_left_leg_1_x4_1_outer_1" />
+                  <geom quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_left_leg_1_x4_1_pcb_1" />
+                  <geom pos="-0.0159099 0.0159099 0.0135" quat="-1 -4.64102e-08 0 0" type="mesh" rgba="0.615686 0.811765 0.929412 0.501961" mesh="legs_1_left_leg_1_foot_1" />
+                  <geom pos="2e-09 -0.037 -0.0853793" quat="1.64085e-08 1.64085e-08 -0.707107 -0.707107" type="mesh" rgba="0.647059 0.647059 0.647059 0.501961" mesh="legs_1_left_leg_1_rubber_1" />
+                </body>
+              </body>
+              <body name="link_legs_1_left_leg_1_x6_1_inner_1" pos="0.0705 0.05 0.0535" quat="0.5 -8.49366e-09 8.49366e-09 0.866025">
+                <inertial pos="2.59957e-11 1.25452e-10 -0.0254599" quat="0.707107 0 0 0.707107" mass="0.0835872" diaginertia="2.42239e-05 2.26952e-05 1.313e-05" />
+                <joint name="joint_legs_1_left_leg_1_x6_1_dof_x6" pos="0 0 0" axis="0 0 1" limited="true" range="-1.5708 1.5708" />
+                <geom type="mesh" rgba="0.498039 0.498039 0.498039 0.501961" mesh="legs_1_left_leg_1_x6_1_inner_1" />
+                <geom pos="0.00575 0.00995929 -0.0325" quat="-2.32051e-08 1 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 0.501961" mesh="legs_1_left_leg_1_calf_pulley_24t_1" />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </body>
+  </worldbody>
+</mujoco>
