@@ -79,6 +79,9 @@ class Matplotlib2DPlotter(BasePlotter):
 
     def show(self):
         plt.show()
+    
+    def save(self, name):
+        plt.savefig(name)
 
     def _min(self, x, y):
         if x is None:
