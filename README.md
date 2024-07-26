@@ -184,7 +184,7 @@ You can run [WandB](https://wandb.ai/) with Isaac Gym Envs by setting `wandb_act
 ## Capture videos
 
 
-We implement the standard `env.render(mode='rgb_rray')` `gym` API to provide an image of the simulator viewer. Additionally, we can leverage `gym.wrappers.RecordVideo` to help record videos that shows agent's gameplay. Consider running the following file which should produce a video in the `videos` folder.
+We implement the standard `env.render(mode='rgb_array')` `gym` API to provide an image of the simulator viewer. Additionally, we can leverage `gym.wrappers.RecordVideo` to help record videos that shows agent's gameplay. Consider running the following file which should produce a video in the `videos` folder.
 
 ```python
 import gym
