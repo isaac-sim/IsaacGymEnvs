@@ -622,7 +622,6 @@ def compute_franka_reward(
     pos_reward = 1.0 - torch.tanh(10.0 * delta_pos)  # Scale based on distance
 
     # 2. Orientation Reward: Reward based on alignment of the cube's orientation with a desired orientation
-    # Assuming you have a desired goal orientation (e.g., no rotation)
     cube_quat = states["cube_quat"]
     goal_quat = states["goal_quat"]  # You can define a goal quaternion if needed
     delta_quat = quat_mul(cube_quat, quat_conjugate(goal_quat))
