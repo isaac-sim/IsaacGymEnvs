@@ -38,6 +38,7 @@ from .factory.factory_task_nut_bolt_place import FactoryTaskNutBoltPlace
 from .factory.factory_task_nut_bolt_screw import FactoryTaskNutBoltScrew
 from .franka_cabinet import FrankaCabinet
 from .franka_cube_stack import FrankaCubeStack
+from. franka_cube_push import FrankaCubePush
 from .humanoid import Humanoid
 from .humanoid_amp import HumanoidAMP
 from .ingenuity import Ingenuity
@@ -105,6 +106,7 @@ isaacgym_task_map = {
     "IndustRealTaskGearsInsert": IndustRealTaskGearsInsert,
     "FrankaCabinet": FrankaCabinet,
     "FrankaCubeStack": FrankaCubeStack,
+    "FrankaCubePush": FrankaCubePush,
     "Humanoid": Humanoid,
     "HumanoidAMP": HumanoidAMP,
     "Ingenuity": Ingenuity,
