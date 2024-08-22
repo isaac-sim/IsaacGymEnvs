@@ -17,12 +17,6 @@ env:
   cubeInitOriNoise: 0.0
   cubeGoalPosNoise: 0.0
   cubeGoalOriNoise: 0.0
-  cubeSizeNoise: 0.0
-
-  cubeFrictionRange: [0.5, 0.5]
-  cubeMassRange: [0.5, 0.5]
-  cubeInertiaNoise: 0.0
-
 
   frankaPositionNoise: 0.0
   frankaRotationNoise: 0.0
@@ -71,4 +65,85 @@ sim:
 task:
   randomize: True
   randomization_params:
-  
+    frequency: 720   # Define how many simulation steps between generating new randomizations
+    observations:
+      range: [0, .002] # range for the white noise
+      range_correlated: [0, .001] # range for correlated noise, refreshed with freq `frequency`
+      operation: "additive"
+      distribution: "gaussian"
+      # schedule: "linear"   # "constant" is to turn on noise after `schedule_steps` num steps
+      # schedule_steps: 40000
+    actions:
+      range: [0., .05]
+      range_correlated: [0, .015] # range for correlated noise, refreshed with freq `frequency`
+      operation: "additive"
+      distribution: "gaussian"
+      # schedule: "linear"  # "linear" will linearly interpolate between no rand and max rand
+      # schedule_steps: 40000
+    sim_params: 
+      gravity:
+        range: [0, 0.4]
+        operation: "additive"
+        distribution: "gaussian"
+        # schedule: "linear"  # "linear" will linearly interpolate between no rand and max rand
+        # schedule_steps: 40000
+
+    actor_params:
+      franka:
+        color: True
+        dof_properties:
+          damping:
+            range: [0.1, 0.5]
+            operation: "scaling"
+            distribution: "loguniform"
+            # schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            # schedule_steps: 30000
+          stiffness:
+            range: [0.1, 0.5]
+            operation: "scaling"
+            distribution: "loguniform"
+            # schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            # schedule_steps: 30000
+          lower: #lower limit of DOF (rad or m)
+            range: [-0.01, 0.01]
+            operation: "additive"
+            distribution: "gaussian"
+            # schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            # schedule_steps: 30000
+          upper: #upper limit of DOF (rad or m)
+            range: [-0.01, 0.01]
+            operation: "additive"
+            distribution: "gaussian"
+            # schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            # schedule_steps: 30000
+          rigid_body_properties:
+            mass:
+              range: [0.5, 1.5]
+              operation: "scaling"
+              distribution: "uniform"
+              setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
+              # schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+              # schedule_steps: 30000
+          rigid_shape_properties:
+            friction:
+              num_buckets: 250
+              range: [0.5, 1.5]
+              operation: "scaling"
+              distribution: "uniform"
+      
+      cube:
+        rigid_body_properties:
+          mass:
+            range: [0.5, 1.5]
+            operation: "scaling"
+            distribution: "uniform"
+            setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
+            # schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            # schedule_steps: 30000
+        rigid_shape_properties:
+          friction:
+            num_buckets: 250
+            range: [0.5, 1.5]
+            operation: "scaling"
+            distribution: "uniform"
+
