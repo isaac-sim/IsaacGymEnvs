@@ -13,7 +13,7 @@ env:
   clipObservations: 5.0
   clipActions: 1.0
 
-  cubeInitPosNoise: 0.0
+  cubeInitPosNoise: 0.2
   cubeInitOriNoise: 0.0
   cubeGoalPosNoise: 0.0
   cubeGoalOriNoise: 0.0
@@ -90,7 +90,6 @@ task:
 
     actor_params:
       franka:
-        color: True
         dof_properties:
           damping:
             range: [0.1, 0.5]
@@ -116,22 +115,23 @@ task:
             distribution: "gaussian"
             # schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
             # schedule_steps: 30000
-          rigid_body_properties:
-            mass:
-              range: [0.5, 1.5]
-              operation: "scaling"
-              distribution: "uniform"
-              setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
-              # schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
-              # schedule_steps: 30000
-          rigid_shape_properties:
-            friction:
-              num_buckets: 250
-              range: [0.5, 1.5]
-              operation: "scaling"
-              distribution: "uniform"
+        rigid_body_properties:
+          mass:
+            range: [0.01, 0.1]
+            operation: "scaling"
+            distribution: "uniform"
+            setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
+            # schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            # schedule_steps: 30000
+        rigid_shape_properties:
+          friction:
+            num_buckets: 250
+            range: [0.5, 1.5]
+            operation: "scaling"
+            distribution: "uniform"
       
       cube:
+        color: True
         rigid_body_properties:
           mass:
             range: [0.5, 1.5]

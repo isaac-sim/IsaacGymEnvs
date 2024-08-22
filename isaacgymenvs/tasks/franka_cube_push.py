@@ -48,6 +48,7 @@ class FrankaCubePush(VecTask):
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
 
+        self.randomize = self.cfg["task"]["randomize"]
         self.max_episode_length = self.cfg["env"]["episodeLength"]
 
         self.action_scale = self.cfg["env"]["actionScale"]
@@ -57,21 +58,16 @@ class FrankaCubePush(VecTask):
         self.init_cube_ori_noise = self.cfg["env"]["cubeInitOriNoise"]
         self.goal_cube_pos_noise = self.cfg["env"]["cubeGoalPosNoise"]
         self.goal_cube_ori_noise = self.cfg["env"]["cubeGoalOriNoise"]
-    
-        # Cube Inertial Randomization Parameters
-        self.cube_mass_range = self.cfg["env"]["cubeMassRange"]
-        self.cube_friction_range = self.cfg["env"]["cubeFrictionRange"]
-        self.cube_inertia_noise = self.cfg["env"]["cubeInertiaNoise"]
-        self.cube_size_noise = self.cfg["env"]["cubeSizeNoise"]
-        
-        
+
         # Robot Start Pose Noise TODO: Rename variable names Rotation -> Ori and Position -> Pos
         self.franka_position_noise = self.cfg["env"]["frankaPositionNoise"]
         self.franka_rotation_noise = self.cfg["env"]["frankaRotationNoise"]
         self.franka_dof_noise = self.cfg["env"]["frankaDofNoise"]
         self.aggregate_mode = self.cfg["env"]["aggregateMode"]
-
         
+        # Domain Randomization Parameters
+        self.randomization_params = self.cfg["task"]["randomization_params"]
+
         # Create dicts to pass to reward function
         self.reward_settings = {
             "r_pos_scale": self.cfg["env"]["posRewardScale"],
@@ -155,6 +151,10 @@ class FrankaCubePush(VecTask):
             self.device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
         self._create_ground_plane()
         self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
+
+        # apply domain randomization if true
+        if self.randomize:
+            self.apply_randomizations(self.randomization_params)
 
     def _create_ground_plane(self):
         plane_params = gymapi.PlaneParams()
@@ -579,6 +579,7 @@ class FrankaCubePush(VecTask):
 
     def post_physics_step(self):
         self.progress_buf += 1
+        self.randomize_buf += 1
 
         env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         if len(env_ids) > 0:
