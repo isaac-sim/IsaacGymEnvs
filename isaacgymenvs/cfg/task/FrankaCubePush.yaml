@@ -17,9 +17,10 @@ env:
   cubeInitOriNoise: 0.0
   cubeGoalPosNoise: 0.0
   cubeGoalOriNoise: 0.0
+  cubeSizeNoise: 0.0
 
-  cubeFrictionNoise: 0.0
-  cubeMassNoise: 0.0
+  cubeFrictionRange: [0.5, 0.5]
+  cubeMassRange: [0.5, 0.5]
   cubeInertiaNoise: 0.0
 
 
@@ -68,4 +69,6 @@ sim:
     contact_collection: 0 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (broken - do not use!)
 
 task:
-  randomize: False
+  randomize: True
+  randomization_params:
+  

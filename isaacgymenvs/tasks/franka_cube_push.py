@@ -53,15 +53,16 @@ class FrankaCubePush(VecTask):
         self.action_scale = self.cfg["env"]["actionScale"]
         
         # Cube location Randomization Parameters
-        self.cube_init_pos_noise = self.cfg["env"]["cubeInitPosNoise"]
-        self.cube_init_ori_noise = self.cfg["env"]["cubeInitOriNoise"]
-        self.cube_goal_pos_noise = self.cfg["env"]["cubeGoalPosNoise"]
-        self.cube_goal_ori_noise = self.cfg["env"]["cubeGoalOriNoise"]
+        self.init_cube_pos_noise = self.cfg["env"]["cubeInitPosNoise"]
+        self.init_cube_ori_noise = self.cfg["env"]["cubeInitOriNoise"]
+        self.goal_cube_pos_noise = self.cfg["env"]["cubeGoalPosNoise"]
+        self.goal_cube_ori_noise = self.cfg["env"]["cubeGoalOriNoise"]
     
         # Cube Inertial Randomization Parameters
-        self.cube_mass_noise = self.cfg["env"]["cubeMassNoise"]
-        self.cube_friction_noise = self.cfg["env"]["cubeFrictionNoise"]
+        self.cube_mass_range = self.cfg["env"]["cubeMassRange"]
+        self.cube_friction_range = self.cfg["env"]["cubeFrictionRange"]
         self.cube_inertia_noise = self.cfg["env"]["cubeInertiaNoise"]
+        self.cube_size_noise = self.cfg["env"]["cubeSizeNoise"]
         
         
         # Robot Start Pose Noise TODO: Rename variable names Rotation -> Ori and Position -> Pos
@@ -84,7 +85,7 @@ class FrankaCubePush(VecTask):
             "Invalid control type specified. Must be one of: {osc, joint_tor}"
 
         # dimensions
-        # obs include: cube_pos(3) + cube_quat(4) + cube_goal_dist_pos(3) + eef_pose (7)
+        # obs include: cube_pos(3) + cube_quat(4) + goal_cube_dist_pos(3) + eef_pose (7)
         self.cfg["env"]["numObservations"] = 17 if self.control_type == "osc" else 26
         # actions include: delta EEF if OSC (6) or joint torques (7)
         self.cfg["env"]["numActions"] = 6 if self.control_type == "osc" else 7
@@ -166,6 +167,8 @@ class FrankaCubePush(VecTask):
 
         asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../assets")
         franka_asset_file = "urdf/franka_description/robots/franka_panda_gripper.urdf"
+        # TODO: Use multi-color cube for better visualization
+        cube_asset_file = "urdf/cube_multicolor.urdf"
 
         if "asset" in self.cfg["env"]:
             asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.cfg["env"]["asset"].get("assetRoot", asset_root))
@@ -200,11 +203,14 @@ class FrankaCubePush(VecTask):
         table_stand_asset = self.gym.create_box(self.sim, *[0.2, 0.2, table_stand_height], table_opts)
 
         # Create cubeAasset
-        self.cube_size = 0.1
+        self.cube_size = 0.1  
         cube_opts = gymapi.AssetOptions()
         cube_asset = self.gym.create_box(self.sim, *([self.cube_size] * 3), cube_opts)
         cube_color = gymapi.Vec3(0.6, 0.1, 0.0)
-
+        
+        # TODO: Create goal marker
+        
+    
         self.num_franka_bodies = self.gym.get_asset_rigid_body_count(franka_asset)
         self.num_franka_dofs = self.gym.get_asset_dof_count(franka_asset)
 
@@ -255,13 +261,13 @@ class FrankaCubePush(VecTask):
         table_stand_start_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
 
         # Define start pose for cubes (doesn't really matter since they're get overridden during reset() anyways)
-        cube_init_pose = gymapi.Transform()
-        cube_init_pose.p = gymapi.Vec3(-1.0, 0.0, 0.0)
-        cube_init_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
+        init_cube_pose = gymapi.Transform()
+        init_cube_pose.p = gymapi.Vec3(-1.0, 0.0, 0.0)
+        init_cube_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
         
-        cube_goal_pose = gymapi.Transform()
-        cube_goal_pose.p = gymapi.Vec3(1.0, 0.0, 0.0)
-        cube_goal_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
+        goal_cube_pose = gymapi.Transform()
+        goal_cube_pose.p = gymapi.Vec3(1.0, 0.0, 0.0)
+        goal_cube_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
 
         # compute aggregate size
         num_franka_bodies = self.gym.get_asset_rigid_body_count(franka_asset)
@@ -306,8 +312,9 @@ class FrankaCubePush(VecTask):
             if self.aggregate_mode == 1:
                 self.gym.begin_aggregate(env_ptr, max_agg_bodies, max_agg_shapes, True)
 
+
             # Create cubes
-            self._cube_id = self.gym.create_actor(env_ptr, cube_asset, cube_init_pose, "cube", i, 2, 0)
+            self._cube_id = self.gym.create_actor(env_ptr, cube_asset, init_cube_pose, "cube", i, 2, 0)
             # Set colors
             self.gym.set_rigid_body_color(env_ptr, self._cube_id, 0, gymapi.MESH_VISUAL, cube_color)
 
@@ -383,13 +390,13 @@ class FrankaCubePush(VecTask):
 
     def _update_states(self):
         self.states.update({
-            # Franka
+            # Franka 
             "q": self._q[:, :],
             "eef_pos": self._eef_state[:, :3],
             "eef_quat": self._eef_state[:, 3:7],
             "eef_vel": self._eef_state[:, 7:],
 
-            # Cubes
+            # Object Observable Information
             "cube_quat": self._cube_state[:, 3:7],
             "cube_pos": self._cube_state[:, :3],
             "cube_contact": self._cube_state[:, :3] - self._eef_state[:, :3], # cube to eef pos diff
@@ -431,6 +438,7 @@ class FrankaCubePush(VecTask):
         # maxs = {ob: torch.max(self.states[ob]).item() for ob in obs}
 
         return self.obs_buf
+    
 
     def reset_idx(self, env_ids):
         
@@ -482,7 +490,7 @@ class FrankaCubePush(VecTask):
         self.gym.set_actor_root_state_tensor_indexed(
             self.sim, gymtorch.unwrap_tensor(self._root_state),
             gymtorch.unwrap_tensor(multi_env_ids_cubes_int32), len(multi_env_ids_cubes_int32))
-
+        
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 0
     def _reset_init_cube_state(self, env_ids, check_valid=True):
@@ -497,31 +505,32 @@ class FrankaCubePush(VecTask):
 
         # Initialize buffer to hold sampled values
         num_resets = len(env_ids)
-        sampled_cube_state = torch.zeros(num_resets, 13, device=self.device)
+        sampled_init_cube_state = torch.zeros(num_resets, 13, device=self.device)
+        sampled_goal_cube_state = torch.zeros(num_resets, 13, device=self.device)
 
         # Sample position and orientation for the cube
         centered_cube_xy_state = torch.tensor(self._table_surface_pos[:2], device=self.device, dtype=torch.float32)
         cube_height = self.states["cube_size"].squeeze(-1)
 
         # Set fixed z value based on table height and cube height
-        sampled_cube_state[:, 2] = self._table_surface_pos[2] + cube_height[env_ids] / 2
+        sampled_init_cube_state[:, 2] = self._table_surface_pos[2] + cube_height[env_ids] / 2
+        sampled_goal_cube_state[:, 2] = self._table_surface_pos[2] + cube_height[env_ids] / 2
 
         # Set no rotation (quat w = 1)
-        sampled_cube_state[:, 6] = 1.0
+        sampled_init_cube_state[:, 6] = 1.0
+        sampled_goal_cube_state[:, 6] = 1.0
 
         # Sample x, y values with noise
-        sampled_cube_state[:, :2] = centered_cube_xy_state.unsqueeze(0) + \
-                                    2.0 * self.start_position_noise * (torch.rand(num_resets, 2, device=self.device) - 0.5)
-
-        # Sample rotation if noise is enabled
-        if self.start_rotation_noise > 0:
-            aa_rot = torch.zeros(num_resets, 3, device=self.device)
-            aa_rot[:, 2] = 2.0 * self.start_rotation_noise * (torch.rand(num_resets, device=self.device) - 0.5)
-            sampled_cube_state[:, 3:7] = quat_mul(axisangle2quat(aa_rot), sampled_cube_state[:, 3:7])
+        sampled_init_cube_state[:, :2] = centered_cube_xy_state.unsqueeze(0) + \
+                                    2.0 * self.init_cube_pos_noise * (torch.rand(num_resets, 2, device=self.device) - 0.5)
+        sampled_goal_cube_state[:, :2] = centered_cube_xy_state.unsqueeze(0) + \
+                                    2.0 * self.goal_cube_pos_noise * (torch.rand(num_resets, 2, device=self.device) - 0.5)  
 
         # Set the new sampled values as the initial state for the cube
-        self._init_cube_state[env_ids, :] = sampled_cube_state
-
+        self._init_cube_state[env_ids, :] = sampled_init_cube_state
+        self._goal_cube_state[env_ids, :] = sampled_goal_cube_state
+        
+        
     def _compute_osc_torques(self, dpose):
         # Solve for Operational Space Control # Paper: khatib.stanford.edu/publications/pdfs/Khatib_1987_RA.pdf
         # Helpful resource: studywolf.wordpress.com/2013/09/17/robot-control-4-operation-space-control/
@@ -623,7 +632,7 @@ def compute_franka_reward(
 
     # 2. Orientation Reward: Reward based on alignment of the cube's orientation with a desired orientation
     cube_quat = states["cube_quat"]
-    goal_quat = states["goal_quat"]  # You can define a goal quaternion if needed
+    goal_quat = states["goal_quat"]  
     delta_quat = quat_mul(cube_quat, quat_conjugate(goal_quat))
     
     ori_reward = 1.0 - torch.tanh(10.0 * torch.norm(delta_quat, dim=-1))  # Quaternion difference metric
