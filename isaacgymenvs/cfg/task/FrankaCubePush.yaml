@@ -13,7 +13,7 @@ env:
   clipObservations: 5.0
   clipActions: 1.0
 
-  cubeInitPosNoise: 0.2
+  cubeInitPosNoise: 0.0
   cubeInitOriNoise: 0.0
   cubeGoalPosNoise: 0.0
   cubeGoalOriNoise: 0.0
@@ -27,7 +27,7 @@ env:
 
   actionScale: 1.0
 
-  posRewardScale: 0.1
+  posRewardScale: 10.0
   oriRewardScale: 0.1
   contactRewardScale: 0.1
 
@@ -82,7 +82,7 @@ task:
       # schedule_steps: 40000
     sim_params: 
       gravity:
-        range: [0, 0.4]
+        range: [0, 0.1]
         operation: "additive"
         distribution: "gaussian"
         # schedule: "linear"  # "linear" will linearly interpolate between no rand and max rand
@@ -131,10 +131,9 @@ task:
             distribution: "uniform"
       
       cube:
-        color: True
         rigid_body_properties:
           mass:
-            range: [0.5, 1.5]
+            range: [0.01, 0.02]
             operation: "scaling"
             distribution: "uniform"
             setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
@@ -143,7 +142,7 @@ task:
         rigid_shape_properties:
           friction:
             num_buckets: 250
-            range: [0.5, 1.5]
+            range: [0.001, 0.002]
             operation: "scaling"
             distribution: "uniform"
 

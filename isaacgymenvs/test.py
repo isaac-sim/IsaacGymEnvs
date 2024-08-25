@@ -2,7 +2,7 @@ import isaacgym
 import isaacgymenvs
 import torch
 
-num_envs = 10
+num_envs = 64
 
 envs = isaacgymenvs.make(
 	seed=0, 
