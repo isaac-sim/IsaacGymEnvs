@@ -91,7 +91,7 @@ class FrankaCubePush(VecTask):
         self.cfg["env"]["numObservations"] = 17 if self.control_type == "osc" else 26
         # actions include: delta EEF if OSC (6) or joint torques (7)
         self.cfg["env"]["numActions"] = 6 if self.control_type == "osc" else 7
-
+        
         # Values to be filled in at runtime
         self.states = {}                        # will be dict filled with relevant states to use for reward calculation
         self.handles = {}                       # will be dict mapping names to relevant sim handles
@@ -508,11 +508,7 @@ class FrankaCubePush(VecTask):
         sphere_pose = gymapi.Transform(r=sphere_rot)
         sphere_geom = gymutil.WireframeSphereGeometry(0.02, 12, 12, sphere_pose, color=(1, 1, 0))
 
-        
-        # Visualize goal cube state
-        # for i in range(len(env_ids)):
-            
-        #     gymutil.draw_lines(axes_geom, gym, viewer, cab.env, top_drawer_grasp)
+    
 
         
     def _reset_init_cube_state(self, env_ids, check_valid=True):
@@ -538,7 +534,7 @@ class FrankaCubePush(VecTask):
         sampled_init_cube_state[:, 2] = self._table_surface_pos[2] + cube_height[env_ids] / 2
         sampled_goal_cube_state[:, 2] = self._table_surface_pos[2] + cube_height[env_ids] / 2
 
-        # Set no rotation (quat w = 1)
+        #sample orientation
         sampled_init_cube_state[:, 6] = 1.0
         sampled_goal_cube_state[:, 6] = 1.0
 
