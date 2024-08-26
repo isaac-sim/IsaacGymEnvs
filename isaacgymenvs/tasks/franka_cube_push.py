@@ -4,9 +4,11 @@ import torch
 
 from isaacgym import gymtorch
 from isaacgym import gymapi
+from isaacgym import gymutil
 
-from isaacgymenvs.utils.torch_jit_utils import quat_mul, to_torch, tensor_clamp, quat_conjugate  
+from isaacgymenvs.utils.torch_jit_utils import quat_mul, quat_apply, to_torch, tensor_clamp, quat_conjugate  
 from isaacgymenvs.tasks.base.vec_task import VecTask
+
 
 
 @torch.jit.script
@@ -48,6 +50,9 @@ class FrankaCubePush(VecTask):
 
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
+        
+        # Initialize gym
+        self.gym = gymapi.acquire_gym()
 
         self.randomize = self.cfg["task"]["randomize"]
         self.max_episode_length = self.cfg["env"]["episodeLength"]
@@ -93,11 +98,10 @@ class FrankaCubePush(VecTask):
         self.num_dofs = None                    # Total number of DOFs per env
         self.actions = None                     # Current actions to be deployed
         self._init_cube_state = None           # Initial state of cube for the current env
-        self._init_goal_cube_state = None     # Initial state of goal cube for the current env         # Goal state of cube for the current env
         self._cube_state = None                # Current state of cube for the current env
         self._goal_cube_state = None           # Goal state of cube for the current env
         self._cube_id = None                   # Actor ID corresponding to cube for a given env
-        self._goal_cube_id = None              # Actor ID corresponding to goal cube for a given env
+
         
         # Tensor placeholders
         self._root_state = None             # State of root body        (n_envs, 13)
@@ -155,6 +159,7 @@ class FrankaCubePush(VecTask):
         self._create_ground_plane()
         self._create_envs(self.num_envs, self.cfg["env"]['envSpacing'], int(np.sqrt(self.num_envs)))
 
+
         # apply domain randomization if true
         if self.randomize:
             self.apply_randomizations(self.randomization_params)
@@ -210,14 +215,6 @@ class FrankaCubePush(VecTask):
         cube_opts = gymapi.AssetOptions()
         cube_asset = self.gym.create_box(self.sim, *([self.cube_size] * 3), cube_opts)
         cube_color = gymapi.Vec3(0.6, 0.1, 0.0)
-        
-        # Create goal cube asset
-        self.goal_cube_size = self.cube_size
-        goal_cube_opts = gymapi.AssetOptions()
-        goal_cube_asset = self.gym.create_box(self.sim, *([self.goal_cube_size] * 3), goal_cube_opts)
-        goal_cube_color = gymapi.Vec3(0.0, 1.0, 0.0)
-        
- 
     
         self.num_franka_bodies = self.gym.get_asset_rigid_body_count(franka_asset)
         self.num_franka_dofs = self.gym.get_asset_dof_count(franka_asset)
@@ -273,10 +270,6 @@ class FrankaCubePush(VecTask):
         init_cube_pose.p = gymapi.Vec3(1.0, 1.0, 0.0)
         init_cube_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
         
-        init_goal_cube_pose = gymapi.Transform()
-        init_goal_cube_pose.p = gymapi.Vec3(1.0, 0.0, 0.0)
-        init_goal_cube_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
-
         # compute aggregate size
         num_franka_bodies = self.gym.get_asset_rigid_body_count(franka_asset)
         num_franka_shapes = self.gym.get_asset_rigid_shape_count(franka_asset)
@@ -287,6 +280,7 @@ class FrankaCubePush(VecTask):
 
         # Create environments
         for i in range(self.num_envs):
+            
             # create env instance
             env_ptr = self.gym.create_env(self.sim, lower, upper, num_per_row)
 
@@ -320,14 +314,12 @@ class FrankaCubePush(VecTask):
             if self.aggregate_mode == 1:
                 self.gym.begin_aggregate(env_ptr, max_agg_bodies, max_agg_shapes, True)
 
-
             # Create cubes
-            self._cube_id = self.gym.create_actor(env_ptr, cube_asset, init_cube_pose, "cube", i, 2, 0)
-            self._goal_cube_id = self.gym.create_actor(env_ptr, goal_cube_asset, init_goal_cube_pose, "goal_cube", i, 5, 0)
-            
+            self._cube_id = self.gym.create_actor(env_ptr, cube_asset, init_cube_pose, "cube", i, 0, 0)
+
             # Set colors
             self.gym.set_rigid_body_color(env_ptr, self._cube_id, 0, gymapi.MESH_VISUAL, cube_color)
-            self.gym.set_rigid_body_color(env_ptr, self._goal_cube_id, 0, gymapi.MESH_VISUAL, goal_cube_color)
+
             
 
             if self.aggregate_mode > 0:
@@ -339,7 +331,7 @@ class FrankaCubePush(VecTask):
 
         # Setup init state buffer
         self._init_cube_state = torch.zeros(self.num_envs, 13, device=self.device)
-        self._init_goal_cube_state = torch.zeros(self.num_envs, 13, device=self.device)
+        self._goal_cube_state = torch.zeros(self.num_envs, 13, device=self.device)
 
         # Setup data
         self.init_data()
@@ -354,7 +346,6 @@ class FrankaCubePush(VecTask):
 
             # Cube
             "cube_body_handle": self.gym.find_actor_rigid_body_handle(self.envs[0], self._cube_id, "box"),
-            "goal_cube_body_handle": self.gym.find_actor_rigid_body_handle(self.envs[0], self._goal_cube_id, "box"),
         }
 
         # Get total DOFs
@@ -378,13 +369,12 @@ class FrankaCubePush(VecTask):
         mm = gymtorch.wrap_tensor(_massmatrix)
         self._mm = mm[:, :7, :7]
         self._cube_state = self._root_state[:, self._cube_id, :]
-        self._goal_cube_state = self._root_state[:, self._goal_cube_id, :]
+        
    
 
         # Initialize states
         self.states.update({
             "cube_size": torch.ones_like(self._eef_state[:, 0]) * self.cube_size,
-            "goal_cube_size": torch.ones_like(self._eef_state[:, 0]) * self.goal_cube_size,
         })
         
 
@@ -397,7 +387,7 @@ class FrankaCubePush(VecTask):
 
 
         # Initialize indices
-        self._global_indices = torch.arange(self.num_envs * 5, dtype=torch.int32,
+        self._global_indices = torch.arange(self.num_envs * 4, dtype=torch.int32,
                                            device=self.device).view(self.num_envs, -1)
 
     def _update_states(self):
@@ -466,8 +456,8 @@ class FrankaCubePush(VecTask):
 
         # Write these new init states to the sim states
         self._cube_state[env_ids] = self._init_cube_state[env_ids]
-        self._goal_cube_state[env_ids] = self._init_goal_cube_state[env_ids]
-   
+        self._goal_cube_state[env_ids] = self._goal_cube_state[env_ids]
+        
         # Reset agent
         reset_noise = torch.rand((len(env_ids), 9), device=self.device)
         pos = tensor_clamp(
@@ -503,13 +493,28 @@ class FrankaCubePush(VecTask):
                                               len(multi_env_ids_int32))
 
         # Update cube states
-        multi_env_ids_cubes_int32 = self._global_indices[env_ids, -2:].flatten()
+        multi_env_ids_cubes_int32 = self._global_indices[env_ids, -1:].flatten()
         self.gym.set_actor_root_state_tensor_indexed(
             self.sim, gymtorch.unwrap_tensor(self._root_state),
             gymtorch.unwrap_tensor(multi_env_ids_cubes_int32), len(multi_env_ids_cubes_int32))
         
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 0
+        
+        # visualize goal cube state
+        axes_geom = gymutil.AxesGeometry(0.1)
+        # Create a wireframe sphere
+        sphere_rot = gymapi.Quat.from_euler_zyx(0.5 * 3.14, 0, 0)
+        sphere_pose = gymapi.Transform(r=sphere_rot)
+        sphere_geom = gymutil.WireframeSphereGeometry(0.02, 12, 12, sphere_pose, color=(1, 1, 0))
+
+        
+        # Visualize goal cube state
+        # for i in range(len(env_ids)):
+            
+        #     gymutil.draw_lines(axes_geom, gym, viewer, cab.env, top_drawer_grasp)
+
+        
     def _reset_init_cube_state(self, env_ids, check_valid=True):
         """
         Reset the cube's position based on self.startPositionNoise and self.startRotationNoise.
@@ -523,7 +528,7 @@ class FrankaCubePush(VecTask):
         # Initialize buffer to hold sampled values
         num_resets = len(env_ids)
         sampled_init_cube_state = torch.zeros(num_resets, 13, device=self.device)
-        sampled_init_goal_cube_state = torch.zeros(num_resets, 13, device=self.device)
+        sampled_goal_cube_state = torch.zeros(num_resets, 13, device=self.device)
 
         # Sample position and orientation for the cube
         centered_cube_xy_state = torch.tensor(self._table_surface_pos[:2], device=self.device, dtype=torch.float32)
@@ -531,24 +536,22 @@ class FrankaCubePush(VecTask):
 
         # Set fixed z value based on table height and cube height
         sampled_init_cube_state[:, 2] = self._table_surface_pos[2] + cube_height[env_ids] / 2
-        sampled_init_goal_cube_state[:, 2] = self._table_surface_pos[2] + cube_height[env_ids] / 2
+        sampled_goal_cube_state[:, 2] = self._table_surface_pos[2] + cube_height[env_ids] / 2
 
         # Set no rotation (quat w = 1)
         sampled_init_cube_state[:, 6] = 1.0
-        sampled_init_goal_cube_state[:, 6] = 1.0
+        sampled_goal_cube_state[:, 6] = 1.0
 
         # Sample x, y values with noise
         sampled_init_cube_state[:, :2] = centered_cube_xy_state.unsqueeze(0) + \
                                     2.0 * self.init_cube_pos_noise * (torch.rand(num_resets, 2, device=self.device) - 0.5)
-        sampled_init_goal_cube_state[:, :2] = centered_cube_xy_state.unsqueeze(0) + \
-                                    2.0 * self.goal_cube_pos_noise * (torch.rand(num_resets, 2, device=self.device) - 0.5)  
-       
+        sampled_goal_cube_state[:, :2] = centered_cube_xy_state.unsqueeze(0) + \
+                                    2.0 * self.goal_cube_pos_noise * (torch.rand(num_resets, 2, device=self.device) - 0.5)
 
         # Set the new sampled values as the initial state for the cube
         self._init_cube_state[env_ids, :] = sampled_init_cube_state
-        self._init_goal_cube_state[env_ids, :] = sampled_init_cube_state
-        
-        
+        self._goal_cube_state[env_ids, :] = sampled_goal_cube_state
+
     def _compute_osc_torques(self, dpose):
         # Solve for Operational Space Control # Paper: khatib.stanford.edu/publications/pdfs/Khatib_1987_RA.pdf
         # Helpful resource: studywolf.wordpress.com/2013/09/17/robot-control-4-operation-space-control/
@@ -622,7 +625,7 @@ class FrankaCubePush(VecTask):
 
             # Plot visualizations
             for i in range(self.num_envs):
-                for pos, rot in zip((eef_pos, cube_pos, cube_pos), (eef_rot, cube_rot, cube_rot)):
+                for pos, rot in zip((eef_pos, cube_pos, goal_cube_pos), (eef_rot, cube_rot, goal_cube_rot)):
                     px = (pos[i] + quat_apply(rot[i], to_torch([1, 0, 0], device=self.device) * 0.2)).cpu().numpy()
                     py = (pos[i] + quat_apply(rot[i], to_torch([0, 1, 0], device=self.device) * 0.2)).cpu().numpy()
                     pz = (pos[i] + quat_apply(rot[i], to_torch([0, 0, 1], device=self.device) * 0.2)).cpu().numpy()

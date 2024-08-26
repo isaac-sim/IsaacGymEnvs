@@ -8,12 +8,12 @@ env:
   numEnvs: ${resolve_default:8192,${...num_envs}}
   envSpacing: 1.5
   episodeLength: 300
-  enableDebugVis: False
+  enableDebugVis: True
 
   clipObservations: 5.0
   clipActions: 1.0
 
-  cubeInitPosNoise: 0.0
+  cubeInitPosNoise: 0.5
   cubeInitOriNoise: 0.0
   cubeGoalPosNoise: 0.0
   cubeGoalOriNoise: 0.0
@@ -131,6 +131,7 @@ task:
             distribution: "uniform"
       
       cube:
+        color: True
         rigid_body_properties:
           mass:
             range: [0.01, 0.02]
