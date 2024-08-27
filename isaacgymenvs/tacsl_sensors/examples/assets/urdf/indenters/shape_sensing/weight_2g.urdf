@@ -1,0 +1,22 @@
+<robot name="indenter">
+	<link name="indenter">
+		<visual>
+			<origin rpy="1.5707963267948966 0.0 0.0" xyz="0.0 0.0 0.0"/>
+			<geometry>
+				<mesh filename="../weights/Test_Weight_2G.obj"/>
+			</geometry>
+		</visual>
+		<collision>
+			<origin rpy="1.5707963267948966 0.0 0.0" xyz="0.0 0.0 0.0"/>
+			<geometry>
+				<mesh filename="../weights/Test_Weight_2G.obj"/>
+			</geometry>
+            <sdf resolution="256"/>
+		</collision>
+		<inertial>
+			<origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+			<mass value="0.002"/>
+			<inertia ixx="1.14764e-7" iyy="8.89985e-8" izz="1.14738e-7" ixy="0.0" ixz="-4.72875e-14" iyz="0.0"/>
+		</inertial>
+	</link>
+</robot>

@@ -1,0 +1,254 @@
+
+# See schema in factory_schema_config_task.py for descriptions of common parameters.
+
+defaults:
+    - TacSLBase
+    - _self_
+
+name: TacSLTaskInsertion
+physics_engine: ${..physics_engine}
+
+sim:
+    disable_gravity: True
+
+env:
+    task_type: insertion #  insertion, placement, screwing
+    numEnvs: ${resolve_default:128,${...num_envs}}
+    numObservations: 21
+    numActions: 6
+
+    # set to True if you use camera sensors in the environment
+    enableCameraSensors: ${eval:'${.use_camera} + ${.use_isaac_gym_tactile}'}
+
+    peg_in_hand_buffer: 1.0  # scalar multiplier to increase peg length within gripper, during task initialization. reasonable range: [0.70, 1]; full range: [0.0, 1.] when 0, peg is fully with gripper
+
+    use_dict_obs: True
+    obsDims: { 'ee_pos': [ 3 ], 'ee_quat': [ 4 ],
+               'socket_pos': [ 3 ], 'socket_quat': [ 4 ],
+#               'wrist': [ 64, 64, 3 ],
+#               'left_tactile': [ 256, 256, 3 ]
+    }
+    stateDims: { }
+#    stateDims: { 'ee_pos': [ 3 ], 'ee_quat': [ 4 ], 'ee_lin_vel': [ 3 ], 'ee_ang_vel': [ 3 ],
+#                 'plug_pos': [ 3 ], 'plug_quat': [ 4 ] , 'socket_pos': [ 3 ], 'socket_quat': [ 4 ],
+#                 'dof_pos': [ 9 ], 'dof_vel': [ 9 ] }
+
+    use_camera_obs: False   # Turn on to learn from camera or tactile images
+    use_tactile_field_obs: False   # Turn on to learn from camera or tactile images
+
+    num_gripper_move_sim_steps: 20  # number of timesteps to reserve for moving gripper before first step of episode
+    num_gripper_close_sim_steps: 30  # number of timesteps to reserve for closing gripper onto plug during each reset
+
+    num_additional_control_steps: 0  # number of additional control steps for each policy step. Used to handle higher control frequency
+    num_additional_control_steps_noise: 0  # integer noise on number of additional control steps for each policy step
+    sim_dt_noise: 0.0 # level of noise as a fraction of sim dt e.g. when sim_dt_noise = 0.5, sim.dt will be in range: [sim_dt, sim_dt*1.5]
+
+    joint_friction: null
+    joint_damping: null
+    default_gripper_joint_friction: 0.5   # set to this value, when domain randomizing other joints
+    default_gripper_joint_damping: 0.0   # set to this value, when domain randomizing other joints
+    franka_open_gripper_width: 0.08   # finger joint target to open gripper
+    franka_close_gripper_width: 0.0   # finger joint target to close gripper, 0.0 is fully closed, can be greater than 0 but needs to smaller than the width of the grasped object
+
+    use_physx_gripper_control: True
+
+    use_gelsight: True  # flag to use Gelsight R1.5 finger
+    use_isaac_gym_tactile: False
+    use_compliant_contact: True
+    compliance_stiffness: 350.0  # this number depends on the contact force. consequently, it's effect varies with gripper gains
+    compliant_damping: 0.0
+    elastomer_friction_factor: 1.0  # scale factor to increase/decrease the friction of the elastomer fingertip
+    tactile_subsample_ratio: 4
+    tactile_cam_euler_offset: [0.0, 0.0, 0.0]   # euler angle offset to tactile camera pose
+    tactile_cam_zoom_level: 1.0   # scalar to zoom tactile camera in or out. If less than 1, zooms-in i.e. move camera closer
+    use_shear_force: False
+    num_shear_rows: 20
+    num_shear_cols: 30
+    zero_out_normal_force_field_obs: False  # flag to set the normal force field to zero and only use shear force field
+    asset_info_filename: 'industreal_asset_info_pegs.yaml'   # industreal_asset_info_pegs.yaml, tacsl_asset_info_peg_placement.yaml, tacsl_asset_info_bolt_on_nut.yaml
+    desired_subassemblies: [ 'round_peg_hole_16mm']   # see all options in FactoryEnvInsertion.yaml
+
+    franka_urdf_file: 'tacsl_franka_gelsight_r15.urdf'
+    franka_asset_dir: tacsl   # directory where franka urdf file is located e.g. tacsl, industreal, factory
+
+    use_camera: False
+    camera_configs:
+        - name: wrist
+          is_body_camera: True
+          actor_name: franka
+          attach_link_name: panda_hand
+          image_size: [64, 64]
+          image_type: rgb
+          horizontal_fov: 75.0
+          camera_pose: [[0.045, 0, 0.04], [0.5, 0, 0.866, 0]]     # R.from_euler('xyz', [0, -np.pi / 2, np.pi]).as_quat()
+        - name: wrist_2
+          is_body_camera: True
+          actor_name: franka
+          attach_link_name: panda_hand
+          image_size: [256, 256]
+          image_type: rgb
+          horizontal_fov: 75.0
+          camera_pose: [[-0.045, 0, 0.04], [0.866, 0, 0.5, 0]]     # R.from_euler('xyz', [0, -np.pi / 2, np.pi]).as_quat()
+        - name: front
+          is_body_camera: False
+          actor_name: null
+          attach_link_name: null
+          image_size: [256, 256]
+          image_type: rgb
+          horizontal_fov: 75.0
+          camera_pose: [[0.8, 0.0, 0.5], [-2.58819045e-01,  1.58480958e-17,  9.65925826e-01,  5.91458986e-17]]   # R.from_euler('xyz', [0, np.pi/6, np.pi]).as_quat()
+        - name: side
+          is_body_camera: False
+          actor_name: null
+          attach_link_name: null
+          image_size: [256, 256]
+          image_type: rgb
+          horizontal_fov: 75.0
+          camera_pose: [[0.3, -0.6797, 0.7099], [-0.1830127,  0.1830127,  0.6830127,  0.6830127]]   # R.from_euler('xyz', [0, np.pi/6, np.pi/2]).as_quat()
+
+randomize:
+    franka_arm_initial_dof_pos: [0.0002, -0.1591, 0.0005, -2.0966, -0.0002, 1.9335, 0.7855]
+    fingertip_midpoint_pos_initial: [0.5, 0.0, 0.15]  # initial position of midpoint between fingertips above table
+    fingertip_midpoint_pos_noise: [0.1, 0.1, 0.05]  # noise on fingertip pos
+    fingertip_midpoint_rot_initial: [3.1416, 0, 0.0]  # initial rotation of fingertips (Euler)
+    fingertip_midpoint_rot_noise: [0.1, 0.1, 1]  # noise on rotation
+    plug_pos_in_gripper_noise_xy: [0.0, 0.0]  # noise on plug position within gripper
+    plug_pos_z_in_gripper_noise_multiplier: 1  # [0, 1] scalar to multiply the noise level along z
+    plug_noise_rot_in_gripper: [0.0, 0.0, 0.0]  # noise on plug rotation within gripper, z is along the axis of the gripper can be [-np.pi, np.pi], y is across the axis can be [-np.pi/10, np.pi/10]
+    socket_pos_xyz_initial: [0.5, 0.0, 0.01]  # initial XY position of socket on table
+    socket_pos_xyz_noise: [0.1, 0.1, 0.01]  # random initialization level on socket position
+    socket_rot_initial: [0.0, 0.0, 0.0]  # initial rotation of socket on table
+    socket_rot_noise: [0.0, 0.0, 0.0]  # random initialization level on socket rotation
+
+    # observation noise
+    socket_pos_xyz_obs_noise: [0.0, 0.0, 0.0]  # observation noise on socket position
+
+    randomize_compliance: False
+    compliance_stiffness_range: [150, 350]
+    compliance_damping_range: [0.0, 1.0]
+
+    randomize_ctrl_params: False  # flag to randomize_controller_params
+    task_prop_gains_min: [400, 400, 400, 30, 30, 30]  # min controller_params
+    task_prop_gains_max: [800, 800, 800, 60, 60, 60]  # max controller_params
+
+    use_diff_tactile_img: False  # flag to use tactile image diff as policy observation
+    concat_tactile_plain: False  # flag to add plain initial tactile image as policy observation
+
+    randomize_color_channel: False  # flag to randomly swap color channels
+    use_ep_image_aug: False  # flag to do episode-level image augmentation including color jitter and shift/zoom
+#    ep_color_aug_bcsh_level: [0.5, 0.5, 0.5, 0.3]  # color-jitter image augmentation levels [brightness, contrast, saturation, hue]
+    ep_color_aug_bcsh_level: [.0, .0, .0, .3]  # color-jitter image augmentation levels [brightness, contrast, saturation, hue]
+    ep_image_aug_crop_scale: [0.75, 1.0]  # image augmentation scale [min, max] image crop scale
+    ep_image_aug_aspect_k: [0.9, 1.1]  # image augmentation scale [min, max] image scale
+    use_t_color_aug: False  # flag to do color-jitter image augmentation at every time-step
+#    t_color_aug_bcsh_level: [0.1, 0.1, 0.1, 0.06]  # color-jitter image augmentation levels [brightness, contrast, saturation, hue]
+    t_color_aug_bcsh_level: [.0, .0, .0, .06]  # color-jitter image augmentation levels [brightness, contrast, saturation, hue]
+
+rl:
+    asymmetric_observations: False
+    add_contact_info_to_aac_states: False
+
+    pos_action_scale: [0.01, 0.01, 0.01]
+    rot_action_scale: [0.05, 0.05, 0.05]
+    force_action_scale: [1.0, 1.0, 1.0]
+    torque_action_scale: [1.0, 1.0, 1.0]
+
+    clamp_rot: True
+    clamp_rot_thresh: 1.0e-6
+
+    add_contact_force_plug_decomposed: False  # add observation of plug force decomposed into contact with lfinger, rfinger, socket
+
+    insertion_frac: 1  # what fraction of contact interaction to perform? 0: no insertion, 1: full insertion
+
+    num_keypoints: 4  # number of keypoints used in reward
+    keypoint_scale: 0.5  # length of line of keypoints
+
+    keypoint_reward_scale: 0.1  # scale on keypoint-based reward
+    action_penalty_scale: 0.0  # scale on action penalty
+    action_gradient_penalty_scale: 0.001  # scale on action gradient penalty
+    contact_penalty_scale: 0.0  # scale on contact force penalty
+    use_shaped_contact_pen: True  # Flag to shape contact penalty
+    contact_pen_reduction_scalar: 0.01  # scalar factor to reduce contact force penalty during contact-rich of the peg at the entrance of the socket
+    contact_rich_region_size_factor: 0.5  # fraction of socket diameter defining area with reduced contact penalty
+    use_shaped_keypoint_reward: True  # Flag to keypoint-based reward, to handle concave shape of the socket, and avoid the solution of the peg ending on the side of the socket, especially when using contact pen
+
+    close_error_thresh: 0.0044958  # threshold below which plug is considered close enough to socket/goal, socket depth: 0.0089916
+    success_bonus: 0.0  # bonus if plug is close enough to the goal
+
+    max_episode_length: 256
+
+ctrl:
+    ctrl_type: task_space_impedance  # {gym_default,
+                               #  joint_space_ik, joint_space_id,
+                               #  task_space_impedance, operational_space_motion,
+                               #  open_loop_force, closed_loop_force,
+                               #  hybrid_force_motion}
+    all:
+        jacobian_type: geometric
+        gripper_prop_gains: [400, 400]
+        gripper_deriv_gains: [2, 2]
+    gym_default:
+        ik_method: dls
+        joint_prop_gains: [40, 40, 40, 40, 40, 40, 40]
+        joint_deriv_gains: [8, 8, 8, 8, 8, 8, 8]
+        gripper_prop_gains: [500, 500]
+        gripper_deriv_gains: [20, 20]
+    joint_space_ik:
+        ik_method: dls
+        joint_prop_gains: [1, 1, 1, 1, 1, 1, 1]
+        joint_deriv_gains: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    joint_space_id:
+        ik_method: dls
+        joint_prop_gains: [40, 40, 40, 40, 40, 40, 40]
+        joint_deriv_gains: [8, 8, 8, 8, 8, 8, 8]
+    task_space_impedance:
+        motion_ctrl_axes: [1, 1, 1, 1, 1, 1]
+        task_prop_gains: [600, 600, 600, 50, 50, 50]
+        task_deriv_gains: [50, 50, 50, 1.41, 1.41, 1.41]
+    task_space_nullspace:
+        motion_ctrl_axes: [1, 1, 1, 1, 1, 1]
+        task_prop_gains: [600, 600, 600, 50, 50, 50]
+        task_deriv_gains: [48.98979, 48.98979, 48.98979, 1.41, 1.41, 1.41]  # computed as 2 * sqrt(k_p), but reduced by 10x for rotation
+        default_dof_pos_tensor: [-0.5199, 0.0338, 0.5198, -2.3704, -0.0249, 2.3996, -2.3382]
+        kp_null: 10.
+        kd_null: 6.3246     # 2.0 * np.sqrt(kp_null)
+    operational_space_motion:
+        motion_ctrl_axes: [1, 1, 1, 1, 1, 1]
+        task_prop_gains: [150, 150, 150, 150, 150, 150]
+        task_deriv_gains: [24.495, 24.495, 24.495, 24.495, 24.495, 24.495]
+    osc_plus_nullspace:
+        motion_ctrl_axes: [1, 1, 1, 1, 1, 1]
+        task_prop_gains: [150, 150, 150, 150, 150, 150]
+        task_deriv_gains: [24.495, 24.495, 24.495, 24.495, 24.495, 24.495]
+        default_dof_pos_tensor: [-0.5199, 0.0338, 0.5198, -2.3704, -0.0249, 2.3996, -2.3382]
+        kp_null: 10.
+        kd_null: 6.3246     # 2.0 * np.sqrt(kp_null)
+    open_loop_force:
+        force_ctrl_axes: [0, 0, 1, 0, 0, 0]
+    closed_loop_force:
+        force_ctrl_axes: [0, 0, 1, 0, 0, 0]
+        wrench_prop_gains: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    hybrid_force_motion:
+        motion_ctrl_axes: [1, 1, 0, 1, 1, 1]
+        task_prop_gains: [40, 40, 40, 40, 40, 40]
+        task_deriv_gains: [8, 8, 8, 8, 8, 8]
+        force_ctrl_axes: [0, 0, 1, 0, 0, 0]
+        wrench_prop_gains: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+
+ige_dr:
+  randomize: True
+  randomization_params:
+    frequency: 128  # Define min number of steps between randomizations; will only occur at resets
+    actor_params:
+      franka:
+        dof_properties:
+          damping:
+            setup_only: False
+            range: [0.00001, 3.0]  # additive (franka_dof_props['damping'] should be set to nonzero value)
+            operation: "additive"
+            distribution: "uniform"
+          friction:
+            setup_only: False
+            range: [0.8, 1.2]  # multiplicative (friction value in URDF should be set to nonzero value)
+            operation: "scaling"
+            distribution: "loguniform"

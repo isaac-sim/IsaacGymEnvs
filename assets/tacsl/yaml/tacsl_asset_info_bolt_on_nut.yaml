@@ -1,0 +1,17 @@
+round_peg_hole_16mm_loose:
+    round_peg_16mm_loose:
+        urdf_par_dir: 'tacsl'
+        urdf_path: 'tacsl_bolt_m16_loose_flipped'
+        diameter: 0.0125983
+        length: 0.041
+        density: 8000.0
+        friction: 0.5
+    placement_pad:
+        urdf_par_dir: 'tacsl'
+        urdf_path: 'tacsl_nut_m16_loose_flipped'
+        diameter: 0.016
+        height: 0.0125
+        base_plate_height: 0.0
+        density: 8000.0
+        friction: 0.5
+

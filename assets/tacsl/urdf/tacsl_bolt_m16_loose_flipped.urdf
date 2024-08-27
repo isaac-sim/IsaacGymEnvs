@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<robot name="factory_bolt_m16_loose">
+    <link name="factory_bolt_m16_loose">
+        <visual>
+            <geometry>
+                <mesh filename="../mesh/tacsl_insertion_screw/tacsl_bolt_m16_loose_flipped.obj"/>
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="../mesh/tacsl_insertion_screw/tacsl_bolt_m16_loose_flipped.obj"/>
+            </geometry>
+            <sdf resolution="512"/>
+        </collision>
+    </link>
+</robot>

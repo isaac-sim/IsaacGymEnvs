@@ -1,0 +1,45 @@
+<robot name="pad">
+    <link name="base_link"/>
+    <link name="translation_x"/>
+    <link name="translation_y"/>
+    <joint name="x_joint" type="prismatic">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="base_link"/>
+        <child link="translation_x"/>
+        <axis xyz="1 0 0"/>
+        <limit effort="1" lower="-1" upper="1" velocity="2.6100"/>
+    </joint>
+
+    <joint name="y_joint" type="prismatic">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="translation_x"/>
+        <child link="translation_y"/>
+        <axis xyz="0 1 0"/>
+        <limit effort="1" lower="-1" upper="1" velocity="2.6100"/>
+    </joint>
+
+    <joint name="z_joint" type="prismatic">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="translation_y"/>
+        <child link="pad"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="1" lower="-1" upper="1" velocity="2.6100"/>
+    </joint>
+	<link name="pad">
+		<visual>
+			<origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+			<geometry>
+				<box size="0.05 0.05 0.01"/>
+			</geometry>
+		</visual>
+		<collision>
+			<origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+			<geometry>
+				<box size="0.05 0.05 0.01"/>
+			</geometry>
+		</collision>
+		<inertial>
+			<origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+		</inertial>
+	</link>
+</robot>

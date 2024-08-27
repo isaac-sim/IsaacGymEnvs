@@ -65,7 +65,7 @@ def _create_sim_once(gym, *args, **kwargs):
 
 
 class Env(ABC):
-    def __init__(self, config: Dict[str, Any], rl_device: str, sim_device: str, graphics_device_id: int, headless: bool): 
+    def __init__(self, config: Dict[str, Any], rl_device: str, sim_device: str, graphics_device_id: int, headless: bool):
         """Initialise the env.
 
         Args:
@@ -100,12 +100,33 @@ class Env(ABC):
 
         self.num_environments = config["env"]["numEnvs"]
         self.num_agents = config["env"].get("numAgents", 1)  # used for multi-agent environments
+        self.use_dict_obs = config["env"].get("use_dict_obs", False)  # used for environments with dictionary of observations
+        if self.use_dict_obs:
+            self.obs_dims = config["env"]["obsDims"]
+            self.obs_space = spaces.Dict(
+                {
+                    k: spaces.Box(
+                        np.ones(shape=dims) * -np.Inf, np.ones(shape=dims) * np.Inf
+                    )
+                    for k, dims in self.obs_dims.items()
+                }
+            )
 
-        self.num_observations = config["env"].get("numObservations", 0)
-        self.num_states = config["env"].get("numStates", 0)
+            self.state_dims = config["env"].get("stateDims", {})
+            self.state_space = spaces.Dict(
+                {
+                    k: spaces.Box(
+                        np.ones(shape=dims) * -np.Inf, np.ones(shape=dims) * np.Inf
+                    )
+                    for k, dims in self.state_dims.items()
+                }
+            )
+        else:
+            self.num_observations = config["env"].get("numObservations", 0)
+            self.num_states = config["env"].get("numStates", 0)
 
-        self.obs_space = spaces.Box(np.ones(self.num_obs) * -np.Inf, np.ones(self.num_obs) * np.Inf)
-        self.state_space = spaces.Box(np.ones(self.num_states) * -np.Inf, np.ones(self.num_states) * np.Inf)
+            self.obs_space = spaces.Box(np.ones(self.num_obs) * -np.Inf, np.ones(self.num_obs) * np.Inf)
+            self.state_space = spaces.Box(np.ones(self.num_states) * -np.Inf, np.ones(self.num_states) * np.Inf)
 
         self.num_actions = config["env"]["numActions"]
         self.control_freq_inv = config["env"].get("controlFrequencyInv", 1)
@@ -208,7 +229,7 @@ class VecTask(Env):
 
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 24}
 
-    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture: bool = False, force_render: bool = False): 
+    def __init__(self, config, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture: bool = False, force_render: bool = False):
         """Initialise the `VecTask`.
 
         Args:
@@ -219,7 +240,6 @@ class VecTask(Env):
             virtual_screen_capture: Set to True to allow the users get captured screen in RGB array via `env.render(mode='rgb_array')`. 
             force_render: Set to True to always force rendering in the steps (if the `control_freq_inv` is greater than 1 we suggest stting this arg to True)
         """
-        # super().__init__(config, rl_device, sim_device, graphics_device_id, headless, use_dict_obs)
         super().__init__(config, rl_device, sim_device, graphics_device_id, headless)
         self.virtual_screen_capture = virtual_screen_capture
         self.virtual_display = None
@@ -263,9 +283,9 @@ class VecTask(Env):
         self.sim_initialized = True
 
         self.set_viewer()
-        self.allocate_buffers()
 
         self.obs_dict = {}
+        self.allocate_buffers()
 
     def set_viewer(self):
         """Create the viewer."""
@@ -307,10 +327,35 @@ class VecTask(Env):
         """
 
         # allocate buffers
-        self.obs_buf = torch.zeros(
-            (self.num_envs, self.num_obs), device=self.device, dtype=torch.float)
-        self.states_buf = torch.zeros(
-            (self.num_envs, self.num_states), device=self.device, dtype=torch.float)
+        if self.use_dict_obs:
+            self.obs_dict = {
+                k: torch.zeros(
+                    (self.num_envs, *dims), device=self.device, dtype=torch.float
+                )
+                for k, dims in self.obs_dims.items()
+            }
+            print("Obs dictionary: ")
+            print(self.obs_dims)
+            for k, dims in self.obs_dims.items():
+                print(f'{k}: {dims}')
+                print(f'{k}: {self.obs_dict[k].shape}')
+
+            for k, dims in self.state_dims.items():
+                if k not in self.obs_dict:
+                    self.obs_dict[k] = torch.zeros(
+                        (self.num_envs, *dims), device=self.device, dtype=torch.float
+                    )
+            print("State dictionary: ")
+            print(self.state_dims)
+            for k, dims in self.state_dims.items():
+                print(f'{k}: {dims}')
+                print(f'{k}: {self.obs_dict[k].shape}')
+        else:
+            self.obs_dict = {}
+            self.obs_buf = torch.zeros(
+                (self.num_envs, self.num_obs), device=self.device, dtype=torch.float)
+            self.states_buf = torch.zeros(
+                (self.num_envs, self.num_states), device=self.device, dtype=torch.float)
         self.rew_buf = torch.zeros(
             self.num_envs, device=self.device, dtype=torch.float)
         self.reset_buf = torch.ones(
@@ -343,6 +388,9 @@ class VecTask(Env):
 
     def get_state(self):
         """Returns the state buffer of the environment (the privileged observations for asymmetric training)."""
+
+        if self.use_dict_obs:
+            return
         return torch.clamp(self.states_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
 
     @abc.abstractmethod
@@ -399,13 +447,30 @@ class VecTask(Env):
 
         self.extras["time_outs"] = self.timeout_buf.to(self.rl_device)
 
-        self.obs_dict["obs"] = torch.clamp(self.obs_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
+        obs_and_states_dict = dict()
 
-        # asymmetric actor-critic
-        if self.num_states > 0:
-            self.obs_dict["states"] = self.get_state()
+        if self.use_dict_obs:
+            obs_and_states_dict['obs'] = {
+                k: torch.clamp(self.obs_dict[k], -self.clip_obs, self.clip_obs) for k in self.obs_dims
+                # TODO: add clone in case clamping messes up with other portion of the code e.g. reward from obs.
+                #  For now, not using clone to save memory.
+                # k: torch.clamp(self.obs_dict[k], -self.clip_obs, self.clip_obs).clone() for k in self.obs_dims
+            }
 
-        return self.obs_dict, self.rew_buf.to(self.rl_device), self.reset_buf.to(self.rl_device), self.extras
+            # asymmetric actor-critic
+            if self.state_dims:
+                obs_and_states_dict['states'] = {
+                    k: torch.clamp(self.obs_dict[k], -self.clip_obs, self.clip_obs) for k in self.state_dims
+                }
+
+        else:
+            obs_and_states_dict["obs"] = torch.clamp(self.obs_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
+
+            # asymmetric actor-critic
+            if self.num_states > 0:
+                obs_and_states_dict["states"] = self.get_state()
+
+        return obs_and_states_dict, self.rew_buf.to(self.rl_device), self.reset_buf.to(self.rl_device), self.extras
 
     def zero_actions(self) -> torch.Tensor:
         """Returns a buffer with zero actions.
@@ -429,13 +494,28 @@ class VecTask(Env):
         Returns:
             Observation dictionary
         """
-        self.obs_dict["obs"] = torch.clamp(self.obs_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
+        obs_and_states_dict = dict()
+        if self.use_dict_obs:
+            obs_and_states_dict['obs'] = {
+                k: torch.clamp(self.obs_dict[k], -self.clip_obs, self.clip_obs) for k in self.obs_dims
+                # TODO: add clone in case clamping messes up with other portion of the code e.g. reward from obs.
+                #  For now, not using clone to save memory.
+                # k: torch.clamp(self.obs_dict[k], -self.clip_obs, self.clip_obs).clone() for k in self.obs_dims
+            }
 
-        # asymmetric actor-critic
-        if self.num_states > 0:
-            self.obs_dict["states"] = self.get_state()
+            # asymmetric actor-critic
+            if self.state_dims:
+                obs_and_states_dict['states'] = {
+                    k: torch.clamp(self.obs_dict[k], -self.clip_obs, self.clip_obs) for k in self.state_dims
+                }
+        else:
+            obs_and_states_dict['obs'] = torch.clamp(self.obs_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
 
-        return self.obs_dict
+            # asymmetric actor-critic
+            if self.num_states > 0:
+                obs_and_states_dict['states'] = self.get_state()
+
+        return obs_and_states_dict
 
     def reset_done(self):
         """Reset the environment.
@@ -446,13 +526,28 @@ class VecTask(Env):
         if len(done_env_ids) > 0:
             self.reset_idx(done_env_ids)
 
-        self.obs_dict["obs"] = torch.clamp(self.obs_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
+        obs_and_states_dict = dict()
+        if self.use_dict_obs:
+            obs_and_states_dict['obs'] = {
+                k: torch.clamp(self.obs_dict[k], -self.clip_obs, self.clip_obs) for k in self.obs_dims
+                # TODO: add clone in case clamping messes up with other portion of the code e.g. reward from obs.
+                #  For now, not using clone to save memory.
+                # k: torch.clamp(self.obs_dict[k], -self.clip_obs, self.clip_obs).clone() for k in self.obs_dims
+            }
 
-        # asymmetric actor-critic
-        if self.num_states > 0:
-            self.obs_dict["states"] = self.get_state()
+            # asymmetric actor-critic
+            if self.state_dims:
+                obs_and_states_dict['states'] = {
+                    k: torch.clamp(self.obs_dict[k], -self.clip_obs, self.clip_obs) for k in self.state_dims
+                }
+        else:
+            obs_and_states_dict["obs"] = torch.clamp(self.obs_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
 
-        return self.obs_dict, done_env_ids
+            # asymmetric actor-critic
+            if self.num_states > 0:
+                obs_and_states_dict['states'] = self.get_state()
+
+        return obs_and_states_dict, done_env_ids
 
     def render(self, mode="rgb_array"):
         """Draw the frame to the viewer, and check for keyboard events."""

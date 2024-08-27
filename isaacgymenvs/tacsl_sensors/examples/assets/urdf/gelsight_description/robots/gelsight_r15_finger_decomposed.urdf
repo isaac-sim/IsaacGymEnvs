@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<robot name="gelsight_r15_finger">
+    <link name="gelsight_finger">
+        <visual>
+            <origin rpy="-1.5707963268 0 0" xyz="0.0 0.0 0.0"/>     <!-- needed when flipping visual mesh in IG  -->
+            <geometry>
+                 <mesh filename="../../../../../../../assets/tacsl/mesh/gelsight_r15_meshes//gelsight_r15_finger_no_gel_coarse_x16_rot_z.obj"/>
+            </geometry>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+            <geometry>
+                <mesh filename="../../../../../../../assets/tacsl/mesh/gelsight_r15_meshes//gelsight_r15_finger_no_gel_coarse_x16_rot_z.obj"/>
+            </geometry>
+            <sdf resolution="256"/>
+        </collision>
+    </link>
+
+
+    <joint name="elastomer_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+        <parent link="gelsight_finger"/>
+        <child link="elastomer"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+
+    <link name="elastomer">         <!-- surface tip of the elastomer  -->
+        <visual>
+            <origin rpy="-1.5707963268 0 0" xyz="0.0 0.0 0.0"/>     <!-- needed when flipping visual mesh in IG  -->
+            <geometry>
+                <mesh filename="../../../../../../../assets/tacsl/mesh/gelsight_r15_meshes//gelsight_r15_finger_gelpad_front_only_rot_z.obj"/>
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="../../../../../../../assets/tacsl/mesh/gelsight_r15_meshes//extruded_elastomer_transformed.obj"/>
+            </geometry>
+            <sdf resolution="256"/>
+        </collision>
+    </link>
+
+    <link name="elastomer_tip"/>
+    <joint name="elastomer_tip_joint" type="fixed">
+<!--        <origin rpy="0 0 0" xyz="0.0 -0.00255914 0.06776"/>    &lt;!&ndash; surface tip of the elastomer  &ndash;&gt;-->
+        <origin rpy="1.5707963267948966 0 0" xyz="0.0 -0.00255914 0.06776"/>    <!-- surface tip of the elastomer  -->
+        <!-- <origin rpy="0 0 0" xyz="0.0 0.0 0.06776"/> -->
+        <parent link="gelsight_finger"/>
+        <child link="elastomer_tip"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+
+    <link name="camera_link"/>
+    <joint name="tactile_camera_joint" type="fixed">
+        <parent link="gelsight_finger"/>
+        <child link="camera_link"/>
+        <origin rpy="3.1416 0.0 -1.5708" xyz="4.23776324e-07 5.08471039e-02 6.77599066e-02"/>
+    </joint>
+</robot>

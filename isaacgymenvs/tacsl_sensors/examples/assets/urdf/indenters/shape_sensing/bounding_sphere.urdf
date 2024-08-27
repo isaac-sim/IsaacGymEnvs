@@ -1,0 +1,74 @@
+<robot name="indenter">
+
+    <link name="base_link"/>
+    <link name="translation_x"/>
+    <link name="translation_y"/>
+    <link name="translation_z"/>
+    <link name="rotation_x"/>
+    <link name="rotation_y"/>
+    <joint name="x_joint" type="prismatic">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="base_link"/>
+        <child link="translation_x"/>
+        <axis xyz="1 0 0"/>
+        <limit effort="12" lower="-1" upper="1" velocity="2.6100"/>
+    </joint>
+
+    <joint name="y_joint" type="prismatic">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="translation_x"/>
+        <child link="translation_y"/>
+        <axis xyz="0 1 0"/>
+        <limit effort="12" lower="-1" upper="1" velocity="2.6100"/>
+    </joint>
+
+    <joint name="z_joint" type="prismatic">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="translation_y"/>
+        <child link="translation_z"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="12" lower="-1" upper="1" velocity="2.6100"/>
+    </joint>
+    <joint name="rx_joint" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="translation_z"/>
+        <child link="rotation_x"/>
+        <axis xyz="1 0 0"/>
+        <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+    </joint>
+    <joint name="ry_joint" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="rotation_x"/>
+        <child link="rotation_y"/>
+        <axis xyz="0 1 0"/>
+        <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+    </joint>
+    <joint name="rz_joint" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="rotation_y"/>
+        <child link="indenter"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+    </joint>
+
+	<link name="indenter">
+		<visual>
+			<origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+			<geometry>
+				<mesh filename="bounding_sphere.obj"/>
+			</geometry>
+		</visual>
+		<collision>
+			<origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+			<geometry>
+				<mesh filename="bounding_sphere.obj"/>
+			</geometry>
+            <sdf resolution="256"/>
+		</collision>
+		<inertial>
+			<origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+			<mass value="0.00327211"/>
+			<inertia ixx="1.14764e-7" iyy="8.89985e-8" izz="1.14738e-7" ixy="0.0" ixz="-4.72875e-14" iyz="0.0"/>
+		</inertial>
+	</link>
+</robot>

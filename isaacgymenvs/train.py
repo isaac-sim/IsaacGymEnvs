@@ -97,6 +97,7 @@ def launch_rlg_hydra(cfg: DictConfig):
     from isaacgymenvs.learning import amp_players
     from isaacgymenvs.learning import amp_models
     from isaacgymenvs.learning import amp_network_builder
+    from isaacgymenvs.learning import a2c_dict_network_builder
     import isaacgymenvs
 
 
@@ -189,6 +190,7 @@ def launch_rlg_hydra(cfg: DictConfig):
         runner.player_factory.register_builder('amp_continuous', lambda **kwargs : amp_players.AMPPlayerContinuous(**kwargs))
         model_builder.register_model('continuous_amp', lambda network, **kwargs : amp_models.ModelAMPContinuous(network))
         model_builder.register_network('amp', lambda **kwargs : amp_network_builder.AMPBuilder())
+        model_builder.register_network('actor_critic_dict', lambda **kwargs : a2c_dict_network_builder.A2CBuilder())
 
         return runner
 
@@ -211,6 +213,7 @@ def launch_rlg_hydra(cfg: DictConfig):
         'train': not cfg.test,
         'play': cfg.test,
         'checkpoint': cfg.checkpoint,
+        'load_critic_only': cfg.get('load_critic_only', False),
         'sigma': cfg.sigma if cfg.sigma != '' else None
     })
 

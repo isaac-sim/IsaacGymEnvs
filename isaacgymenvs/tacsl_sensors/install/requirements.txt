@@ -1,0 +1,4 @@
+torch==2.2.0
+torchvision==0.17
+networkx==3.1
+ray

@@ -1,0 +1,147 @@
+round_peg_hole_4mm:
+    round_peg_4mm:
+        urdf_par_dir: 'industreal'
+        urdf_path: 'industreal_round_peg_4mm'
+        diameter: 0.003988
+        length: 0.050
+        density: 8000.0 
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.004
+    placement_pad:
+        urdf_par_dir: 'tacsl'
+        urdf_path: 'tacsl_peg_placement_pad'
+        diameter: 0.1
+        height: 0.025
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_8mm:
+    round_peg_8mm:
+        urdf_par_dir: 'industreal'
+        urdf_path: 'industreal_round_peg_8mm'
+        diameter: 0.007986
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.008
+    placement_pad:
+        urdf_par_dir: 'tacsl'
+        urdf_path: 'tacsl_peg_placement_pad'
+        diameter: 0.1
+        height: 0.025
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_12mm:
+    round_peg_12mm:
+        urdf_par_dir: 'industreal'
+        urdf_path: 'industreal_round_peg_12mm'
+        diameter: 0.011983
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.012
+    placement_pad:
+        urdf_par_dir: 'tacsl'
+        urdf_path: 'tacsl_peg_placement_pad'
+        diameter: 0.1
+        height: 0.025
+        density: 8000.0
+        friction: 0.5
+
+round_peg_hole_16mm:
+    round_peg_16mm:
+        urdf_par_dir: 'industreal'
+        urdf_path: 'industreal_round_peg_16mm'
+        diameter: 0.015983
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.016
+    placement_pad:
+        urdf_par_dir: 'tacsl'
+        urdf_path: 'tacsl_peg_placement_pad'
+        diameter: 0.1
+        height: 0.025
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_4mm:
+    rectangular_peg_4mm:
+        urdf_par_dir: 'industreal'
+        urdf_path: 'industreal_rectangular_peg_4mm'
+        width: 0.00397
+        depth: 0.00397
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.004
+    placement_pad:
+        urdf_par_dir: 'tacsl'
+        urdf_path: 'tacsl_peg_placement_pad'
+        diameter: 0.1
+        height: 0.025
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_8mm:
+    rectangular_peg_8mm:
+        urdf_par_dir: 'industreal'
+        urdf_path: 'industreal_rectangular_peg_8mm'
+        width: 0.007964
+        depth: 0.006910
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.008
+    placement_pad:
+        urdf_par_dir: 'tacsl'
+        urdf_path: 'tacsl_peg_placement_pad'
+        diameter: 0.1
+        height: 0.025
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_12mm:
+    rectangular_peg_12mm:
+        urdf_par_dir: 'industreal'
+        urdf_path: 'industreal_rectangular_peg_12mm'
+        width: 0.011957
+        depth: 0.007910
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.012
+    placement_pad:
+        urdf_par_dir: 'tacsl'
+        urdf_path: 'tacsl_peg_placement_pad'
+        diameter: 0.1
+        height: 0.025
+        density: 8000.0
+        friction: 0.5
+
+rectangular_peg_hole_16mm:
+    rectangular_peg_16mm:
+        urdf_par_dir: 'industreal'
+        urdf_path: 'industreal_rectangular_peg_16mm'
+        width: 0.015957
+        depth: 0.009910
+        length: 0.050
+        density: 8000.0
+        friction: 1.0
+        grasp_offset: 0.04
+        plug_width: 0.016
+    placement_pad:
+        urdf_par_dir: 'tacsl'
+        urdf_path: 'tacsl_peg_placement_pad'
+        diameter: 0.1
+        height: 0.025
+        density: 8000.0
+        friction: 0.5

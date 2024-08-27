@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<robot name="gelsight_finger">
+    <link name="gelsight_finger">
+        <visual>
+            <origin rpy="-1.5707963268 0 0" xyz="0.0 0.0 0.0"/>     <!-- needed when flipping visual mesh in IG  -->
+            <geometry>
+                <mesh filename="../../../../../../../assets/tacsl/mesh/gs_mini_meshes/panda_adapter_gsmini.obj"/>
+            </geometry>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+            <geometry>
+                <mesh filename="../../../../../../../assets/tacsl/mesh/gs_mini_meshes/panda_adapter_gsmini.obj"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="gelsight_sensor_joint" type="fixed">
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        <parent link="gelsight_finger"/>
+        <child link="gelsight_sensor"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+
+    <link name="gelsight_sensor">
+        <visual>
+            <origin rpy="-1.5707963268 0 0" xyz="0.0 0.0 0.0"/>     <!-- needed when flipping visual mesh in IG  -->
+            <geometry>
+                <mesh filename="../../../../../../../assets/tacsl/mesh/gs_mini_meshes/gsmini_shell_hollow_transformed.obj"/>
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="../../../../../../../assets/tacsl/mesh/gs_mini_meshes/gsmini_shell_hollow_transformed.obj"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="elastomer_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="0.0 -0.0 0.0"/>
+        <parent link="gelsight_sensor"/>
+        <child link="elastomer"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+
+    <link name="elastomer">
+        <visual>
+            <origin rpy="-1.5707963268 0 0" xyz="0.0 0.0 0.0"/>     <!-- needed when flipping visual mesh in IG  -->
+            <geometry>
+                <mesh filename="../../../../../../../assets/tacsl/mesh/gs_mini_meshes/gsmini_elastomer_transformed_both_sides.obj"/>
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="../../../../../../../assets/tacsl/mesh/gs_mini_meshes/gsmini_elastomer_transformed_enclosed.obj"/>
+            </geometry>
+            <sdf resolution="256"/>
+        </collision>
+    </link>
+
+    <link name="elastomer_tip"/>    <!-- surface tip of the elastomer  -->
+    <joint name="elastomer_tip_joint" type="fixed">
+        <origin rpy="3.141592653589793 0 0" xyz="-0.00050001 -0.05975001 -0.01125"/>
+        <parent link="gelsight_finger"/>
+        <child link="elastomer_tip"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+
+    <link name="camera_link"/>
+    <joint name="tactile_camera_joint" type="fixed">
+        <parent link="gelsight_finger"/>
+        <child link="camera_link"/>
+        <origin rpy="0.0 0.0 -1.5708" xyz="4.23776324e-07 5.08471039e-02 6.77599066e-02"/>
+    </joint>
+</robot>

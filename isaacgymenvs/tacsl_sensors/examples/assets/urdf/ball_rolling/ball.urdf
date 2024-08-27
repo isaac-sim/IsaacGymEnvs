@@ -1,0 +1,20 @@
+<robot name="ball">
+	<link name="ball">
+		<visual>
+			<origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+			<geometry>
+				<mesh filename="sphere.obj"/>
+			</geometry>
+		</visual>
+		<collision>
+			<origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+			<geometry>
+				<sphere radius="0.02"/>
+			</geometry>
+            <sdf resolution="256"/>
+		</collision>
+		<inertial>
+			<origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+		</inertial>
+	</link>
+</robot>

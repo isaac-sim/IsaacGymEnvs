@@ -1,0 +1,16 @@
+
+# Uses compliant contact
+'name': 'tactile_camera'
+'is_body_camera': True
+'actor_name': 'gelsight_finger'
+'attach_link_name': 'elastomer_tip'
+'width': 240
+'height': 320
+# 'image_type': 'rgb',
+'image_type': 'depth'
+'camera_dist': 0.020342857142857145
+'cx': 0.0119885   # 0.023977/2  usually elastomer width divided by 2
+'cy': 0.016   # 0.023977/2  usually elastomer height divided by 2
+'near_plane': 0.0001   # distance from the camera point to the near clipping plane in world units (meters)
+'tip_to_cam_euler': [1.5707963267948966, -1.5707963267948966, 0]   # camera orientation in attach link frame
+'use_collision_geometry': False
