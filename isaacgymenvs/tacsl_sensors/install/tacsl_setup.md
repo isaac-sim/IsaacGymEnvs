@@ -23,7 +23,7 @@ and pip install within python 3.8:
 pip install -e IsaacGym_Preview_TacSL_Package/isaacgym/python/
 ```
 
-- Install the `tacsl/release` branch of IsaacGymEnvs from [here](../../tree/tacsl/release?ref_type=heads):
+- Install the `tacsl` branch of IsaacGymEnvs from [here](../../..):
 ```commandline
 pip install -e isaacgymenvs
 ```
@@ -38,7 +38,7 @@ pip install -e ./rl_games
 ```commandline
 pip install -r requirements.txt
 ```
-- Download the Gelsight assets from [here](https://drive.google.com/file/d/1kf-F4RdHdKiNZpNLi-fSV-KE0ny72_L0/view?usp=sharing) and place them in the IGE folder [here](../../tree/tacsl/release/assets/tacsl/mesh?ref_type=heads)
+- Download the Gelsight assets from [here](https://drive.google.com/file/d/1kf-F4RdHdKiNZpNLi-fSV-KE0ny72_L0/view?usp=sharing) and place them in the IGE folder [here](../../../assets/tacsl/mesh)
 
 ---
 ## Running
@@ -54,7 +54,7 @@ python franka_osc.py
 cd isaacgymenvs/tacsl_sensors/install
 ./train_state.sh
 ```
-  - See [here](../../tree/tacsl/release/docs/tacsl.md?ref_type=heads)
+  - See [here](../../../docs/tacsl.md)
     for more detailed documentation and instructions on training policies with different sensor modalities.
 
 
