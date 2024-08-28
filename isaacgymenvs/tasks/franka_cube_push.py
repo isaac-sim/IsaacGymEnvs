@@ -670,6 +670,9 @@ def compute_franka_reward(
     rewards = (reward_settings["r_pos_scale"] * pos_reward +
                reward_settings["r_ori_scale"] * ori_reward +
                reward_settings["r_contact_scale"] * contact_reward)
+    
+    # TODO: Add jerk penalty
+    # TODO: Add real-robot safey penalty
 
     # Compute resets: reset the environment if the episode ends or the task is successfully completed
     success_threshold = 0.05  # Success threshold for distance to goal
