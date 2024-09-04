@@ -175,9 +175,8 @@ class FrankaCubePush(VecTask):
 
         asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../assets")
         franka_asset_file = "urdf/franka_description/robots/franka_panda_gripper.urdf"
-        # TODO: Use multi-color cube for better visualization
-        cube_asset_file = "urdf/cube_multicolor.urdf"
-
+ 
+    
         if "asset" in self.cfg["env"]:
             asset_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.cfg["env"]["asset"].get("assetRoot", asset_root))
             franka_asset_file = self.cfg["env"]["asset"].get("assetFileNameFranka", franka_asset_file)
@@ -210,11 +209,18 @@ class FrankaCubePush(VecTask):
         table_stand_opts.fix_base_link = True
         table_stand_asset = self.gym.create_box(self.sim, *[0.2, 0.2, table_stand_height], table_opts)
 
-        # Create cube asset
-        self.cube_size = 0.1  
-        cube_opts = gymapi.AssetOptions()
-        cube_asset = self.gym.create_box(self.sim, *([self.cube_size] * 3), cube_opts)
+        # Create cube asset (Puck)
+        # cube_opts = gymapi.AssetOptions()
+        # cube_asset = self.gym.create_cylinder(self.sim, self.puck_radius, self.puck_height, cube_opts)
+        
         cube_color = gymapi.Vec3(0.6, 0.1, 0.0)
+        
+        # load cube asset
+        puck_asset_file = "urdf/puck.urdf"
+        self.cube_size = 0.03
+        cube_asset = self.gym.load_asset(self.sim,asset_root, puck_asset_file, gymapi.AssetOptions())
+        
+        
     
         self.num_franka_bodies = self.gym.get_asset_rigid_body_count(franka_asset)
         self.num_franka_dofs = self.gym.get_asset_dof_count(franka_asset)

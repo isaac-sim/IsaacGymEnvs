@@ -41,11 +41,11 @@ sigma: ''
 # set to True to use multi-gpu training
 multi_gpu: False
 
-wandb_activate: False
+wandb_activate: True
 wandb_group: ''
 wandb_name: ${train.params.config.name}
-wandb_entity: ''
-wandb_project: 'isaacgymenvs'
+wandb_entity: 'robin-abba'
+wandb_project: 'push-ppo'
 wandb_tags: []
 wandb_logcode_dir: '' 
 
@@ -59,7 +59,7 @@ headless: False
 
 # set default task and default training config based on task
 defaults:
-  - task: Ant
+  - task: FrankaCubePush
   - train: ${task}PPO
   - pbt: no_pbt
   - override hydra/job_logging: disabled
