@@ -89,7 +89,9 @@ class FrankaReach(VecTask):
 
         # dimensions
         # obs include: cube_pos(3) + cube_quat(4) + goal_cube_dist_pos(3) + eef_pose (7)
-        self.cfg["env"]["numObservations"] = 17 if self.control_type == "osc" else 26
+        # obs = [cube_pos, cube_quat, eef_pos, eef_quat, eef_goal_pos, eef_goal_quat, eef_pos_dist]
+        # 3 + 4 + 3 + 4 + 3 + 4 + 3 = 24
+        self.cfg["env"]["numObservations"] = 24 if self.control_type == "osc" else 26
         # actions include: delta EEF if OSC (6) or joint torques (7)
         self.cfg["env"]["numActions"] = 6 if self.control_type == "osc" else 7
         
@@ -413,10 +415,11 @@ class FrankaReach(VecTask):
             "cube_to_goal_cube_pos": self._goal_cube_state[:, :3] - self._cube_state[:, :3],
             
             # ee goal
-            "eef_goal_pos": self._cube_state[:, :3],
-            "eef_goal_quat": self._cube_state[:, 3:7],
+            "eef_goal_pos": self._eef_goal_state[:, :3],
+            "eef_goal_quat": self._eef_goal_state[:, 3:7],
             "eef_dist_pos": self._eef_goal_state[:, :3] - self._eef_state[:, :3],
         })
+        
 
     def _refresh(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
@@ -596,9 +599,8 @@ class FrankaReach(VecTask):
         sampled_eef_goal_state[:, :2] = centered_cube_xy_state.unsqueeze(0) + \
                                     2.0 * self.goal_cube_pos_noise * (torch.rand(num_resets, 2, device=self.device) - 0.5)
 
-        # Set the new sampled values as the initial state for the cube
-        print(sampled_eef_goal_state)
         self._eef_goal_state[env_ids, :] = sampled_eef_goal_state
+        
 
     def _compute_osc_torques(self, dpose):
         # Solve for Operational Space Control # Paper: khatib.stanford.edu/publications/pdfs/Khatib_1987_RA.pdf
@@ -656,6 +658,8 @@ class FrankaReach(VecTask):
 
         self.compute_observations()
         self.compute_reward(self.actions)
+        
+        
 
         # debug viz
         if self.viewer and self.debug_viz:
@@ -668,9 +672,11 @@ class FrankaReach(VecTask):
             
             eef_goal_pos = self.states["eef_goal_pos"]
             eef_goal_rot = self.states["eef_goal_quat"]
-
-
-
+            
+            print("eef_goal_pos:", eef_goal_pos)
+            print("eef_pos:", eef_pos)
+                 
+   
             # Plot visualizations
             for i in range(self.num_envs):
                 for pos, rot in zip((eef_pos, eef_goal_pos), (eef_rot, eef_goal_rot)):
@@ -722,7 +728,7 @@ def compute_franka_reward(
     eef_goal_reward = 1.0 - torch.tanh(10.0 * eef_goal_dist)
 
  
-    
+
     # Combine rewards with scaling factors
     rewards = (reward_settings["r_eef_reach_scale"] * eef_goal_reward)
               
