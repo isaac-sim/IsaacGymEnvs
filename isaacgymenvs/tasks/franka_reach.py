@@ -133,6 +133,9 @@ class FrankaReach(VecTask):
         self.franka_default_dof_pos = to_torch(
             [0, 0.1963, 0, -2.6180, 0, 2.9416, 0.7854, 0.000, 0.000], device=self.device
         )
+        self.franka_default_ee_pose = to_torch(
+            [0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 1.0], device=self.device
+        ) # x, y, z, qx, qy, qz, qw
 
         # OSC Gains 
         # TODO: Variable gains determined by ActionSpace
