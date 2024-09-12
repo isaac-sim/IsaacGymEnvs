@@ -7,7 +7,7 @@ from isaacgym import gymapi
 from isaacgym import gymutil
 
 from isaacgymenvs.utils.torch_jit_utils import quat_mul, quat_apply, to_torch, tensor_clamp, quat_conjugate  
-from isaacgymenvs.tasks.base.vec_task import VecTask
+from isaacgymenvs.tasks.base.priv_info_task import PrivInfoVecTask
 
 
 
@@ -46,7 +46,7 @@ def axisangle2quat(vec, eps=1e-6):
     return quat
 
 
-class FrankaCubePush(VecTask):
+class FrankaCubePush(PrivInfoVecTask):
 
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
