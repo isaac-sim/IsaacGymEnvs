@@ -61,10 +61,6 @@ class FrankaReach(VecTask):
         self.action_scale = self.cfg["env"]["actionScale"]
         
         # Cube location Randomization Parameters
-        self.init_cube_pos_noise = self.cfg["env"]["cubeInitPosNoise"]
-        self.init_cube_ori_noise = self.cfg["env"]["cubeInitOriNoise"]
-        self.goal_cube_pos_noise = self.cfg["env"]["cubeGoalPosNoise"]
-        self.goal_cube_ori_noise = self.cfg["env"]["cubeGoalOriNoise"]
 
         # Robot Start Pose Noise TODO: Rename variable names Rotation -> Ori and Position -> Pos
         self.franka_position_noise = self.cfg["env"]["frankaPositionNoise"]
@@ -97,8 +93,8 @@ class FrankaReach(VecTask):
         # dimensions
         # obs include: cube_pos(3) + cube_quat(4) + goal_cube_dist_pos(3) + eef_pose (7)
         # obs = [cube_pos, cube_quat, eef_pos, eef_quat, eef_goal_pos, eef_goal_quat, eef_pos_dist]
-        # 3 + 4 + 3 + 4 + 3 + 4 + 3 = 24
-        self.cfg["env"]["numObservations"] = 24 if self.control_type == "osc" else 26
+        # 3 + 4 + 3 + 4
+        self.cfg["env"]["numObservations"] = 14 if self.control_type == "osc" else 26
         # actions include: delta EEF if OSC (6) or joint torques (7)
         self.cfg["env"]["numActions"] = 6 if self.control_type == "osc" else 7
         
@@ -222,19 +218,12 @@ class FrankaReach(VecTask):
         table_stand_opts.fix_base_link = True
         table_stand_asset = self.gym.create_box(self.sim, *[0.2, 0.2, table_stand_height], table_opts)
 
-        # Create cube asset (Puck)
-        # cube_opts = gymapi.AssetOptions()
-        # cube_asset = self.gym.create_cylinder(self.sim, self.puck_radius, self.puck_height, cube_opts)
-        
-        cube_color = gymapi.Vec3(0.6, 0.1, 0.0)
-        
+
         # load cube asset
         puck_asset_file = "urdf/puck.urdf"
         self.cube_size = 0.03
         cube_asset = self.gym.load_asset(self.sim,asset_root, puck_asset_file, gymapi.AssetOptions())
-        
-        
-    
+
         self.num_franka_bodies = self.gym.get_asset_rigid_body_count(franka_asset)
         self.num_franka_dofs = self.gym.get_asset_dof_count(franka_asset)
 
@@ -336,9 +325,6 @@ class FrankaReach(VecTask):
             # Create cubes
             self._cube_id = self.gym.create_actor(env_ptr, cube_asset, init_cube_pose, "cube", i, 0, 0)
 
-            # Set colors
-            self.gym.set_rigid_body_color(env_ptr, self._cube_id, 0, gymapi.MESH_VISUAL, cube_color)
-
             if self.aggregate_mode > 0:
                 self.gym.end_aggregate(env_ptr)
 
@@ -365,7 +351,7 @@ class FrankaReach(VecTask):
             "hand": self.gym.find_actor_rigid_body_handle(env_ptr, franka_handle, "panda_hand"),
 
             # Cube
-            "cube_body_handle": self.gym.find_actor_rigid_body_handle(self.envs[0], self._cube_id, "box"),
+            # "cube_body_handle": self.gym.find_actor_rigid_body_handle(self.envs[0], self._cube_id, "box"),
         }
 
         # Get total DOFs
@@ -416,14 +402,6 @@ class FrankaReach(VecTask):
             "eef_quat": self._eef_state[:, 3:7],
             "eef_vel": self._eef_state[:, 7:],
 
-            # Object Observable Information
-            "cube_quat": self._cube_state[:, 3:7],
-            "cube_pos": self._cube_state[:, :3],
-            "cube_contact": self._cube_state[:, :3] - self._eef_state[:, :3], # cube to eef pos diff
-            "goal_cube_pos": self._goal_cube_state[:, :3],
-            "goal_cube_quat": self._goal_cube_state[:, 3:7],
-            "cube_to_goal_cube_pos": self._goal_cube_state[:, :3] - self._cube_state[:, :3],
-            
             # ee goal
             "eef_goal_pos": self._eef_goal_state[:, :3],
             "eef_goal_quat": self._eef_goal_state[:, 3:7],
@@ -450,10 +428,6 @@ class FrankaReach(VecTask):
 
     def compute_observations(self):
         self._refresh()
-
-        cube_pos=self.states["cube_pos"]
-        cube_quat=self.states["cube_quat"]
-        
         eef_pos=self.states["eef_pos"]
         eef_quat=self.states["eef_quat"]
         
@@ -461,7 +435,7 @@ class FrankaReach(VecTask):
         eef_goal_quat=self.states["eef_goal_quat"]
         
         
-        obs = [cube_pos, cube_quat, eef_pos, eef_quat, eef_goal_pos, eef_goal_quat]
+        obs = [eef_pos, eef_quat, eef_goal_pos, eef_goal_quat]
 
         # Concatenate all observations
         self.obs_buf = torch.cat(obs, dim=-1)
@@ -479,14 +453,10 @@ class FrankaReach(VecTask):
         env_ids_int32 = env_ids.to(dtype=torch.int32)
 
         # if not self._i:
-        # self._reset_init_cube_state(env_ids=env_ids, check_valid=False)
         self._reset_eef_goal_state(env_ids=env_ids)
         # self._i = True
 
-        # Write these new init states to the sim states
-        # self._cube_state[env_ids] = self._init_cube_state[env_ids]
-        # self._goal_cube_state[env_ids] = self._goal_cube_state[env_ids]
-        
+
         # Reset agent
         reset_noise = torch.rand((len(env_ids), 9), device=self.device)
         pos = tensor_clamp(
@@ -537,46 +507,7 @@ class FrankaReach(VecTask):
         sphere_pose = gymapi.Transform(r=sphere_rot)
         sphere_geom = gymutil.WireframeSphereGeometry(0.02, 12, 12, sphere_pose, color=(1, 1, 0))
 
-    
-
-        
-    def _reset_init_cube_state(self, env_ids, check_valid=True):
-        """
-        Reset the cube's position based on self.startPositionNoise and self.startRotationNoise.
-        Populates the appropriate self._init_cube_state.
-        """
-
-        # If env_ids is None, reset all environments
-        if env_ids is None:
-            env_ids = torch.arange(start=0, end=self.num_envs, device=self.device, dtype=torch.long)
-
-        # Initialize buffer to hold sampled values
-        num_resets = len(env_ids)
-        sampled_init_cube_state = torch.zeros(num_resets, 13, device=self.device)
-        sampled_goal_cube_state = torch.zeros(num_resets, 13, device=self.device)
-
-        # Sample position and orientation for the cube
-        centered_cube_xy_state = torch.tensor(self._table_surface_pos[:2], device=self.device, dtype=torch.float32)
-        cube_height = self.states["cube_size"].squeeze(-1)
-
-        # Set fixed z value based on table height and cube height
-        sampled_init_cube_state[:, 2] = self._table_surface_pos[2] + cube_height[env_ids] / 2
-        sampled_goal_cube_state[:, 2] = self._table_surface_pos[2] + cube_height[env_ids] / 2
-
-        #sample orientation
-        sampled_init_cube_state[:, 6] = 1.0
-        sampled_goal_cube_state[:, 6] = 1.0
-
-        # Sample x, y values with noise
-        sampled_init_cube_state[:, :2] = centered_cube_xy_state.unsqueeze(0) + 0.2 + \
-                                    2.0 * self.init_cube_pos_noise * (torch.rand(num_resets, 2, device=self.device) - 0.5)
-        sampled_goal_cube_state[:, :2] = centered_cube_xy_state.unsqueeze(0) + \
-                                    2.0 * self.goal_cube_pos_noise * (torch.rand(num_resets, 2, device=self.device) - 0.5)
-
-        # Set the new sampled values as the initial state for the cube
-        self._init_cube_state[env_ids, :] = sampled_init_cube_state
-        self._goal_cube_state[env_ids, :] = sampled_goal_cube_state
-        
+          
         
     def _reset_eef_goal_state(self, env_ids):
         """
