@@ -18,8 +18,8 @@ env:
   cubeGoalPosNoise: 0.0
   cubeGoalOriNoise: 0.0
 
-  goalEEPosResetNoise: 0.0
-  goalEEOriResetNoise: 0.0
+  eeGoalPosResetNoise: 0.25
+  eeGoalOriResetNoise: 0.785
 
   frankaPositionNoise: 0.0
   frankaRotationNoise: 0.0

@@ -71,6 +71,11 @@ class FrankaReach(VecTask):
         self.franka_dof_noise = self.cfg["env"]["frankaDofNoise"]
         self.aggregate_mode = self.cfg["env"]["aggregateMode"]
         
+        
+        # Robot Goal EE Pose Reset Noise
+        self.ee_goal_pos_reset_noise = self.cfg["env"]["eeGoalPosResetNoise"]
+        self.ee_goal_ori_reset_noise = self.cfg["env"]["eeGoalOriResetNoise"]
+        
         # Domain Randomization Parameters
         self.randomization_params = self.cfg["task"]["randomization_params"]
 
@@ -134,7 +139,7 @@ class FrankaReach(VecTask):
             [0, 0.1963, 0, -2.6180, 0, 2.9416, 0.7854, 0.000, 0.000], device=self.device
         )
         self.franka_default_ee_pose = to_torch(
-            [0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 1.0], device=self.device
+            [0.1, 0.0, 1.5, 0.0, 0.0, 0.0, 1.0], device=self.device
         ) # x, y, z, qx, qy, qz, qw
 
         # OSC Gains 
@@ -477,8 +482,8 @@ class FrankaReach(VecTask):
         # self._i = True
 
         # Write these new init states to the sim states
-        self._cube_state[env_ids] = self._init_cube_state[env_ids]
-        self._goal_cube_state[env_ids] = self._goal_cube_state[env_ids]
+        # self._cube_state[env_ids] = self._init_cube_state[env_ids]
+        # self._goal_cube_state[env_ids] = self._goal_cube_state[env_ids]
         
         # Reset agent
         reset_noise = torch.rand((len(env_ids), 9), device=self.device)
@@ -585,23 +590,27 @@ class FrankaReach(VecTask):
         num_resets = len(env_ids)
         sampled_eef_goal_state = torch.zeros(num_resets, 13, device=self.device)
 
-        # Sample position and orientation for the cube
-        centered_cube_xy_state = torch.tensor(self._table_surface_pos[:2], device=self.device, dtype=torch.float32)
-        cube_height = self.states["cube_size"].squeeze(-1)
+        # Set the sampled values to the default franka ee goal pos
+        # sampled_eef_goal_state[:, :3] = self.franka_default_ee_pose[:3]
+        # Set the sampled values to the default franka ee goal quat
+        # sampled_eef_goal_state[:, 3:7] = self.franka_default_ee_pose[3:]
         
+        ee_pos_state = torch.tensor(self.franka_default_ee_pose[:3], device=self.device, dtype=torch.float32)
         
+        # Randomize EE Goal Pose
+        if self.ee_goal_pos_reset_noise > 0:
+            rand_xyz = ee_pos_state.unsqueeze(0) + \
+            2.0 * self.ee_goal_pos_reset_noise * (torch.rand(num_resets, 3, device=self.device) - 0.5) # random noise [-1., 1.]
+            sampled_eef_goal_state[:, :3] += rand_xyz
+            
 
-        # Set fixed z value based on table height and cube height
-        # sampled_eef_goal_state[:, 2] = self._table_surface_pos[2] + cube_height[env_ids] / 2
-        sampled_eef_goal_state[:, 2] = 0.5
-
-        #sample orientation
-        sampled_eef_goal_state[:, 6] = 1.0
-
-        # Sample x, y values with noise
-        sampled_eef_goal_state[:, :2] = centered_cube_xy_state.unsqueeze(0) + \
-                                    2.0 * self.goal_cube_pos_noise * (torch.rand(num_resets, 2, device=self.device) - 0.5)
-
+  
+        # if self.ee_goal_ori_reset_noise > 0:
+        #     rand_rot = torch.zeros(1, 3)
+        #     rand_rot[:, -1] = self.ee_goal_ori_reset_noise * (-1. + np.random.rand() * 2.0)
+        #     new_quat = axisangle2quat(rand_rot).squeeze().numpy().tolist()
+        #     sampled_eef_goal_state[:, 3:7] = gymapi.Quat(*new_quat)
+        
         self._eef_goal_state[env_ids, :] = sampled_eef_goal_state
         
 
@@ -662,8 +671,6 @@ class FrankaReach(VecTask):
         self.compute_observations()
         self.compute_reward(self.actions)
         
-        
-
         # debug viz
         if self.viewer and self.debug_viz:
             self.gym.clear_lines(self.viewer)
@@ -675,11 +682,7 @@ class FrankaReach(VecTask):
             
             eef_goal_pos = self.states["eef_goal_pos"]
             eef_goal_rot = self.states["eef_goal_quat"]
-            
-            print("eef_goal_pos:", eef_goal_pos)
-            print("eef_pos:", eef_pos)
-                 
-   
+        
             # Plot visualizations
             for i in range(self.num_envs):
                 for pos, rot in zip((eef_pos, eef_goal_pos), (eef_rot, eef_goal_rot)):
@@ -703,23 +706,6 @@ def compute_franka_reward(
 ):
     # type: (Tensor, Tensor, Tensor, Dict[str, Tensor], Dict[str, float], float) -> Tuple[Tensor, Tensor]
 
-    # Compute distance from the cube to the goal position
-    cube_pos = states["cube_pos"]
-    goal_pos = states["goal_cube_pos"]
-    delta_pos = torch.norm(cube_pos - goal_pos, dim=-1)
-
-    # 1. Position Reward: Reward for getting closer to the goal
-    pos_reward = 1.0 - torch.tanh(10.0 * delta_pos)  # Scale based on distance
-
-    # 2. Orientation Reward: Reward based on alignment of the cube's orientation with a desired orientation
-    cube_quat = states["cube_quat"]
-    goal_quat = states["goal_cube_quat"]  
-    delta_quat = quat_mul(cube_quat, quat_conjugate(goal_quat))
-    
-    ori_reward = 1.0 - torch.tanh(10.0 * torch.norm(delta_quat, dim=-1))  # Quaternion difference metric
-
-    # 3. Contact Reward: Distance between the cube and the end effector
-    contact_reward = 1.0 - torch.tanh(10.0 * torch.norm(states["cube_contact"], dim=-1))
 
     # 4. Jerk Reward: Penalize large changes in actions
     jerk_penalty = torch.norm(actions[:, :] - actions[:, 1:], dim=-1)
@@ -731,18 +717,16 @@ def compute_franka_reward(
     eef_goal_reward = 1.0 - torch.tanh(10.0 * eef_goal_dist)
 
  
-
     # Combine rewards with scaling factors
     rewards = (reward_settings["r_eef_reach_scale"] * eef_goal_reward)
               
-    
-    
+
     # TODO: Add jerk penalty
     # TODO: Add real-robot safey penalty
 
     # Compute resets: reset the environment if the episode ends or the task is successfully completed
     success_threshold = 0.05  # Success threshold for distance to goal
-    success_condition = delta_pos < success_threshold
+    success_condition = eef_goal_dist < success_threshold
     reset_buf = torch.where((progress_buf >= max_episode_length - 1) | success_condition, torch.ones_like(reset_buf), reset_buf)
 
     return rewards, reset_buf
