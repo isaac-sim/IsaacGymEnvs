@@ -7,6 +7,7 @@ from isaacgym import gymapi
 from isaacgym import gymutil
 
 from isaacgymenvs.utils.torch_jit_utils import quat_mul, quat_apply, to_torch, tensor_clamp, quat_conjugate  
+from isaacgymenvs.utils.torch_jit_utils import quat_from_euler_xyz
 from isaacgymenvs.tasks.base.vec_task import VecTask
 
 
@@ -84,7 +85,8 @@ class FrankaReach(VecTask):
             "r_pos_scale": self.cfg["env"]["posRewardScale"],
             "r_ori_scale": self.cfg["env"]["oriRewardScale"],
             "r_contact_scale": self.cfg["env"]["contactRewardScale"],
-            "r_eef_reach_scale": self.cfg["env"]["eefReachRewardScale"],
+            "r_eef_pos_reach_scale": self.cfg["env"]["eefPosReachRewardScale"],
+            "r_eef_ori_reach_scale": self.cfg["env"]["eefOriReachRewardScale"],
         }
 
         # Controller type (OSC or joint torques)
@@ -425,7 +427,9 @@ class FrankaReach(VecTask):
             # ee goal
             "eef_goal_pos": self._eef_goal_state[:, :3],
             "eef_goal_quat": self._eef_goal_state[:, 3:7],
+            
             "eef_dist_pos": self._eef_goal_state[:, :3] - self._eef_state[:, :3],
+            "eef_dist_quat": self._eef_goal_state[:, 3:7] - self._eef_state[:, 3:7],
         })
         
 
@@ -456,10 +460,8 @@ class FrankaReach(VecTask):
         eef_goal_pos=self.states["eef_goal_pos"]
         eef_goal_quat=self.states["eef_goal_quat"]
         
-        # compute ee pos diff
-        eef_pos_dist = eef_goal_pos - eef_pos
         
-        obs = [cube_pos, cube_quat, eef_pos, eef_quat, eef_goal_pos, eef_goal_quat, eef_pos_dist]
+        obs = [cube_pos, cube_quat, eef_pos, eef_quat, eef_goal_pos, eef_goal_quat]
 
         # Concatenate all observations
         self.obs_buf = torch.cat(obs, dim=-1)
@@ -599,18 +601,18 @@ class FrankaReach(VecTask):
         
         # Randomize EE Goal Pose
         if self.ee_goal_pos_reset_noise > 0:
-            rand_xyz = ee_pos_state.unsqueeze(0) + \
+            rand_pos = ee_pos_state.unsqueeze(0) + \
             2.0 * self.ee_goal_pos_reset_noise * (torch.rand(num_resets, 3, device=self.device) - 0.5) # random noise [-1., 1.]
-            sampled_eef_goal_state[:, :3] += rand_xyz
+            sampled_eef_goal_state[:, :3] += rand_pos
             
+        # Randomize EE Goal Orientation
+        if self.ee_goal_ori_reset_noise > 0:
+            # Generate random Euler angles in radians for roll, pitch, yaw (x, y, z axes)
+            rand_euler_angles = 2.0 * self.ee_goal_ori_reset_noise * (torch.rand(num_resets, 3, device=self.device) - 0.5)
+            # Convert randomized Euler angles to quaternions
+            rand_quat = quat_from_euler_xyz(rand_euler_angles[:, 0], rand_euler_angles[:, 1], rand_euler_angles[:, 2])
+            sampled_eef_goal_state[:, 3:7] = rand_quat  # Set the quaternion part of the goal state
 
-  
-        # if self.ee_goal_ori_reset_noise > 0:
-        #     rand_rot = torch.zeros(1, 3)
-        #     rand_rot[:, -1] = self.ee_goal_ori_reset_noise * (-1. + np.random.rand() * 2.0)
-        #     new_quat = axisangle2quat(rand_rot).squeeze().numpy().tolist()
-        #     sampled_eef_goal_state[:, 3:7] = gymapi.Quat(*new_quat)
-        
         self._eef_goal_state[env_ids, :] = sampled_eef_goal_state
         
 
@@ -707,23 +709,26 @@ def compute_franka_reward(
     # type: (Tensor, Tensor, Tensor, Dict[str, Tensor], Dict[str, float], float) -> Tuple[Tensor, Tensor]
 
 
-    # 4. Jerk Reward: Penalize large changes in actions
-    jerk_penalty = torch.norm(actions[:, :] - actions[:, 1:], dim=-1)
-    jerk_penalty = torch.mean(jerk_penalty, dim=-1)
-    
-    # End Effector Goal Reward
-    eef_goal_dist = torch.norm(states["eef_dist_pos"], dim=-1)
-    
-    eef_goal_reward = 1.0 - torch.tanh(10.0 * eef_goal_dist)
+    # TODO: Jerk Reward: Penalize large changes in actions
 
- 
+    # End Effector Pose Reward
+    eef_goal_pos_dist = torch.norm(states["eef_dist_pos"], dim=-1)
+    eef_goal_pos_reward = 1.0 - torch.tanh(10.0 * eef_goal_pos_dist)
+    
+    # End Effector Orientation Reward
+    eef_goal_quat_dist = torch.norm(states["eef_dist_quat"], dim=-1)
+    eef_goal_quat_reward = 1.0 - torch.tanh(10.0 * eef_goal_quat_dist)
+    
+
     # Combine rewards with scaling factors
-    rewards = (reward_settings["r_eef_reach_scale"] * eef_goal_reward)
+    rewards = (reward_settings["r_eef_pos_reach_scale"] * eef_goal_pos_reward + 
+               reward_settings["r_eef_ori_reach_scale"] * eef_goal_quat_reward)
+
               
-
-    # TODO: Add jerk penalty
-    # TODO: Add real-robot safey penalty
-
+    # Compute state distance to goal (append pos and quat distances)
+    eef_goal_dist = torch.cat([eef_goal_pos_dist, eef_goal_quat_dist])
+    eef_goal_dist = torch.norm(eef_goal_dist, dim=-1)
+    
     # Compute resets: reset the environment if the episode ends or the task is successfully completed
     success_threshold = 0.05  # Success threshold for distance to goal
     success_condition = eef_goal_dist < success_threshold

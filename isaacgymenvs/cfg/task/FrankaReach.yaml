@@ -33,7 +33,9 @@ env:
   posRewardScale: 1.0
   oriRewardScale: 0.1
   contactRewardScale: 0.1
-  eefReachRewardScale: 1.0
+  eefPosReachRewardScale: 1.0
+  eefOriReachRewardScale: 0.5
+  jerkRewardScale: 0.2
 
 
   controlType: osc  # options are {joint_tor, osc}
