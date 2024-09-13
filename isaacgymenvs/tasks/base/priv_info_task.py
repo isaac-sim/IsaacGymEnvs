@@ -1,4 +1,6 @@
+import numpy as np 
 import torch
+from gym import spaces
 from isaacgymenvs.tasks.base.vec_task import VecTask
 
 class PrivInfoVecTask(VecTask):
@@ -18,10 +20,20 @@ class PrivInfoVecTask(VecTask):
         super().__init__(config, rl_device, sim_device, graphics_device_id, headless, **kwargs)
         self.config = config
         self._allocate_task_buffer()
+        self.obs_space = spaces.Dict(
+            {
+                "obs": spaces.Box(np.ones(self.num_obs) * -np.Inf, np.ones(self.num_obs) * np.Inf),
+                "priv_info": spaces.Box(np.ones(self.num_env_factors) * -np.Inf, np.ones(self.num_env_factors) * np.Inf),
+                "proprio_hist": spaces.Box(np.ones(self.prop_hist_len) * -np.Inf, np.ones(self.prop_hist_len) * np.Inf),
+            }
+        )
 
         # TODO: loop over envs and update priv info buf 
         # TODO: populate proprio_hist_buf history buf
         # https://github.com/HaozhiQi/hora/blob/main/hora/tasks/allegro_hand_hora.py
+
+        # TODO: on tdmpc end, optional encoder for priv_info / proprio_hist from config 
+        # TODO: on tdmpc end, batch/num_envs tensor shapes
 
     def _allocate_task_buffer(self):
         # extra buffers for observe randomized params
@@ -49,6 +61,7 @@ class PrivInfoVecTask(VecTask):
         super().reset()
         self.obs_dict['priv_info'] = self.priv_info_buf.to(self.rl_device)
         self.obs_dict['proprio_hist'] = self.proprio_hist_buf.to(self.rl_device)
+        breakpoint()
         return self.obs_dict
 
     def step(self, actions):
