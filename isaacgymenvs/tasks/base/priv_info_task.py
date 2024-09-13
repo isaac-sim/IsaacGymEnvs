@@ -28,8 +28,8 @@ class PrivInfoVecTask(VecTask):
             }
         )
 
-        # TODO: loop over envs and update priv info buf 
-        # TODO: populate proprio_hist_buf history buf
+        # TODO: loop over envs and update priv info buf at env creation 
+        # TODO: populate proprio_hist_buf history buf at each timestpe
         # https://github.com/HaozhiQi/hora/blob/main/hora/tasks/allegro_hand_hora.py
 
         # TODO: on tdmpc end, optional encoder for priv_info / proprio_hist from config 
