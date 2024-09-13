@@ -30,6 +30,9 @@ env:
   posRewardScale: 1.0
   oriRewardScale: 0.1
   contactRewardScale: 0.1
+  
+  propHistoryLen: 30
+  privInfoDim: 9 
 
 
   controlType: osc  # options are {joint_tor, osc}
