@@ -453,6 +453,9 @@ class FrankaCubePush(PrivInfoVecTask):
         
         if self.randomize:
             self.apply_randomizations(self.randomization_params)
+
+            # TODO: fill in self.priv_info_buf with randomized params
+            # TODO: start with com, mass, friction (constant per episode)
         
         env_ids_int32 = env_ids.to(dtype=torch.int32)
 

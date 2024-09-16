@@ -40,6 +40,8 @@ class PrivInfoVecTask(VecTask):
         self.prop_hist_len = self.config['env']['propHistoryLen']
         self.num_env_factors = self.config['env']['privInfoDim']
         self.priv_info_buf = torch.zeros((self.num_envs, self.num_env_factors), device=self.device, dtype=torch.float)
+
+        # TODO: fix 32 below 
         self.proprio_hist_buf = torch.zeros((self.num_envs, self.prop_hist_len, 32), device=self.device, dtype=torch.float)
 
     def _update_priv_buf(self, env_id, name, value, lower=None, upper=None):
