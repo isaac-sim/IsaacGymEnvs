@@ -63,7 +63,7 @@ class PrivInfoVecTask(VecTask):
         super().reset()
         self.obs_dict['priv_info'] = self.priv_info_buf.to(self.rl_device)
         self.obs_dict['proprio_hist'] = self.proprio_hist_buf.to(self.rl_device)
-        breakpoint()
+        # breakpoint()
         return self.obs_dict
 
     def step(self, actions):
