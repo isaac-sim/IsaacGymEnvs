@@ -80,6 +80,9 @@ class FrankaCubePush(PrivInfoVecTask):
             "r_ori_scale": self.cfg["env"]["oriRewardScale"],
             "r_contact_scale": self.cfg["env"]["contactRewardScale"],
         }
+        
+        # print messages for priv info for each env
+        self.enable_priv_info_print = self.cfg["env"]["enablePrivInfoPrint"]
 
         # Controller type (OSC or joint torques)
         self.control_type = self.cfg["env"]["controlType"]
@@ -454,9 +457,7 @@ class FrankaCubePush(PrivInfoVecTask):
         if self.randomize:
             self.apply_randomizations(self.randomization_params)
 
-            # TODO: fill in self.priv_info_buf with randomized params
-            # TODO: start with com, mass, friction (constant per episode)
-            #  store prvi info in priv_info_buf
+            #  store prvi info in priv_info_buf [[env_id], [mass, friction, com_x, com_y, com_z]]
             self._store_priv_info(env_ids)
             
 
@@ -522,9 +523,7 @@ class FrankaCubePush(PrivInfoVecTask):
         sphere_geom = gymutil.WireframeSphereGeometry(0.02, 12, 12, sphere_pose, color=(1, 1, 0))
 
     def _store_priv_info(self, env_ids):
-        
-        b_print_priv_info = False # TODO: put this arg in yaml file
-        
+ 
         for env_id in env_ids:
             env_ptr = self.envs[env_id]
             cube_handle = self.gym.find_actor_handle(env_ptr, "cube")
@@ -553,7 +552,7 @@ class FrankaCubePush(PrivInfoVecTask):
             self.priv_info_buf[env_id, 4] = cube_com.z
             
             
-            if b_print_priv_info:
+            if self.enable_priv_info_print:
                 print(f"Env {env_id}, Cube Privileged Info:")
                 print(f"  Mass = {cube_mass}")
                 print(f"  CoM = {cube_com.x}, {cube_com.y}, {cube_com.z}")
