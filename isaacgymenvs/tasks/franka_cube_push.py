@@ -456,6 +456,10 @@ class FrankaCubePush(PrivInfoVecTask):
 
             # TODO: fill in self.priv_info_buf with randomized params
             # TODO: start with com, mass, friction (constant per episode)
+            #  store prvi info in priv_info_buf
+            self._store_priv_info(env_ids)
+            
+
         
         env_ids_int32 = env_ids.to(dtype=torch.int32)
 
@@ -517,8 +521,44 @@ class FrankaCubePush(PrivInfoVecTask):
         sphere_pose = gymapi.Transform(r=sphere_rot)
         sphere_geom = gymutil.WireframeSphereGeometry(0.02, 12, 12, sphere_pose, color=(1, 1, 0))
 
-    
-
+    def _store_priv_info(self, env_ids):
+        
+        b_print_priv_info = False # TODO: put this arg in yaml file
+        
+        for env_id in env_ids:
+            env_ptr = self.envs[env_id]
+            cube_handle = self.gym.find_actor_handle(env_ptr, "cube")
+            cube_rb_props = self.gym.get_actor_rigid_body_properties(env_ptr, cube_handle)
+            cube_shape_props = self.gym.get_actor_rigid_shape_properties(env_ptr, cube_handle)
+            
+            #isaacgym.gymapi.RigidBodyProperties
+            for i, rb_prop in enumerate(cube_rb_props):
+                cube_mass = rb_prop.mass # float (kg)
+                cube_com = rb_prop.com # Vec3
+                # cube_inertia = rb_prop.inertia # Mat33
+                
+            #isaacgym.gymapi.RigidShapeProperties
+            for i, shape_prop in enumerate(cube_shape_props):
+                cube_friction = shape_prop.friction
+                # cube_rolling_friction = shape_prop.rolling_friction
+                # cube_torsion_friction = shape_prop.torsion_friction
+                # cube_compliance = shape_prop.compliance
+                # cube_restitution = shape_prop.restitution # [0,1]
+                
+            # store in priv_info_buf
+            self.priv_info_buf[env_id, 0] = cube_mass
+            self.priv_info_buf[env_id, 1] = cube_friction
+            self.priv_info_buf[env_id, 2] = cube_com.x
+            self.priv_info_buf[env_id, 3] = cube_com.y
+            self.priv_info_buf[env_id, 4] = cube_com.z
+            
+            
+            if b_print_priv_info:
+                print(f"Env {env_id}, Cube Privileged Info:")
+                print(f"  Mass = {cube_mass}")
+                print(f"  CoM = {cube_com.x}, {cube_com.y}, {cube_com.z}")
+                print(f"  Friction = {cube_friction}")
+             
         
     def _reset_init_cube_state(self, env_ids, check_valid=True):
         """
