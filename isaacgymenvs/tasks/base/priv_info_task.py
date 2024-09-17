@@ -28,7 +28,7 @@ class PrivInfoVecTask(VecTask):
             }
         )
 
-        # TODO: loop over envs and update priv info buf at env creation 
+ 
         # TODO: populate proprio_hist_buf history buf at each timestpe
         # https://github.com/HaozhiQi/hora/blob/main/hora/tasks/allegro_hand_hora.py
 
@@ -43,6 +43,9 @@ class PrivInfoVecTask(VecTask):
 
         # TODO: fix 32 below 
         self.proprio_hist_buf = torch.zeros((self.num_envs, self.prop_hist_len, 32), device=self.device, dtype=torch.float)
+        
+        # print(f"Priviliged Information Buffer Dimension: {self.num_env_factors.shape} <- (num_envs, priv_info_dim)")
+        # print(f"Proprioceptiion Buffer Dimension: {self.proprio_hist_buf.shape} <- (num_envs, num_env_factors, num_env_factors)")
 
     def _update_priv_buf(self, env_id, name, value, lower=None, upper=None):
         # normalize to -1, 1
