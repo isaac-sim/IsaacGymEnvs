@@ -9,6 +9,7 @@ env:
   envSpacing: 1.5
   episodeLength: 300
   enableDebugVis: False
+  enablePrivInfoPrint: False
 
   clipObservations: 5.0
   clipActions: 1.0
