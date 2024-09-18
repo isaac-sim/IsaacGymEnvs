@@ -200,13 +200,13 @@ def apply_random_samples(prop, og_prop, attr, attr_randomization_params,
             new_prop_val = gymapi.Vec3(
                 og_prop[attr].x * sample[0],
                 og_prop[attr].y * sample[1],
-                og_prop[attr].z * sample[2]
+                og_prop[attr].z 
             )
         elif attr_randomization_params['operation'] == 'additive':
             new_prop_val = gymapi.Vec3(
                 og_prop[attr].x + sample[0],
                 og_prop[attr].y + sample[1],
-                og_prop[attr].z + sample[2]
+                og_prop[attr].z 
             )
         
         # Update the COM in the RigidBodyProperties

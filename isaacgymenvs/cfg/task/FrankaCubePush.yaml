@@ -147,7 +147,7 @@ task:
             # schedule_steps: 30000
           com:
             # range: [[-0.02, 0.02], [-0.02, 0.02], [-0.01, 0.01]]
-            range: [0.1, 0.11]
+            range: [-0.02, 0.02]
             distribution: "uniform"
             operation: "additive" 
 
