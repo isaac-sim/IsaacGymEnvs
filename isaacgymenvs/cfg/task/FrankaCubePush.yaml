@@ -8,8 +8,8 @@ env:
   numEnvs: ${resolve_default:8192,${...num_envs}}
   envSpacing: 1.5
   episodeLength: 300
-  enableDebugVis: True
-  enablePrivInfoPrint: True
+  enableDebugVis: False
+  enablePrivInfoPrint: False
   includePrivInfo: False
 
   clipObservations: 5.0
