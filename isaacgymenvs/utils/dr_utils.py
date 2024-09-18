@@ -191,6 +191,34 @@ def apply_random_samples(prop, og_prop, attr, attr_randomization_params,
         if 'num_buckets' in attr_randomization_params and attr_randomization_params['num_buckets'] > 0:
             new_prop_val = get_bucketed_val(new_prop_val, attr_randomization_params)
         prop[attr] = new_prop_val
+    
+    # for CoM Randomization
+    elif isinstance(og_prop[attr], gymapi.Vec3):
+        sample = generate_random_samples(attr_randomization_params, 3, curr_gym_step_count, extern_sample)
+
+        if attr_randomization_params['operation'] == 'scaling':
+            new_prop_val = gymapi.Vec3(
+                og_prop[attr].x * sample[0],
+                og_prop[attr].y * sample[1],
+                og_prop[attr].z * sample[2]
+            )
+        elif attr_randomization_params['operation'] == 'additive':
+            new_prop_val = gymapi.Vec3(
+                og_prop[attr].x + sample[0],
+                og_prop[attr].y + sample[1],
+                og_prop[attr].z + sample[2]
+            )
+        
+        # Update the COM in the RigidBodyProperties
+        if isinstance(prop, gymapi.RigidBodyProperties):
+            prop.com = new_prop_val
+        elif isinstance(prop, list) and all(isinstance(p, gymapi.RigidBodyProperties) for p in prop):
+            for p in prop:
+                p.com = new_prop_val
+        else:
+            raise TypeError(f"Unexpected property type: {type(prop)}. Expected RigidBodyProperties or list of RigidBodyProperties.")
+
+            
     else:
         sample = generate_random_samples(attr_randomization_params, 1,
                                          curr_gym_step_count, extern_sample)

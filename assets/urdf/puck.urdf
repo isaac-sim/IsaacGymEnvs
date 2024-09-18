@@ -4,13 +4,13 @@
     <visual>
       <origin xyz="0 0 0"/>
       <geometry>
-        <cylinder radius="0.06" length="0.03"/>
+        <cylinder radius="0.0381" length="0.0254"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0"/>
       <geometry>
-        <cylinder radius="0.05" length="0.05"/>
+        <cylinder radius="0.0381" length="0.0254"/>
       </geometry>
     </collision>
     <inertial>

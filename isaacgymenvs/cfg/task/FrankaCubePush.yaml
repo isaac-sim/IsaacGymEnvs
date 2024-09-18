@@ -8,8 +8,8 @@ env:
   numEnvs: ${resolve_default:8192,${...num_envs}}
   envSpacing: 1.5
   episodeLength: 300
-  enableDebugVis: False
-  enablePrivInfoPrint: False
+  enableDebugVis: True
+  enablePrivInfoPrint: True
   includePrivInfo: False
 
   clipObservations: 5.0
@@ -17,7 +17,7 @@ env:
 
   cubeInitPosNoise: 0.3
   cubeInitOriNoise: 3.14
-  cubeGoalPosNoise: 0.0
+  cubeGoalPosNoise: 0.3
   cubeGoalOriNoise: 0.0
 
   frankaPositionNoise: 0.0
@@ -30,8 +30,8 @@ env:
   actionScale: 1.0
 
   posRewardScale: 1.0
-  oriRewardScale: 0.1
-  contactRewardScale: 0.1
+  oriRewardScale: 0.0
+  contactRewardScale: 0.01
   
   propHistoryLen: 30
   privInfoDim: 9 
@@ -145,6 +145,12 @@ task:
             setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
             # schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
             # schedule_steps: 30000
+          com:
+            # range: [[-0.02, 0.02], [-0.02, 0.02], [-0.01, 0.01]]
+            range: [0.1, 0.11]
+            distribution: "uniform"
+            operation: "additive" 
+
         rigid_shape_properties:
           friction:
             num_buckets: 250
