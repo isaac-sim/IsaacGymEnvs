@@ -10,6 +10,7 @@ env:
   episodeLength: 300
   enableDebugVis: False
   enablePrivInfoPrint: False
+  includePrivInfo: False
 
   clipObservations: 5.0
   clipActions: 1.0
@@ -86,7 +87,7 @@ task:
       # schedule_steps: 40000
     sim_params: 
       gravity:
-        range: [0, 0.1]
+        range: [-0.2, 0.2]
         operation: "additive"
         distribution: "gaussian"
         # schedule: "linear"  # "linear" will linearly interpolate between no rand and max rand
@@ -121,7 +122,7 @@ task:
             # schedule_steps: 30000
         rigid_body_properties:
           mass:
-            range: [0.01, 0.1]
+            range: [0.8, 1.2]
             operation: "scaling"
             distribution: "uniform"
             setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
@@ -130,7 +131,7 @@ task:
         rigid_shape_properties:
           friction:
             num_buckets: 250
-            range: [0.5, 1.5]
+            range: [0.9, 1.1]
             operation: "scaling"
             distribution: "uniform"
       
@@ -138,7 +139,7 @@ task:
         color: True
         rigid_body_properties:
           mass:
-            range: [0.1, 10.]
+            range: [0.1, 5.]
             operation: "scaling"
             distribution: "uniform"
             setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
@@ -147,7 +148,7 @@ task:
         rigid_shape_properties:
           friction:
             num_buckets: 250
-            range: [0.001, 0.002]
+            range: [0.1, 5.0]
             operation: "scaling"
             distribution: "uniform"
 

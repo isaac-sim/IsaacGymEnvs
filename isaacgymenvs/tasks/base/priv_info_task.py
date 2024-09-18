@@ -20,7 +20,7 @@ class PrivInfoVecTask(VecTask):
         super().__init__(config, rl_device, sim_device, graphics_device_id, headless, **kwargs)
         self.config = config
         self._allocate_task_buffer()
-        self.obs_space = spaces.Dict(
+        self.mpc_obs_space = spaces.Dict(
             {
                 "obs": spaces.Box(np.ones(self.num_obs) * -np.Inf, np.ones(self.num_obs) * np.Inf),
                 "priv_info": spaces.Box(np.ones(self.num_env_factors) * -np.Inf, np.ones(self.num_env_factors) * np.Inf),
