@@ -83,6 +83,7 @@ class FrankaCubePush(PrivInfoVecTask):
         
         # print messages for priv info for each env
         self.enable_priv_info_print = self.cfg["env"]["enablePrivInfoPrint"]
+     
         
         # include priviliged information in the observation space
         self.include_priv_info = self.cfg["env"]["includePrivInfo"]
@@ -453,7 +454,17 @@ class FrankaCubePush(PrivInfoVecTask):
         cube_pos_diff = self._goal_cube_state[:, :3] - cube_pos
         # TODO: compute current cube to goal cube quaternion
         
+        # Observable Information
         obs = [cube_pos, cube_quat, eef_pos, eef_quat, cube_pos_diff]
+        
+        # Include priv info in the observation space
+        if self.include_priv_info:
+            obs.append(self.priv_info_buf)
+            
+        # print obs shape
+        print(f"Observation shape: {torch.cat(obs, dim=-1).shape}")  
+        
+        
 
         # Concatenate all observations
         self.obs_buf = torch.cat(obs, dim=-1)
