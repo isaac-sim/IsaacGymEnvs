@@ -8,9 +8,9 @@ env:
   numEnvs: ${resolve_default:8192,${...num_envs}}
   envSpacing: 1.5
   episodeLength: 300
-  enableDebugVis: False
+  enableDebugVis: True
   enablePrivInfoPrint: False # it won't print if randomize is false
-  includePrivInfo: True #include priv info in the observation
+  includePrivInfo: False #include priv info in the observation
 
   clipObservations: 5.0
   clipActions: 1.0
@@ -139,7 +139,7 @@ task:
         color: True
         rigid_body_properties:
           mass:
-            range: [0.1, 3.]
+            range: [0.1, 10.]
             operation: "scaling"
             distribution: "uniform"
             setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
@@ -147,14 +147,14 @@ task:
             # schedule_steps: 30000
           com:
             # range: [[-0.02, 0.02], [-0.02, 0.02], [-0.01, 0.01]]
-            range: [-0.02, 0.02]
+            range: [-0.04, 0.04]
             distribution: "uniform"
             operation: "additive" 
 
         rigid_shape_properties:
           friction:
             num_buckets: 250
-            range: [0.1, 2.0]
+            range: [0.1, 3.0]
             operation: "scaling"
             distribution: "uniform"
 

@@ -94,8 +94,14 @@ class FrankaCubePush(PrivInfoVecTask):
             "Invalid control type specified. Must be one of: {osc, joint_tor}"
 
         # dimensions
-        # obs include: cube_pos(3) + cube_quat(4) + goal_cube_dist_pos(3) + eef_pose (7)
-        self.cfg["env"]["numObservations"] = 17 if self.control_type == "osc" else 26
+        # obs include: cube_pos(3) + cube_quat(4) + goal_cube_dist_pos(3) + eef_pose (7) + [priv_info_dim]
+        if self.include_priv_info:
+            self.cfg["env"]["numObservations"] = 26
+        else:
+            self.cfg["env"]["numObservations"] = 17
+            
+
+        # self.cfg["env"]["numObservations"] = 17 if self.control_type == "osc" else 26
         # actions include: delta EEF if OSC (6) or joint torques (7)
         self.cfg["env"]["numActions"] = 6 if self.control_type == "osc" else 7
         
@@ -461,10 +467,7 @@ class FrankaCubePush(PrivInfoVecTask):
         if self.include_priv_info:
             obs.append(self.priv_info_buf)
             
-        # print obs shape
-        print(f"Observation shape: {torch.cat(obs, dim=-1).shape}")  
-        
-        
+          
 
         # Concatenate all observations
         self.obs_buf = torch.cat(obs, dim=-1)
@@ -589,7 +592,7 @@ class FrankaCubePush(PrivInfoVecTask):
             for i, rb_prop in enumerate(cube_rb_props):
                 cube_mass = rb_prop.mass # float (kg)
                 cube_com = rb_prop.com # Vec3
-                # cube_inertia = rb_prop.inertia # Mat33
+                # cube_inertia = rb_prop.inertia # Mat33 == [Vec3, Vec3, Vec3]
                 
             #isaacgym.gymapi.RigidShapeProperties
             for i, shape_prop in enumerate(cube_shape_props):
@@ -612,6 +615,10 @@ class FrankaCubePush(PrivInfoVecTask):
                 print(f"  Mass = {cube_mass}")
                 print(f"  CoM = {cube_com.x}, {cube_com.y}, {cube_com.z}")
                 print(f"  Friction = {cube_friction}")
+                # print(f" Inertia = {cube_inertia.x}, {cube_inertia.y}, {cube_inertia.z}")
+                
+            
+            
              
         
     def _reset_init_cube_state(self, env_ids, check_valid=True):
@@ -769,10 +776,10 @@ def compute_franka_reward(
     jerk_penalty = torch.mean(jerk_penalty, dim=-1)
 
  
-    
     # Combine rewards with scaling factors
     rewards = (reward_settings["r_pos_scale"] * pos_reward +
                reward_settings["r_contact_scale"] * contact_reward)
+
     
     # TODO: Add jerk penalty
     # TODO: Add real-robot safey penalty
@@ -780,6 +787,10 @@ def compute_franka_reward(
     # Compute resets: reset the environment if the episode ends or the task is successfully completed
     success_threshold = 0.05  # Success threshold for distance to goal
     success_condition = delta_pos < success_threshold
+    
+
+             
+    
     reset_buf = torch.where((progress_buf >= max_episode_length - 1) | success_condition, torch.ones_like(reset_buf), reset_buf)
 
     return rewards, reset_buf
