@@ -4,21 +4,20 @@
     <visual>
       <origin xyz="0 0 0"/>
       <geometry>
-        <cylinder radius="0.0381" length="0.0254"/>
+        <cylinder radius="0.055" length="0.04"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0"/>
       <geometry>
-        <cylinder radius="0.0381" length="0.0254"/>
+        <cylinder radius="0.055" length="0.04"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="0.1"/>
       <origin xyz="0 0 0"/>
-      <!-- inertia of cyclinder m=0.1 kg r=0,06 m l= 0.03 m -->
-      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0002"/>
-
+      <!-- inertia of cyclinder m=0.1 kg r=0.55 m l= 0.04 m -->
+      <inertia ixx="0.000089" ixy="0.0" ixz="0.0" iyy="0.000089" iyz="0.0" izz="0.000151"/>
     </inertial>
   </link>
 </robot>
