@@ -93,8 +93,13 @@ class FrankaCubePush(PrivInfoVecTask):
         assert self.control_type in {"osc", "joint_tor"},\
             "Invalid control type specified. Must be one of: {osc, joint_tor}"
 
+        self.control_input = self.cfg["env"]["controlInput"]
+        # assert self.control_type in {"pose3d", "pose6d"},\
+            # "Invalid control input specified. Must be one of: {pose3d, pose6d}"
+
+
         # dimensions
-        # obs include: cube_pos(3) + cube_quat(4) + goal_cube_dist_pos(3) + eef_pose (7) + [priv_info_dim]
+        # obs include: cube_pos(3) + cube_quat(4) + goal_cube_dist_pos(3)  + eef_pose (7) + [priv_info_dim]
         if self.include_priv_info:
             self.cfg["env"]["numObservations"] = 26
         else:
@@ -103,7 +108,11 @@ class FrankaCubePush(PrivInfoVecTask):
 
         # self.cfg["env"]["numObservations"] = 17 if self.control_type == "osc" else 26
         # actions include: delta EEF if OSC (6) or joint torques (7)
-        self.cfg["env"]["numActions"] = 6 if self.control_type == "osc" else 7
+        if self.control_input == "pose3d":
+            self.cfg["env"]["numActions"] = 3
+        else: # pose6d
+            self.cfg["env"]["numActions"] = 6
+        
         
         # Values to be filled in at runtime
         self.states = {}                        # will be dict filled with relevant states to use for reward calculation
@@ -425,6 +434,7 @@ class FrankaCubePush(PrivInfoVecTask):
             # Object Observable Information
             "cube_pos": self._cube_state[:, :3],
             "cube_quat": self._cube_state[:, 3:7],
+            "cube_vel": self._cube_state[:, 7:10],
             
             "cube_contact": self._cube_state[:, :3] - self._finger_state[:, :3], # cube to eef pos diff
             
@@ -456,12 +466,16 @@ class FrankaCubePush(PrivInfoVecTask):
         cube_quat=self.states["cube_quat"]
         eef_pos=self.states["eef_pos"]
         eef_quat=self.states["eef_quat"]
+
+        cube_vel=self.states["cube_vel"]
+        
         # compute current cube to goal cube position
         cube_pos_diff = self._goal_cube_state[:, :3] - cube_pos
+        
         # TODO: compute current cube to goal cube quaternion
         
         # Observable Information
-        obs = [cube_pos, cube_quat, eef_pos, eef_quat, cube_pos_diff]
+        obs = [cube_pos, cube_quat, eef_pos, eef_quat, cube_vel,  cube_pos_diff]
         
         # Include priv info in the observation space
         if self.include_priv_info:
@@ -689,16 +703,25 @@ class FrankaCubePush(PrivInfoVecTask):
     def pre_physics_step(self, actions):
         self.actions = actions.clone().to(self.device)
 
-        # arm  command
-        u_arm = self.actions
+        # arm command (only x, y, z actions)
+        u_arm = self.actions[:, :3]  # Only take the first 3 elements (x, y, z)
 
-        # print(self.cmd_limit, self.action_scale)
+        # Scale the position control (pose3d)
+        u_arm = u_arm * self.cmd_limit[:, :3] / self.action_scale
 
-        # Control arm (scale value first)
-        u_arm = u_arm * self.cmd_limit / self.action_scale
+        # Fixed orientation in axis-angle or quaternion (choose based on implementation)
+        fixed_orientation = torch.tensor([0.0, 0.0, 0.0], device=self.device)  # Fixed axis-angle, no rotation
+
+        # Prepare dpose (6D: position + orientation)
+        dpose = torch.zeros((self.num_envs, 6), device=self.device)
+        dpose[:, :3] = u_arm  # Set the position control to x, y, z
+        dpose[:, 3:] = fixed_orientation  # Set the orientation to the fixed value
+
         if self.control_type == "osc":
-            u_arm = self._compute_osc_torques(dpose=u_arm)
-        self._arm_control[:, :] = u_arm
+            # Compute OSC torques with fixed orientation
+            u_arm = self._compute_osc_torques(dpose=dpose)
+
+        self._arm_control[:, :] = u_arm  # Apply control with fixed orientation and computed position
 
         # Deploy actions
         self.gym.set_dof_position_target_tensor(self.sim, gymtorch.unwrap_tensor(self._pos_control))

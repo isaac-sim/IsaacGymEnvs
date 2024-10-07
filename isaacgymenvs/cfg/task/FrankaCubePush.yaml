@@ -8,21 +8,21 @@ env:
   numEnvs: ${resolve_default:8192,${...num_envs}}
   envSpacing: 1.5
   episodeLength: 300
-  enableDebugVis: True
+  enableDebugVis: False
   enablePrivInfoPrint: False # it won't print if randomize is false
   includePrivInfo: False #include priv info in the observation
 
   clipObservations: 5.0
   clipActions: 1.0
 
-  cubeInitPosNoise: 0.3
+  cubeInitPosNoise: 0.2
   cubeInitOriNoise: 3.14
-  cubeGoalPosNoise: 0.3
+  cubeGoalPosNoise: 0.2
   cubeGoalOriNoise: 0.0
 
   frankaPositionNoise: 0.0
   frankaRotationNoise: 0.0
-  frankaDofNoise: 0.25
+  frankaDofNoise: 0.0
 
 
   aggregateMode: 3
@@ -38,6 +38,7 @@ env:
 
 
   controlType: osc  # options are {joint_tor, osc}
+  controlInput: pose3d # options are {pose3d, pose6d}
 
   asset:
     assetRoot: "../../assets"
@@ -68,7 +69,7 @@ sim:
     contact_collection: 0 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (broken - do not use!)
 
 task:
-  randomize: True
+  randomize: False
   randomization_params:
     frequency: 720   # Define how many simulation steps between generating new randomizations
     observations:
