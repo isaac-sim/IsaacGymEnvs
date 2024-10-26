@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<robot name="00143_socket">
+	<link name="00143_socket">
+		<visual>
+			<geometry>
+				<mesh filename="../mesh/00143/asset_socket.obj"/>
+			</geometry>
+		</visual>
+		<collision>
+			<geometry>
+				<mesh filename="../mesh/00143/asset_socket.obj"/>
+			</geometry>
+			<sdf resolution="256"/>
+		</collision>
+	</link>
+</robot>

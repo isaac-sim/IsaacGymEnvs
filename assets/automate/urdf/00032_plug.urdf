@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<robot name="00032_plug">
+	<link name="00032_plug">
+		<visual>
+			<geometry>
+				<mesh filename="../mesh/00032/asset_plug.obj"/>
+			</geometry>
+		</visual>
+		<collision>
+			<geometry>
+				<mesh filename="../mesh/00032/asset_plug.obj"/>
+			</geometry>
+			<sdf resolution="256"/>
+		</collision>
+	</link>
+</robot>

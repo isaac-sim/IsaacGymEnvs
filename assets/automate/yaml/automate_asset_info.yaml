@@ -1,0 +1,1100 @@
+asset_01053:
+  01053_plug:
+    urdf_path: '01053_plug'
+    density: 8000.0
+    friction: 0.5
+  01053_socket:
+    urdf_path: '01053_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00470:
+  00470_plug:
+    urdf_path: '00470_plug'
+    density: 8000.0
+    friction: 0.5
+  00470_socket:
+    urdf_path: '00470_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00499:
+  00499_plug:
+    urdf_path: '00499_plug'
+    density: 8000.0
+    friction: 0.5
+  00499_socket:
+    urdf_path: '00499_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00652:
+  00652_plug:
+    urdf_path: '00652_plug'
+    density: 8000.0
+    friction: 0.5
+  00652_socket:
+    urdf_path: '00652_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00346:
+  00346_plug:
+    urdf_path: '00346_plug'
+    density: 8000.0
+    friction: 0.5
+  00346_socket:
+    urdf_path: '00346_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00004:
+  00004_plug:
+    urdf_path: '00004_plug'
+    density: 8000.0
+    friction: 0.5
+  00004_socket:
+    urdf_path: '00004_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00681:
+  00681_plug:
+    urdf_path: '00681_plug'
+    density: 8000.0
+    friction: 0.5
+  00681_socket:
+    urdf_path: '00681_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00783:
+  00783_plug:
+    urdf_path: '00783_plug'
+    density: 8000.0
+    friction: 0.5
+  00783_socket:
+    urdf_path: '00783_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00768:
+  00768_plug:
+    urdf_path: '00768_plug'
+    density: 8000.0
+    friction: 0.5
+  00768_socket:
+    urdf_path: '00768_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00192:
+  00192_plug:
+    urdf_path: '00192_plug'
+    density: 8000.0
+    friction: 0.5
+  00192_socket:
+    urdf_path: '00192_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_01026:
+  01026_plug:
+    urdf_path: '01026_plug'
+    density: 8000.0
+    friction: 0.5
+  01026_socket:
+    urdf_path: '01026_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00007:
+  00007_plug:
+    urdf_path: '00007_plug'
+    density: 8000.0
+    friction: 0.5
+  00007_socket:
+    urdf_path: '00007_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00308:
+  00308_plug:
+    urdf_path: '00308_plug'
+    density: 8000.0
+    friction: 0.5
+  00308_socket:
+    urdf_path: '00308_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00437:
+  00437_plug:
+    urdf_path: '00437_plug'
+    density: 8000.0
+    friction: 0.5
+  00437_socket:
+    urdf_path: '00437_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00446:
+  00446_plug:
+    urdf_path: '00446_plug'
+    density: 8000.0
+    friction: 0.5
+  00446_socket:
+    urdf_path: '00446_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00016:
+  00016_plug:
+    urdf_path: '00016_plug'
+    density: 8000.0
+    friction: 0.5
+  00016_socket:
+    urdf_path: '00016_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00133:
+  00133_plug:
+    urdf_path: '00133_plug'
+    density: 8000.0
+    friction: 0.5
+  00133_socket:
+    urdf_path: '00133_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00855:
+  00855_plug:
+    urdf_path: '00855_plug'
+    density: 8000.0
+    friction: 0.5
+  00855_socket:
+    urdf_path: '00855_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00471:
+  00471_plug:
+    urdf_path: '00471_plug'
+    density: 8000.0
+    friction: 0.5
+  00471_socket:
+    urdf_path: '00471_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00030:
+  00030_plug:
+    urdf_path: '00030_plug'
+    density: 8000.0
+    friction: 0.5
+  00030_socket:
+    urdf_path: '00030_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00186:
+  00186_plug:
+    urdf_path: '00186_plug'
+    density: 8000.0
+    friction: 0.5
+  00186_socket:
+    urdf_path: '00186_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_01132:
+  01132_plug:
+    urdf_path: '01132_plug'
+    density: 8000.0
+    friction: 0.5
+  01132_socket:
+    urdf_path: '01132_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00863:
+  00863_plug:
+    urdf_path: '00863_plug'
+    density: 8000.0
+    friction: 0.5
+  00863_socket:
+    urdf_path: '00863_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00426:
+  00426_plug:
+    urdf_path: '00426_plug'
+    density: 8000.0
+    friction: 0.5
+  00426_socket:
+    urdf_path: '00426_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00077:
+  00077_plug:
+    urdf_path: '00077_plug'
+    density: 8000.0
+    friction: 0.5
+  00077_socket:
+    urdf_path: '00077_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00703:
+  00703_plug:
+    urdf_path: '00703_plug'
+    density: 8000.0
+    friction: 0.5
+  00703_socket:
+    urdf_path: '00703_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00028:
+  00028_plug:
+    urdf_path: '00028_plug'
+    density: 8000.0
+    friction: 0.5
+  00028_socket:
+    urdf_path: '00028_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00110:
+  00110_plug:
+    urdf_path: '00110_plug'
+    density: 8000.0
+    friction: 0.5
+  00110_socket:
+    urdf_path: '00110_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00015:
+  00015_plug:
+    urdf_path: '00015_plug'
+    density: 8000.0
+    friction: 0.5
+  00015_socket:
+    urdf_path: '00015_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00329:
+  00329_plug:
+    urdf_path: '00329_plug'
+    density: 8000.0
+    friction: 0.5
+  00329_socket:
+    urdf_path: '00329_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_01125:
+  01125_plug:
+    urdf_path: '01125_plug'
+    density: 8000.0
+    friction: 0.5
+  01125_socket:
+    urdf_path: '01125_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00103:
+  00103_plug:
+    urdf_path: '00103_plug'
+    density: 8000.0
+    friction: 0.5
+  00103_socket:
+    urdf_path: '00103_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00444:
+  00444_plug:
+    urdf_path: '00444_plug'
+    density: 8000.0
+    friction: 0.5
+  00444_socket:
+    urdf_path: '00444_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00014:
+  00014_plug:
+    urdf_path: '00014_plug'
+    density: 8000.0
+    friction: 0.5
+  00014_socket:
+    urdf_path: '00014_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00615:
+  00615_plug:
+    urdf_path: '00615_plug'
+    density: 8000.0
+    friction: 0.5
+  00615_socket:
+    urdf_path: '00615_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00078:
+  00078_plug:
+    urdf_path: '00078_plug'
+    density: 8000.0
+    friction: 0.5
+  00078_socket:
+    urdf_path: '00078_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00187:
+  00187_plug:
+    urdf_path: '00187_plug'
+    density: 8000.0
+    friction: 0.5
+  00187_socket:
+    urdf_path: '00187_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_01029:
+  01029_plug:
+    urdf_path: '01029_plug'
+    density: 8000.0
+    friction: 0.5
+  01029_socket:
+    urdf_path: '01029_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00021:
+  00021_plug:
+    urdf_path: '00021_plug'
+    density: 8000.0
+    friction: 0.5
+  00021_socket:
+    urdf_path: '00021_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_01041:
+  01041_plug:
+    urdf_path: '01041_plug'
+    density: 8000.0
+    friction: 0.5
+  01041_socket:
+    urdf_path: '01041_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00755:
+  00755_plug:
+    urdf_path: '00755_plug'
+    density: 8000.0
+    friction: 0.5
+  00755_socket:
+    urdf_path: '00755_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_01102:
+  01102_plug:
+    urdf_path: '01102_plug'
+    density: 8000.0
+    friction: 0.5
+  01102_socket:
+    urdf_path: '01102_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00614:
+  00614_plug:
+    urdf_path: '00614_plug'
+    density: 8000.0
+    friction: 0.5
+  00614_socket:
+    urdf_path: '00614_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00597:
+  00597_plug:
+    urdf_path: '00597_plug'
+    density: 8000.0
+    friction: 0.5
+  00597_socket:
+    urdf_path: '00597_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00686:
+  00686_plug:
+    urdf_path: '00686_plug'
+    density: 8000.0
+    friction: 0.5
+  00686_socket:
+    urdf_path: '00686_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_01129:
+  01129_plug:
+    urdf_path: '01129_plug'
+    density: 8000.0
+    friction: 0.5
+  01129_socket:
+    urdf_path: '01129_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00074:
+  00074_plug:
+    urdf_path: '00074_plug'
+    density: 8000.0
+    friction: 0.5
+  00074_socket:
+    urdf_path: '00074_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00293:
+  00293_plug:
+    urdf_path: '00293_plug'
+    density: 8000.0
+    friction: 0.5
+  00293_socket:
+    urdf_path: '00293_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00649:
+  00649_plug:
+    urdf_path: '00649_plug'
+    density: 8000.0
+    friction: 0.5
+  00649_socket:
+    urdf_path: '00649_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00638:
+  00638_plug:
+    urdf_path: '00638_plug'
+    density: 8000.0
+    friction: 0.5
+  00638_socket:
+    urdf_path: '00638_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00143:
+  00143_plug:
+    urdf_path: '00143_plug'
+    density: 8000.0
+    friction: 0.5
+  00143_socket:
+    urdf_path: '00143_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00345:
+  00345_plug:
+    urdf_path: '00345_plug'
+    density: 8000.0
+    friction: 0.5
+  00345_socket:
+    urdf_path: '00345_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00537:
+  00537_plug:
+    urdf_path: '00537_plug'
+    density: 8000.0
+    friction: 0.5
+  00537_socket:
+    urdf_path: '00537_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00648:
+  00648_plug:
+    urdf_path: '00648_plug'
+    density: 8000.0
+    friction: 0.5
+  00648_socket:
+    urdf_path: '00648_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00388:
+  00388_plug:
+    urdf_path: '00388_plug'
+    density: 8000.0
+    friction: 0.5
+  00388_socket:
+    urdf_path: '00388_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00163:
+  00163_plug:
+    urdf_path: '00163_plug'
+    density: 8000.0
+    friction: 0.5
+  00163_socket:
+    urdf_path: '00163_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00117:
+  00117_plug:
+    urdf_path: '00117_plug'
+    density: 8000.0
+    friction: 0.5
+  00117_socket:
+    urdf_path: '00117_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_01079:
+  01079_plug:
+    urdf_path: '01079_plug'
+    density: 8000.0
+    friction: 0.5
+  01079_socket:
+    urdf_path: '01079_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00340:
+  00340_plug:
+    urdf_path: '00340_plug'
+    density: 8000.0
+    friction: 0.5
+  00340_socket:
+    urdf_path: '00340_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00506:
+  00506_plug:
+    urdf_path: '00506_plug'
+    density: 8000.0
+    friction: 0.5
+  00506_socket:
+    urdf_path: '00506_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00741:
+  00741_plug:
+    urdf_path: '00741_plug'
+    density: 8000.0
+    friction: 0.5
+  00741_socket:
+    urdf_path: '00741_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00271:
+  00271_plug:
+    urdf_path: '00271_plug'
+    density: 8000.0
+    friction: 0.5
+  00271_socket:
+    urdf_path: '00271_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00301:
+  00301_plug:
+    urdf_path: '00301_plug'
+    density: 8000.0
+    friction: 0.5
+  00301_socket:
+    urdf_path: '00301_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00062:
+  00062_plug:
+    urdf_path: '00062_plug'
+    density: 8000.0
+    friction: 0.5
+  00062_socket:
+    urdf_path: '00062_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00210:
+  00210_plug:
+    urdf_path: '00210_plug'
+    density: 8000.0
+    friction: 0.5
+  00210_socket:
+    urdf_path: '00210_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00731:
+  00731_plug:
+    urdf_path: '00731_plug'
+    density: 8000.0
+    friction: 0.5
+  00731_socket:
+    urdf_path: '00731_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00042:
+  00042_plug:
+    urdf_path: '00042_plug'
+    density: 8000.0
+    friction: 0.5
+  00042_socket:
+    urdf_path: '00042_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00559:
+  00559_plug:
+    urdf_path: '00559_plug'
+    density: 8000.0
+    friction: 0.5
+  00559_socket:
+    urdf_path: '00559_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00514:
+  00514_plug:
+    urdf_path: '00514_plug'
+    density: 8000.0
+    friction: 0.5
+  00514_socket:
+    urdf_path: '00514_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00726:
+  00726_plug:
+    urdf_path: '00726_plug'
+    density: 8000.0
+    friction: 0.5
+  00726_socket:
+    urdf_path: '00726_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00553:
+  00553_plug:
+    urdf_path: '00553_plug'
+    density: 8000.0
+    friction: 0.5
+  00553_socket:
+    urdf_path: '00553_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_01136:
+  01136_plug:
+    urdf_path: '01136_plug'
+    density: 8000.0
+    friction: 0.5
+  01136_socket:
+    urdf_path: '01136_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00083:
+  00083_plug:
+    urdf_path: '00083_plug'
+    density: 8000.0
+    friction: 0.5
+  00083_socket:
+    urdf_path: '00083_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00319:
+  00319_plug:
+    urdf_path: '00319_plug'
+    density: 8000.0
+    friction: 0.5
+  00319_socket:
+    urdf_path: '00319_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00417:
+  00417_plug:
+    urdf_path: '00417_plug'
+    density: 8000.0
+    friction: 0.5
+  00417_socket:
+    urdf_path: '00417_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00175:
+  00175_plug:
+    urdf_path: '00175_plug'
+    density: 8000.0
+    friction: 0.5
+  00175_socket:
+    urdf_path: '00175_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00700:
+  00700_plug:
+    urdf_path: '00700_plug'
+    density: 8000.0
+    friction: 0.5
+  00700_socket:
+    urdf_path: '00700_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00360:
+  00360_plug:
+    urdf_path: '00360_plug'
+    density: 8000.0
+    friction: 0.5
+  00360_socket:
+    urdf_path: '00360_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00318:
+  00318_plug:
+    urdf_path: '00318_plug'
+    density: 8000.0
+    friction: 0.5
+  00318_socket:
+    urdf_path: '00318_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00320:
+  00320_plug:
+    urdf_path: '00320_plug'
+    density: 8000.0
+    friction: 0.5
+  00320_socket:
+    urdf_path: '00320_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00581:
+  00581_plug:
+    urdf_path: '00581_plug'
+    density: 8000.0
+    friction: 0.5
+  00581_socket:
+    urdf_path: '00581_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_01092:
+  01092_plug:
+    urdf_path: '01092_plug'
+    density: 8000.0
+    friction: 0.5
+  01092_socket:
+    urdf_path: '01092_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00410:
+  00410_plug:
+    urdf_path: '00410_plug'
+    density: 8000.0
+    friction: 0.5
+  00410_socket:
+    urdf_path: '00410_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00213:
+  00213_plug:
+    urdf_path: '00213_plug'
+    density: 8000.0
+    friction: 0.5
+  00213_socket:
+    urdf_path: '00213_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00659:
+  00659_plug:
+    urdf_path: '00659_plug'
+    density: 8000.0
+    friction: 0.5
+  00659_socket:
+    urdf_path: '00659_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00831:
+  00831_plug:
+    urdf_path: '00831_plug'
+    density: 8000.0
+    friction: 0.5
+  00831_socket:
+    urdf_path: '00831_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00422:
+  00422_plug:
+    urdf_path: '00422_plug'
+    density: 8000.0
+    friction: 0.5
+  00422_socket:
+    urdf_path: '00422_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00296:
+  00296_plug:
+    urdf_path: '00296_plug'
+    density: 8000.0
+    friction: 0.5
+  00296_socket:
+    urdf_path: '00296_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00138:
+  00138_plug:
+    urdf_path: '00138_plug'
+    density: 8000.0
+    friction: 0.5
+  00138_socket:
+    urdf_path: '00138_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_01036:
+  01036_plug:
+    urdf_path: '01036_plug'
+    density: 8000.0
+    friction: 0.5
+  01036_socket:
+    urdf_path: '01036_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00486:
+  00486_plug:
+    urdf_path: '00486_plug'
+    density: 8000.0
+    friction: 0.5
+  00486_socket:
+    urdf_path: '00486_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00860:
+  00860_plug:
+    urdf_path: '00860_plug'
+    density: 8000.0
+    friction: 0.5
+  00860_socket:
+    urdf_path: '00860_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00211:
+  00211_plug:
+    urdf_path: '00211_plug'
+    density: 8000.0
+    friction: 0.5
+  00211_socket:
+    urdf_path: '00211_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00480:
+  00480_plug:
+    urdf_path: '00480_plug'
+    density: 8000.0
+    friction: 0.5
+  00480_socket:
+    urdf_path: '00480_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00081:
+  00081_plug:
+    urdf_path: '00081_plug'
+    density: 8000.0
+    friction: 0.5
+  00081_socket:
+    urdf_path: '00081_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00256:
+  00256_plug:
+    urdf_path: '00256_plug'
+    density: 8000.0
+    friction: 0.5
+  00256_socket:
+    urdf_path: '00256_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00190:
+  00190_plug:
+    urdf_path: '00190_plug'
+    density: 8000.0
+    friction: 0.5
+  00190_socket:
+    urdf_path: '00190_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00032:
+  00032_plug:
+    urdf_path: '00032_plug'
+    density: 8000.0
+    friction: 0.5
+  00032_socket:
+    urdf_path: '00032_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00141:
+  00141_plug:
+    urdf_path: '00141_plug'
+    density: 8000.0
+    friction: 0.5
+  00141_socket:
+    urdf_path: '00141_socket'
+    density: 8000.0
+    friction: 0.5
+
+
+asset_00255:
+  00255_plug:
+    urdf_path: '00255_plug'
+    density: 8000.0
+    friction: 0.5
+  00255_socket:
+    urdf_path: '00255_socket'
+    density: 8000.0
+    friction: 0.5
+
+

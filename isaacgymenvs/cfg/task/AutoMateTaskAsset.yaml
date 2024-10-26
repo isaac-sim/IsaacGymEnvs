@@ -1,0 +1,85 @@
+# See schema in factory_schema_config_task.py for descriptions of common parameters.
+
+defaults:
+    - AutoMateBase
+    - _self_
+    # - /factory_schema_config_task
+
+name: AutoMateTaskAsset
+physics_engine: ${..physics_engine}
+
+env:
+    numEnvs: ${resolve_default:128,${...num_envs}}
+    numObservations: 32
+    numActions: 12
+
+    overwrite_subassemblies: False
+    desired_subassemblies: ['asset_00346']
+
+randomize:
+    joint_noise: 0.0  # noise on Franka DOF positions [deg]
+    initial_state: goal  # initialize plugs in random state or goal state {random, goal}
+    plug_bias_y: -0.1  # if random, Y-axis offset of plug during each reset to prevent initial interpenetration with socket
+    plug_bias_z: 0.0  # if random, Z-axis offset of plug during each reset to prevent initial interpenetration with ground plane
+    plug_noise_xy: 0.05  # if random, XY-axis noise on plug position during each reset
+
+rl:
+    max_episode_length: 1024
+
+ctrl:
+    ctrl_type: task_space_impedance  # {gym_default,
+                               #  joint_space_ik, joint_space_id, 
+                               #  task_space_impedance, operational_space_motion, 
+                               #  open_loop_force, closed_loop_force,
+                               #  hybrid_force_motion}
+    all:
+        jacobian_type: geometric
+        gripper_prop_gains: [500, 500]
+        gripper_deriv_gains: [2, 2]
+    gym_default:
+        ik_method: dls
+        joint_prop_gains: [40, 40, 40, 40, 40, 40, 40]
+        joint_deriv_gains: [8, 8, 8, 8, 8, 8, 8]
+        gripper_prop_gains: [500, 500]
+        gripper_deriv_gains: [20, 20]
+    joint_space_ik:
+        ik_method: dls
+        joint_prop_gains: [1, 1, 1, 1, 1, 1, 1]
+        joint_deriv_gains: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    joint_space_id:
+        ik_method: dls
+        joint_prop_gains: [40, 40, 40, 40, 40, 40, 40]
+        joint_deriv_gains: [8, 8, 8, 8, 8, 8, 8]
+    task_space_impedance:
+        motion_ctrl_axes: [1, 1, 1, 1, 1, 1]
+        task_prop_gains: [300, 300, 300, 50, 50, 50]
+        # task_prop_gains: [1000, 1000, 1000, 50, 50, 50]
+        task_deriv_gains: [34, 34, 34, 1.4, 1.4, 1.4]
+    task_space_nullspace:
+        motion_ctrl_axes: [1, 1, 1, 1, 1, 1]
+        # task_prop_gains: [40, 40, 40, 40, 40, 40]  # Factory RSS default
+        # task_deriv_gains: [8, 8, 8, 8, 8, 8]  # Factory RSS default
+        # task_prop_gains: [300, 300, 300, 50, 50, 50]
+        # task_deriv_gains: [34, 34, 34, 1.4, 1.4, 1.4]
+        task_prop_gains: [1000, 1000, 1000, 50, 50, 50]
+        task_deriv_gains: [63.2, 63.2, 63.2, 1.41, 1.41, 1.41]  # computed as 2 * sqrt(k_p), but reduced by 10x for rotation
+#        default_dof_pos_tensor: [0.3413, -0.8011, -0.0670, -1.8299,  0.0266,  1.0185,  1.0927]
+        default_dof_pos_tensor: [0.0, 0.0, 0.0, -1.870, 0.0, 1.8675, 0.785398]
+        kp_null: 1.0
+        kd_null: 2.0     # 2.0 * np.sqrt(kp_null)
+    operational_space_motion:
+        motion_ctrl_axes: [1, 1, 1, 1, 1, 1]
+        task_prop_gains: [60, 60, 60, 5, 5, 5]
+        task_deriv_gains: [15.5, 15.5, 15.5, 4.5, 4.5, 4.5]
+    open_loop_force:
+        force_ctrl_axes: [0, 0, 1, 0, 0, 0]
+    closed_loop_force:
+        force_ctrl_axes: [0, 0, 1, 0, 0, 0]
+        wrench_prop_gains: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    hybrid_force_motion:
+        motion_ctrl_axes: [1, 1, 1, 1, 1, 1]
+        task_prop_gains: [40, 40, 40, 40, 40, 40]
+        task_deriv_gains: [8, 8, 8, 8, 8, 8]
+        force_ctrl_axes: [0, 0, 1, 0, 0, 0]
+        wrench_prop_gains: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+
