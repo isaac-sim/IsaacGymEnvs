@@ -1,0 +1,99 @@
+name: DRRandom
+
+defaults:
+  - DRBase
+  - _self_
+
+envCreator:
+  env_size: 40.0
+  backstage_z_offset: 20.0
+  ground_color: [ 0.25, 0.25, 0.25 ]
+  ground_len_z: 0.3
+  gate_bar_len_x: [ 0.15 ]  # thick
+  gate_bar_len_y: [ 2.0 ]  # length
+  gate_bar_len_z: [ 0.225 ]  # wide
+  gate_color: [ 1.0, 0.5, 0.3 ]
+  disable_tqdm: False
+  # drone asset options
+  drone_asset_options: ${..droneSim.drone_asset_options}
+  # random boxes, params: [size_x, size_y, size_z]
+  num_box_actors: 5
+  num_box_assets: 5
+  box_params_min: [ 0.3, 0.3, 0.3 ]
+  box_params_max: [ 2.0, 2.0, 2.0 ]
+  box_color: [ 0.12156862745098039, 0.4666666666666667, 0.7058823529411765 ]
+  # random capsules, params: [radius, length]
+  num_capsule_actors: 5
+  num_capsule_assets: 5
+  capsule_params_min: [ 0.3, 0.3 ]
+  capsule_params_max: [ 1.0, 1.0 ]
+  capsule_color: [ 0.7294117647058823, 0.21176470588235294, 0.3411764705882353 ]
+  # random cuboid wireframes, params: [size_x, size_y, size_z, weight]
+  num_cuboid_wireframe_actors: 0
+  num_cuboid_wireframe_assets: 0
+  cuboid_wireframe_params_min: [ 0.3, 0.3, 0.3, 0.2 ]
+  cuboid_wireframe_params_max: [ 2.0, 2.0, 2.0, 0.4 ]
+  cuboid_wireframe_color: [ 0.5803921568627451, 0.403921568627451, 0.7411764705882353 ]
+  # random cylinders, params: [radius, length]
+  num_cylinder_actors: 5
+  num_cylinder_assets: 5
+  cylinder_params_min: [ 0.1, 0.2 ]
+  cylinder_params_max: [ 1.0, 2.0 ]
+  cylinder_color: [ 0.5490196078431373, 0.33725490196078434, 0.29411764705882354 ]
+  # random hollow cuboids, params: [length_x, inner_length_y, inner_length_z, diff_length_y, diff_length_z]
+  num_hollow_cuboid_actors: 0
+  num_hollow_cuboid_assets: 0
+  hollow_cuboid_params_min: [ 0.10, 0.5, 0.5, 0.2, 0.2 ]
+  hollow_cuboid_params_max: [ 0.25, 1.4, 1.4, 0.6, 0.6 ]
+  hollow_cuboid_color: [ 0.8901960784313725, 0.4666666666666667, 0.7607843137254902 ]
+  # random spheres, params: [radius]
+  num_sphere_actors: 5
+  num_sphere_assets: 5
+  sphere_params_min: [ 0.3 ]
+  sphere_params_max: [ 1.0 ]
+  sphere_color: [ 0.7372549019607844, 0.7411764705882353, 0.13333333333333333 ]
+  # random trees, params: none
+  num_tree_actors: 0
+  num_tree_assets: 0
+  tree_color: [ 0.4196078431372549, 0.5411764705882353, 0.47843137254901963 ]
+  # random walls, params: [size_x, size_y, size_z]
+  num_wall_actors: 5
+  num_wall_assets: 5
+  wall_params_min: [ 0.2, 1.5, 1.5 ]
+  wall_params_max: [ 0.2, 2.5, 2.5 ]
+  wall_color: [ 0.09019607843137255, 0.7450980392156863, 0.8117647058823529 ]
+
+disableObstacleManager: False
+
+waypointGenerator:
+  num_waypoints: 4
+  num_gate_x_lens: 1  # check envCreator.gate_bar_len_x
+  num_gate_weights: 1  # check envCreator.gate_bar_len_z
+  gate_weight_max: 0.225  # check envCreator.gate_bar_len_z
+  fixed_waypoint_id: 1
+  fixed_waypoint_position: [ 0.0, 0.0, 20.0 ]
+
+initRandOpt:
+  randWaypointOptions:
+    wp_size_min: 1.2  # check gate_bar_len_y
+    wp_size_max: 2.0
+    init_roll_max: 0.5
+    init_pitch_max: 0.5
+    init_yaw_max: 3.14
+    psi_max: 1.57
+    theta_max: 0.79
+    alpha_max: 3.14
+    gamma_max: 0.5
+    r_min: 0.0
+    r_max: 20.0
+    force_gate_flag: 1
+    same_track: False
+  randObstacleOptions:
+    extra_clearance: 1.42
+    orbit_density: 0.05
+    tree_density: 0.05
+    wall_density: 0.05
+    wall_dist_scale: 1.0
+    std_dev_scale: 1.0
+    gnd_distance_min: 1.0
+    gnd_distance_max: 10.0

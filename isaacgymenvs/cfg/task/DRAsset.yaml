@@ -1,0 +1,36 @@
+name: DRAsset
+
+defaults:
+  - DRBase
+  - _self_
+
+env:
+  numEnvs: ${resolve_default:16384,${...num_envs}}
+  numObservations: 56  # 18 [p, R, v, w] + 17 * 2 [waypoint] + 4 [action]
+  obsImgMode: empty
+  maxEpisodeLength: 250  # step 25 Hz, episode max 10 s
+  enableCameraSensors: False
+  groundOffset: -10.0
+  disableGround: False
+  appendWpDist: 10.0
+
+assetName: splits
+
+initRandOpt:
+  randDroneOptions:
+    next_wp_id_max: 1
+    dist_along_line_min: 0.0
+    dist_along_line_max: 0.0
+    drone_rotation_x_max: 0.0
+    dist_to_line_max: 0.0
+    lin_vel_x_max: 0.0  # m/s
+    lin_vel_y_max: 0.0
+    lin_vel_z_max: 0.0
+    ang_vel_x_max: 0.0  # rad/s
+    ang_vel_y_max: 0.0
+    ang_vel_z_max: 0.0
+    aileron_max: 0.0
+    elevator_max: 0.0
+    rudder_max: 0.0
+    throttle_min: -1.0
+    throttle_max: -1.0

@@ -1,0 +1,525 @@
+task:
+  name: DRRandom
+  physics_engine: ${..physics_engine}
+  sim:
+    dt: 0.004
+    substeps: 1
+    up_axis: z
+    gravity:
+    - 0.0
+    - 0.0
+    - -9.81
+    use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
+    num_client_threads: 0
+    physx:
+      always_use_articulations: false
+      bounce_threshold_velocity: 0.2
+      contact_collection: 1
+      contact_offset: 0.02
+      default_buffer_size_multiplier: 2.0
+      friction_correlation_distance: 0.025
+      friction_offset_threshold: 0.04
+      max_depenetration_velocity: 1.0
+      max_gpu_contact_pairs: 1048576
+      num_position_iterations: 4
+      num_subscenes: ${....num_subscenes}
+      num_threads: ${....num_threads}
+      num_velocity_iterations: 1
+      rest_offset: 0.001
+      solver_type: ${....solver_type}
+      use_gpu: ${contains:"cuda",${....sim_device}}
+  env:
+    numEnvs: ${resolve_default:256,${...num_envs}}
+    numActions: 4
+    numAgents: 1
+    numObservations: 120
+    controlFrequencyInv: 10
+    obsImgMode: dce
+    maxEpisodeLength: 150
+    enableDebugVis: false
+    enableVirtualWalls: true
+    enableCameraSensors: true
+    cameraEnableTensors: true
+    cameraWidth: 480
+    cameraHeight: 270
+    cameraHfov: 90
+    cameraBodyPos:
+    - 0.08
+    - 0.0
+    - 0.015
+    cameraAngleDeg: 30
+    cameraDepthMax: 20
+    logging:
+      enable: false
+      experimentName: ${...name}
+      logMainCam: false
+      logExtraCams: false
+      maxNumEpisodes: 10
+      numStepsPerSave: 50
+      extraCameraWidth: 256
+      extraCameraHeight: 256
+      extraCameraHfov: 90
+    viewer:
+      camPos:
+      - -20
+      - -20
+      - 30
+      camTarget:
+      - 20
+      - 20
+      - 10
+  initRandOpt:
+    randDroneOptions:
+      next_wp_id_max: 1
+      dist_along_line_min: 0.0
+      dist_along_line_max: 0.25
+      drone_rotation_x_max: 1
+      dist_to_line_max: 2.0
+      lin_vel_x_max: 1
+      lin_vel_y_max: 1
+      lin_vel_z_max: 1
+      ang_vel_x_max: 1
+      ang_vel_y_max: 1
+      ang_vel_z_max: 1
+      aileron_max: 0.2
+      elevator_max: 0.2
+      rudder_max: 0.2
+      throttle_min: -1
+      throttle_max: -0.5
+    randCameraOptions:
+      d_x_max: 0.01
+      d_y_max: 0
+      d_z_max: 0.01
+      d_angle_max: 5
+    randWaypointOptions:
+      wp_size_min: 1.4
+      wp_size_max: 2.0
+      init_roll_max: 0.2
+      init_pitch_max: 0.2
+      init_yaw_max: 3.14
+      psi_max: 0.3
+      theta_max: 0.3
+      alpha_max: 3.14
+      gamma_max: 0.2
+      r_min: 6
+      r_max: 18
+      force_gate_flag: -1
+      same_track: 0
+    randObstacleOptions:
+      extra_clearance: 1.4
+      orbit_density: 0
+      tree_density: 1
+      wall_density: 1
+      wall_dist_scale: 0.67
+      std_dev_scale: 1
+      gnd_distance_min: 2
+      gnd_distance_max: 5
+  mdp:
+    observation:
+      dim_action: ${...env.numActions}
+      pos_max: 40.0
+      vel_max: 20.0
+      ang_vel_max: 12
+      dist_to_corner_max: 20.0
+    reward:
+      k_progress: 1.0
+      k_perception: 0.02
+      k_cam_dev: -10.0
+      k_cmd_ang_vel: -0.0004
+      k_cmd_diff: -0.0002
+      k_collision: -10.0
+      k_guidance: 1.0
+      k_rejection: 2.0
+      k_waypoint: 5.0
+      k_timeout: -10.0
+      guidance_x_thresh: 3.0
+      guidance_tol: 0.2
+      enable_normalization: false
+    extra_reward:
+      k_vel_lateral: -0.001
+      k_vel_backward: -0.005
+  droneSim:
+    num_rotors: 4
+    rotors_x:
+    - -0.078665
+    - 0.078665
+    - -0.078665
+    - 0.078665
+    rotors_y:
+    - 0.097143
+    - 0.097143
+    - -0.097143
+    - -0.097143
+    rotors_dir:
+    - 1
+    - -1
+    - -1
+    - 1
+    drone_asset_options:
+      arm_length_front: 0.125
+      arm_length_back: 0.125
+      arm_thickness: 0.01
+      arm_front_angle: 1.780236
+      motor_diameter: 0.023
+      motor_height: 0.006
+      central_body_pos:
+      - 0.0
+      - 0.0
+      - 0.015
+      central_body_dim:
+      - 0.15
+      - 0.05
+      - 0.05
+      propeller_diameter: 0.12954
+      propeller_height: 0.01
+      mass: 0.76
+      center_of_mass:
+      - 0.0
+      - 0.0
+      - 0.0
+      diagonal_inertia:
+      - 0.0025
+      - 0.0021
+      - 0.0043
+      principle_axes_q:
+      - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+      disable_visuals: false
+    simpleBetaflight:
+      dt: ${...sim.dt}
+      center_sensitivity:
+      - 100.0
+      - 100.0
+      - 100.0
+      max_rate:
+      - 670.0
+      - 670.0
+      - 670.0
+      rate_expo:
+      - 0.0
+      - 0.0
+      - 0.0
+      kp:
+      - 70.0
+      - 70.0
+      - 125.0
+      ki:
+      - 0.5
+      - 0.5
+      - 25.0
+      kd:
+      - 1.0
+      - 1.0
+      - 0.0
+      kff:
+      - 0.0
+      - 0.0
+      - 0.0
+      iterm_lim:
+      - 5.0
+      - 5.0
+      - 5.0
+      pid_sum_lim:
+      - 1000.0
+      - 1000.0
+      - 1000.0
+      dterm_lpf_cutoff: 1000
+      rotors_x: ${..rotors_x}
+      rotors_y: ${..rotors_y}
+      rotors_dir: ${..rotors_dir}
+      pid_sum_mixer_scale: 1000.0
+      output_idle: 0.05
+      throttle_boost_gain: 0.0
+      throttle_boost_freq: 125.0
+      thrust_linearization_gain: 0.4
+    rotorPolyLag:
+      dt: ${...sim.dt}
+      num_rotors: ${..num_rotors}
+      rotors_dir: ${..rotors_dir}
+      spinup_time_constant: 0.033
+      slowdown_time_constant: 0.033
+      k_rpm_quadratic: -13421.95
+      k_rpm_linear: 37877.42
+      rotor_diagonal_inertia:
+      - 0.0
+      - 0.0
+      - 9.3575e-06
+      rotor_principle_axes_q:
+      - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    propellerPoly:
+      num_props: ${..num_rotors}
+      k_force_quadratic: 2.1549e-08
+      k_force_linear: -4.5101e-05
+      k_torque_quadratic: 4.74078e-10
+      k_torque_linear: -9.92222e-07
+    bodyDragPoly:
+      air_density: 1.204
+      a_trans:
+      - 0.015
+      - 0.015
+      - 0.03
+      k_trans_quadratic:
+      - 1.04
+      - 1.04
+      - 1.04
+      k_trans_linear:
+      - 0.0
+      - 0.0
+      - 0.0
+      a_rot:
+      - 0.01
+      - 0.01
+      - 0.01
+      k_rot_quadratic:
+      - 0.0
+      - 0.0
+      - 0.0
+      k_rot_linear:
+      - 0.0
+      - 0.0
+      - 0.0
+    wrenchSum:
+      num_positions: ${..num_rotors}
+      position_x: ${..rotors_x}
+      position_y: ${..rotors_y}
+      position_z:
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+  envCreator:
+    env_size: 40.0
+    backstage_z_offset: 20.0
+    ground_color:
+    - 0.25
+    - 0.25
+    - 0.25
+    ground_len_z: 0.3
+    gate_bar_len_x:
+    - 0.15
+    gate_bar_len_y:
+    - 2.0
+    gate_bar_len_z:
+    - 0.225
+    gate_color:
+    - 1.0
+    - 0.5
+    - 0.3
+    disable_tqdm: false
+    drone_asset_options: ${..droneSim.drone_asset_options}
+    num_box_actors: 0
+    num_box_assets: 0
+    box_params_min:
+    - 0.3
+    - 0.3
+    - 0.3
+    box_params_max:
+    - 2.0
+    - 2.0
+    - 2.0
+    box_color:
+    - 0.12156862745098039
+    - 0.4666666666666667
+    - 0.7058823529411765
+    num_capsule_actors: 0
+    num_capsule_assets: 0
+    capsule_params_min:
+    - 0.3
+    - 0.3
+    capsule_params_max:
+    - 1.0
+    - 1.0
+    capsule_color:
+    - 0.7294117647058823
+    - 0.21176470588235294
+    - 0.3411764705882353
+    num_cuboid_wireframe_actors: 0
+    num_cuboid_wireframe_assets: 0
+    cuboid_wireframe_params_min:
+    - 0.3
+    - 0.3
+    - 0.3
+    - 0.2
+    cuboid_wireframe_params_max:
+    - 2.0
+    - 2.0
+    - 2.0
+    - 0.4
+    cuboid_wireframe_color:
+    - 0.5803921568627451
+    - 0.403921568627451
+    - 0.7411764705882353
+    num_cylinder_actors: 0
+    num_cylinder_assets: 0
+    cylinder_params_min:
+    - 0.1
+    - 0.2
+    cylinder_params_max:
+    - 1.0
+    - 2.0
+    cylinder_color:
+    - 0.5490196078431373
+    - 0.33725490196078434
+    - 0.29411764705882354
+    num_hollow_cuboid_actors: 0
+    num_hollow_cuboid_assets: 0
+    hollow_cuboid_params_min:
+    - 0.1
+    - 0.5
+    - 0.5
+    - 0.2
+    - 0.2
+    hollow_cuboid_params_max:
+    - 0.25
+    - 1.4
+    - 1.4
+    - 0.6
+    - 0.6
+    hollow_cuboid_color:
+    - 0.8901960784313725
+    - 0.4666666666666667
+    - 0.7607843137254902
+    num_sphere_actors: 0
+    num_sphere_assets: 0
+    sphere_params_min:
+    - 0.3
+    sphere_params_max:
+    - 1.0
+    sphere_color:
+    - 0.7372549019607844
+    - 0.7411764705882353
+    - 0.13333333333333333
+    num_tree_actors: 4
+    num_tree_assets: 4
+    tree_color:
+    - 0.4196078431372549
+    - 0.5411764705882353
+    - 0.47843137254901963
+    num_wall_actors: 12
+    num_wall_assets: 12
+    wall_params_min:
+    - 0.2
+    - 1.5
+    - 1.5
+    wall_params_max:
+    - 0.2
+    - 2.5
+    - 2.5
+    wall_color:
+    - 0.09019607843137255
+    - 0.7450980392156863
+    - 0.8117647058823529
+  disableObstacleManager: false
+  waypointGenerator:
+    num_waypoints: 4
+    num_gate_x_lens: 1
+    num_gate_weights: 1
+    gate_weight_max: 0.225
+    fixed_waypoint_id: 1
+    fixed_waypoint_position:
+    - 0.0
+    - 0.0
+    - 20.0
+train:
+  params:
+    seed: ${...seed}
+    algo:
+      name: dr_continuous
+    model:
+      name: continuous_a2c_logstd
+    network:
+      name: actor_critic
+      separate: false
+      space:
+        continuous:
+          mu_activation: None
+          sigma_activation: None
+          mu_init:
+            name: default
+          sigma_init:
+            name: const_initializer
+            val: 0
+          fixed_sigma: true
+      mlp:
+        units:
+        - 256
+        - 128
+        - 128
+        - 64
+        activation: elu
+        d2rl: false
+        initializer:
+          name: default
+        regularizer:
+          name: None
+    load_checkpoint: ${if:${...checkpoint},True,False}
+    load_path: ${...checkpoint}
+    config:
+      name: ${resolve_default:DRRandom,${....experiment}}
+      full_experiment_name: ${.name}
+      env_name: rlgpu
+      multi_gpu: ${....multi_gpu}
+      ppo: true
+      mixed_precision: false
+      normalize_input: false
+      normalize_value: true
+      num_actors: ${....task.env.numEnvs}
+      reward_shaper:
+        scale_value: 0.1
+      normalize_advantage: true
+      gamma: 0.99
+      tau: 0.95
+      learning_rate: 0.001
+      lr_schedule: adaptive
+      kl_threshold: 0.016
+      score_to_win: 20000
+      max_epochs: ${resolve_default:500,${....max_iterations}}
+      save_best_after: 50
+      save_frequency: 50
+      grad_norm: 1.0
+      entropy_coef: 0.0
+      truncate_grads: true
+      e_clip: 0.2
+      horizon_length: 1024
+      minibatch_size: 32768
+      mini_epochs: 8
+      critic_coef: 2
+      clip_value: true
+      bounds_loss_coef: 0.0001
+pbt:
+  enabled: false
+task_name: ${task.name}
+experiment: ''
+num_envs: 512
+seed: 42
+torch_deterministic: false
+max_iterations: 1000
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: 0
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: false
+checkpoint: ''
+sigma: ''
+multi_gpu: false
+wandb_activate: true
+wandb_group: ''
+wandb_name: ${train.params.config.name}
+wandb_entity: ''
+wandb_project: isaacgymenvs
+wandb_tags: []
+wandb_logcode_dir: ''
+capture_video: false
+capture_video_freq: 1464
+capture_video_len: 100
+force_render: true
+headless: false
