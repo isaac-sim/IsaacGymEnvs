@@ -178,7 +178,7 @@ class DroneManager:
         )
 
         # update drone position
-        # TODO: MOST POSITIONS ARE AT RIGHT HAND SIZE (BUG?)
+        # TODO: MOST POSITIONS ARE AT RIGHT HAND SIDE (BUG?)
         n_1 = n - 1
         starting_wp_pos = self.wp_position[env_id, n_1]
         terminal_wp_pos = self.wp_position[env_id, n]
