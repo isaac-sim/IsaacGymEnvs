@@ -29,9 +29,6 @@ class WaypointGeneratorParams:
 
 @dataclass
 class RandWaypointOptions:
-    """
-    See slide #18 https://www.icloud.com.cn/keynote/0edENiNhnKOeu85yEo2gvtfjw#Midterm_Slides.
-    """
 
     wp_size_min: float = 1.0
 
