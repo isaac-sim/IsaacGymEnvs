@@ -30,6 +30,7 @@ List of Examples
 * [DeXtreme](#dextreme-transfer-of-agile-in-hand-manipulation-from-simulation-to-reality)
 * [DexPBT](#dexpbt-scaling-up-dexterous-manipulation-for-hand-arm-systems-with-population-based-training)
 * [IndustReal](#industreal-transferring-contact-rich-assembly-tasks-from-simulation-to-reality)
+* [Drone Racing](#drone-racing-obstacle-free-and-obstacle-aware-autonomous-drone-racing)
 
 ### Ant [ant.py](../isaacgymenvs/tasks/ant.py)
 
@@ -560,4 +561,91 @@ Also note that the simulation methods, original environments, and low-level cont
   booktitle = {Robotics: Science and Systems},
   year = {2022}
 } 
+```
+
+### Drone Racing: Obstacle-Free and Obstacle-Aware Autonomous Drone Racing
+
+#### Installation
+
+Running drone racing tasks requires additional packages,
+we recommend installing them altogether using the environment file provided in the task directory.
+
+```bash
+# install dependencies
+conda env create -f isaacgymenvs/tasks/drone_racing/rlgpu.yaml
+conda activate rlgpu
+
+# install isaac gym
+cd $ISAACGYM_DIR/python
+pip install -e .
+
+# install this repo
+cd $ISAACGYMENV_DIR
+pip install -e .
+
+# update LD_LIBRARY_PATH before using Isaac Gym
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/$CONDA_DIR/envs/rlgpu/lib
+```
+
+#### Overview
+
+Task implementations are in ``isaacgymenvs/tasks/drone_racing/tasks``.
+
+In ``isaacgymenvs/tasks/drone_racing/demos`` you can find executable Python scripts.
+Some scripts are for testing, some are for demonstrating environments, and some are for processing experiment logs.
+
+We use scripts instead of multiple configuration files to specify different tasks.
+These scripts override fields in the configuration files.
+Scripts for training and testing policies are in ``isaacgymenvs/tasks/drone_racing/demos/sh``.
+There you can also find scripts for plotting figures, sweeping hyperparams, and testing simulation
+performance.
+
+Some pre-trained network weights are in ``isaacgymenvs/tasks/drone_racing/demos/checkpoints``.
+
+#### Scripts
+
+**``train_rand_dr.sh`` & ``train_rand_naive.sh``:** train in random environments with obstacles, cameras are enabled. DR means enabling racing track domain randomization for every rollout. Naive means the opposite.
+
+![train_rand](images/drone_racing_train_rand.png)
+
+**``train_rand_no_obstcale_no_cam.sh``:** train in random environments without obstacles, cameras are disabled. No track domain randomization for every rollout.
+
+![train_rand_no_obst](../isaacgymenvs/tasks/drone_racing/demos/imgs/perf_test_rand_no_obst.png)
+
+**``train_splits_no_cam.sh``:** train on track Split-S, cameras are disabled.
+
+![train_splits](../isaacgymenvs/tasks/drone_racing/demos/imgs/perf_test_splits.png)
+
+**``collection_cam_asset_hard.sh``:** test on hard racing tracks with obstacles.
+
+![asset_hard](images/drone_racing_test_hard.png)
+
+**``collection_cam_asset_no_obst.sh``:** test on tracks without obstacles, cameras are enabled.
+
+![asset_no_obst](images/drone_racing_test_no_obst.png)
+
+**``collection_cam_asset_obst.sh``:** test on tracks with obstacles, cameras are enabled.
+
+![asset_obst](images/drone_racing_test_obst.png)
+
+**``collection_cam_rand.sh``:** test on random tracks with obstacles, cameras are enabled.
+
+![test_rand](images/drone_racing_test_rand.png)
+
+**``test_no_cam_splits.sh`` & ``test_no_cam_turns.sh``:** test on Split-S and Turns with cameras disabled.
+
+![splits_turns](images/drone_racing_test_splits_turns.png)
+
+#### Citing
+
+```
+@misc{liu2024droneracing,
+      title={Learning Generalizable Policy for Obstacle-Aware Autonomous Drone Racing}, 
+      author={Yueqian Liu},
+      year={2024},
+      eprint={2411.04246},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2411.04246}, 
+}
 ```
