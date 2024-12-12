@@ -1,3 +1,5 @@
+# Ref: https://github.com/isaac-sim/IsaacGymEnvs?tab=readme-ov-file#creating-an-environment
+
 import isaacgym
 import isaacgymenvs
 import torch
