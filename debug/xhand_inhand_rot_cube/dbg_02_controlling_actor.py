@@ -74,37 +74,23 @@ while not gym.query_viewer_has_closed(viewer):
     # Refresh root state tensors
     # gym.refresh_actor_root_state_tensor(sim)
     
-    if APPLY_PER_ENV:
-        # Apply actions per environment
-        for env in envs:
-            for i in range(gym.get_actor_count(env)):
-                # Get DOF states
-                dof_states = gym.get_actor_dof_states(env, actor_handle, gymapi.STATE_ALL)
 
-                # Separate joint positions and velocities
-                joint_positions = [state["pos"] for state in dof_states]
-                print(f'Joint positions: {joint_positions}')
-                actor_handle = gym.get_actor_handle(env, i)
-                num_dofs = gym.get_actor_dof_count(env, actor_handle)
-                action_tensor = torch.tensor(joint_positions) + 0.05
-                print(f'Action tensor: {action_tensor}')
-                # action_tensor = torch.zeros((num_dofs,), dtype=torch.float32, device="cuda:0")
-                # action_tensor[0] = 0.1  # Example: Setting position of the first joint
-                gym.set_actor_dof_position_targets(env, actor_handle, action_tensor.cpu().numpy())
-    # else:
+    # Apply actions per environment
+    for env in envs:
+        for i in range(gym.get_actor_count(env)):
+            # Get DOF states
+            dof_states = gym.get_actor_dof_states(env, actor_handle, gymapi.STATE_ALL)
 
-        
-        
-    #     # Apply actions to all environments
-    #     action_tensor = torch.zeros((num_envs, 12), dtype=torch.float32, device="cuda:0")
-    #     # a randon number between [0, 0.1] is set to the first joint of each actor
-    #     position = torch.rand((num_envs, 12), dtype=torch.float32, device="cuda:0") * 0.5
-        
-    #     action_tensor[:, :] = position[:, :]
-    #     # action_tensor[0] = 0.1  # Example: Setting position of the first joint
-    #     # gym.set_dof_position_target_tensor(env, action_tensor.numpy())  # Pass tensor as numpy array
-    #     print(action_tensor.cpu())
-    #     gym.set_dof_position_target_tensor(sim, gymtorch.unwrap_tensor(action_tensor.cpu()))
+            # Separate joint positions and velocities
+            joint_positions = [state["pos"] for state in dof_states]
+            print(f'Joint positions: {joint_positions}')
+            actor_handle = gym.get_actor_handle(env, i)
+            num_dofs = gym.get_actor_dof_count(env, actor_handle)
+            action_tensor = torch.tensor(joint_positions) + 0.05
+            print(f'Action tensor: {action_tensor}')
+            # action_tensor = torch.zeros((num_dofs,), dtype=torch.float32, device="cuda:0")
+            # action_tensor[0] = 0.1  # Example: Setting position of the first joint
+            gym.set_actor_dof_position_targets(env, actor_handle, action_tensor.cpu().numpy())
 
     # visualize the simulation
     gym.step_graphics(sim)
