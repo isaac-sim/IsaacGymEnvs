@@ -4,10 +4,14 @@
 
 from isaacgymenvs.tasks.base.vec_task import VecTask
 from isaacgym import gymapi
+from isaacgym import gymtorch
+
 import torch
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-
+from isaacgymenvs.utils.torch_jit_utils import scale, unscale, quat_mul, quat_conjugate, quat_from_angle_axis, \
+    to_torch, get_axis_params, torch_rand_float, tensor_clamp  
+    
 class XHandRotCube(VecTask):
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, 
                  virtual_screen_capture = False, force_render = False):
@@ -20,10 +24,17 @@ class XHandRotCube(VecTask):
         
         self.max_episode_length = self.cfg["env"]["episodeLength"]
         
+        # control parameters
+        self.act_moving_average = self.cfg["env"]["actionsMovingAverage"]
+        
         self.envs = []
         super().__init__(cfg, rl_device, sim_device, graphics_device_id, headless, 
                          virtual_screen_capture=virtual_screen_capture, 
                          force_render=force_render)
+        
+        self.num_dofs = self.gym.get_sim_dof_count(self.sim) // self.num_envs
+        print("Num dofs: ", self.num_dofs)
+        self.prev_targets = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device)
         
         # set position of the camera to get a better view
         if self.viewer != None:
@@ -107,10 +118,49 @@ class XHandRotCube(VecTask):
             # self.goal_object_indices.append(goal_object_idx)
         
         ## set dof properties
+            self.num_hand_dofs = self.gym.get_asset_dof_count(robot_asset)
+            self.actuated_dof_indices = [i for i in range(self.num_hand_dofs)]
+            self.actuated_dof_indices = to_torch(self.actuated_dof_indices, dtype=torch.long, device=self.device)
+            hand_dof_props = self.gym.get_asset_dof_properties(robot_asset)
+            
+            self.hand_dof_lower_limits = []
+            self.hand_dof_upper_limits = []
+            self.hand_dof_default_pos = []
+            self.hand_dof_default_vel = []
+            
+            for i in range(self.num_hand_dofs):
+                self.hand_dof_lower_limits.append(hand_dof_props['lower'][i])
+                self.hand_dof_upper_limits.append(hand_dof_props['upper'][i])
+                self.hand_dof_default_pos.append(0.0)
+                self.hand_dof_default_vel.append(0.0)
+
+                print("Max effort: ", hand_dof_props['effort'][i])
+                hand_dof_props['driveMode'][i] = gymapi.DOF_MODE_POS
+                hand_dof_props['effort'][i] = 0.5
+                hand_dof_props['stiffness'][i] = 3
+                hand_dof_props['damping'][i] = 0.1
+                hand_dof_props['friction'][i] = 0.01
+                hand_dof_props['armature'][i] = 0.001
+            self.gym.set_actor_dof_properties(env_ptr, hand_actor, hand_dof_props)
+
+        self.hand_dof_lower_limits = to_torch(self.hand_dof_lower_limits, device=self.device)
+        self.hand_dof_upper_limits = to_torch(self.hand_dof_upper_limits, device=self.device)
+        self.hand_dof_default_pos = to_torch(self.hand_dof_default_pos, device=self.device)
+        self.hand_dof_default_vel = to_torch(self.hand_dof_default_vel, device=self.device)
         
-    
     def pre_physics_step(self, actions):
-        pass
+        self.actions = actions.clone().to(self.device)
+        self.cur_targets = torch.zeros((self.num_envs, self.num_hand_dofs), dtype=torch.float, device=self.device)
+        
+        self.cur_targets[:, self.actuated_dof_indices] = scale(self.actions,
+                                                                self.hand_dof_lower_limits[self.actuated_dof_indices], self.hand_dof_upper_limits[self.actuated_dof_indices])
+        self.cur_targets[:, self.actuated_dof_indices] = self.act_moving_average * self.cur_targets[:,
+                                                                                                    self.actuated_dof_indices] + (1.0 - self.act_moving_average) * self.prev_targets[:, self.actuated_dof_indices]
+        self.cur_targets[:, self.actuated_dof_indices] = tensor_clamp(self.cur_targets[:, self.actuated_dof_indices],
+                                                                          self.hand_dof_lower_limits[self.actuated_dof_indices], self.hand_dof_upper_limits[self.actuated_dof_indices])
+
+        self.prev_targets[:, self.actuated_dof_indices] = self.cur_targets[:, self.actuated_dof_indices]
+        self.gym.set_dof_position_target_tensor(self.sim, gymtorch.unwrap_tensor(self.cur_targets))
     
     def post_physics_step(self):
         pass
