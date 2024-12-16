@@ -59,12 +59,15 @@ class XHandRotCube(VecTask):
         asset_root = "./assets"
         robot_asset_file = "urdf/xhand/xhand_right.urdf"
         object_asset_file = "urdf/objects/cube_multicolor.urdf"
+        goal_asset_file = "urdf/objects/cube_multicolor.urdf"
         
             
         ## set asset options
         robot_asset_options = gymapi.AssetOptions()
         robot_asset_options.fix_base_link = True
         robot_asset_options.disable_gravity = True
+        goal_asset_options = gymapi.AssetOptions()
+        goal_asset_options.disable_gravity = True
         
         ## load asset
         robot_asset = self.gym.load_asset(self.sim, asset_root, robot_asset_file, robot_asset_options)
@@ -73,6 +76,10 @@ class XHandRotCube(VecTask):
         object_asset = self.gym.load_asset(self.sim, asset_root, object_asset_file)
         if object_asset is None:
             raise Exception("Failed to load object asset")
+
+        goal_asset = self.gym.load_asset(self.sim, asset_root, goal_asset_file, goal_asset_options)
+        if goal_asset is None:
+            raise Exception("Failed to load goal object asset")
 
         # create environment
         ## create env grid
@@ -87,10 +94,18 @@ class XHandRotCube(VecTask):
             hand_init_pose.r = gymapi.Quat(qx, qy, qz, qw)
             hand_actor = self.gym.create_actor(env_ptr, robot_asset, hand_init_pose, "robot_hand", i, -1)
         ### create object actor
-            object_init_pose = gymapi.Transform()
-            object_init_pose.p = gymapi.Vec3(0, 0, 0.6)
-            object_actor = self.gym.create_actor(env_ptr, object_asset, object_init_pose, "object", i, -1)
-
+            object_start_pose = gymapi.Transform()
+            object_start_pose.p = gymapi.Vec3(0, 0, 0.6)
+            object_actor = self.gym.create_actor(env_ptr, object_asset, object_start_pose, "object", i, -1)
+        ### create goal object actor
+            self.goal_displacement = gymapi.Vec3(-0.2, -0.06, 0.12)
+            goal_start_pose = gymapi.Transform()
+            goal_start_pose.p = object_start_pose.p + self.goal_displacement
+            goal_start_pose.p.z -= 0.04
+            goal_handle = self.gym.create_actor(env_ptr, goal_asset, goal_start_pose, "goal_object", i + self.num_envs, 0, 0)
+            # goal_object_idx = self.gym.get_actor_index(env_ptr, goal_handle, gymapi.DOMAIN_SIM)
+            # self.goal_object_indices.append(goal_object_idx)
+        
         ## set dof properties
         
     
