@@ -26,6 +26,11 @@ class XHandRotCube(VecTask):
         
         # control parameters
         self.act_moving_average = self.cfg["env"]["actionsMovingAverage"]
+        self.object_actor_handles = []
+        
+        # observation and reward parameters
+        self.fall_dist = self.cfg["env"]["fallDistance"]
+
         
         self.envs = []
         super().__init__(cfg, rl_device, sim_device, graphics_device_id, headless, 
@@ -41,6 +46,13 @@ class XHandRotCube(VecTask):
             cam_pos = gymapi.Vec3(7.0, 5.0, 1.0)
             cam_target = gymapi.Vec3(6.0, 5.0, 0.0)
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
+            
+        self.gym.refresh_actor_root_state_tensor(self.sim)
+        # get gym GPU state tensors
+        actor_root_state_tensor = self.gym.acquire_actor_root_state_tensor(self.sim)
+        # shape: (num_action_in_all_envs, 13)
+        self.root_state_tensor = gymtorch.wrap_tensor(actor_root_state_tensor)
+        self.initial_root_state_tensor = self.root_state_tensor.clone()
             
     def create_sim(self):
         self.dt = self.sim_params.dt
@@ -92,6 +104,9 @@ class XHandRotCube(VecTask):
         if goal_asset is None:
             raise Exception("Failed to load goal object asset")
 
+        self.object_indices = []
+        self.target_indices = []
+        
         # create environment
         ## create env grid
         for i in range(self.num_envs):
@@ -108,12 +123,18 @@ class XHandRotCube(VecTask):
             object_start_pose = gymapi.Transform()
             object_start_pose.p = gymapi.Vec3(0, 0, 0.6)
             object_actor = self.gym.create_actor(env_ptr, object_asset, object_start_pose, "object", i, -1)
+            object_idx = self.gym.get_actor_index(env_ptr, object_actor, gymapi.DOMAIN_SIM)
+            self.object_indices.append(object_idx)
+            self.object_actor_handles.append(object_actor)
+            
         ### create goal object actor
             self.goal_displacement = gymapi.Vec3(-0.2, -0.06, 0.12)
             goal_start_pose = gymapi.Transform()
             goal_start_pose.p = object_start_pose.p + self.goal_displacement
             goal_start_pose.p.z -= 0.04
             goal_handle = self.gym.create_actor(env_ptr, goal_asset, goal_start_pose, "goal_object", i + self.num_envs, 0, 0)
+            goal_object_idx = self.gym.get_actor_index(env_ptr, goal_handle, gymapi.DOMAIN_SIM)
+            self.target_indices.append(goal_object_idx)
             # goal_object_idx = self.gym.get_actor_index(env_ptr, goal_handle, gymapi.DOMAIN_SIM)
             # self.goal_object_indices.append(goal_object_idx)
         
@@ -149,6 +170,11 @@ class XHandRotCube(VecTask):
         self.hand_dof_default_vel = to_torch(self.hand_dof_default_vel, device=self.device)
         
     def pre_physics_step(self, actions):
+        # Ref: https://isaac-sim.github.io/IsaacLab/main/source/migration/migrating_from_isaacgymenvs.html#pre-and-post-physics-step
+        # reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
+        # print(f"reset_env_ids: {reset_env_ids}")
+        
+        # apply action
         self.actions = actions.clone().to(self.device)
         self.cur_targets = torch.zeros((self.num_envs, self.num_hand_dofs), dtype=torch.float, device=self.device)
         
@@ -163,17 +189,52 @@ class XHandRotCube(VecTask):
         self.gym.set_dof_position_target_tensor(self.sim, gymtorch.unwrap_tensor(self.cur_targets))
     
     def post_physics_step(self):
-        pass
+        # Ref: https://isaac-sim.github.io/IsaacLab/main/source/migration/migrating_from_isaacgymenvs.html#pre-and-post-physics-step
+        self.progress_buf += 1
+
+        env_ids = self.reset_buf.nonzero(
+            as_tuple=False).squeeze(-1)
+        if len(env_ids) > 0:
+            self.reset_idx(env_ids)
+
+        self.compute_observations(env_ids)
+        self.compute_reward(env_ids)
+
     
-    def reset_idx(self, env_idx):
-        pass
+    def reset_idx(self, env_ids):
+        # reset object pose
+        self.gym.set_actor_root_state_tensor_indexed(self.sim,
+                                                     gymtorch.unwrap_tensor(self.initial_root_state_tensor),
+                                                     gymtorch.unwrap_tensor(torch.tensor(self.object_indices, dtype=torch.int32, device=self.device)), 
+                                                     len(self.object_indices))
+                
+        # zero reset buffer
+        self.reset_buf[env_ids] = 0
     
-    def compute_observation(self, env_idx):
-        pass
+    def compute_observations(self, env_idx):
+        self.gym.refresh_dof_state_tensor(self.sim)
+        self.gym.refresh_actor_root_state_tensor(self.sim)
+        self.gym.refresh_rigid_body_state_tensor(self.sim)
+        
+        self.object_pose = self.root_state_tensor[self.object_indices, 0:7]
+        self.object_pos = self.root_state_tensor[self.object_indices, 0:3]
+        
+        self.target_pose = self.root_state_tensor[self.target_indices, 0:7]
+        self.target_pos = self.root_state_tensor[self.target_indices, 0:3]
+        
     
     def compute_reward(self, env_idx):
+        self.reset_buf = compute_reward_fn(
+            self.reset_buf, 
+            self.object_pos, self.target_pos, self.fall_dist)
         pass
     
 @torch.jit.script
-def compute_reward_fn():
-    pass
+def compute_reward_fn(reset_buf:torch.Tensor,
+                      object_pos, target_pos, fall_dist:float):
+    # Distance from the hand to the object
+    goal_dist = torch.norm(object_pos - target_pos, p=2, dim=-1)
+    # print("Goal dist: ", goal_dist)
+    resets = torch.where(goal_dist >= fall_dist, torch.ones_like(reset_buf), reset_buf)
+
+    return resets
