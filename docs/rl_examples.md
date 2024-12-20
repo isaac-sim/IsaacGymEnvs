@@ -575,6 +575,9 @@ we recommend installing them altogether using the environment file provided in t
 conda env create -f isaacgymenvs/tasks/drone_racing/rlgpu.yaml
 conda activate rlgpu
 
+# install rerun urdf support
+pip install git+https://github.com/rerun-io/rerun-loader-python-example-urdf.git
+
 # install isaac gym
 cd $ISAACGYM_DIR/python
 pip install -e .
