@@ -1,0 +1,186 @@
+# base configuration for drone racing including:
+# sim, env, rand opts for drone and camera, drone control and sim
+# common observation and default reward calculation
+
+name: DRBase
+
+physics_engine: ${..physics_engine}
+
+sim:
+  # SimParams, Simulation Tuning
+  dt: 0.004  # physics simulation dt, default is 0.0167, we use 250Hz to show motor dynamics
+  substeps: 1  # 2
+  up_axis: "z"  # UpAxis.UP_AXIS_Y
+  gravity: [ 0.0, 0.0, -9.81 ]  # [0.0, -9.8, 0.0]
+  use_gpu_pipeline: ${eq:${...pipeline},"gpu"}  # False
+  num_client_threads: 0
+  physx:
+    always_use_articulations: False
+    bounce_threshold_velocity: 0.2  # 0.2
+    contact_collection: 1  # 0: none, 1: CC_LAST_SUBSTEP, 2: CC_ALL_SUBSTEPS
+    contact_offset: 0.02
+    default_buffer_size_multiplier: 2.0
+    friction_correlation_distance: 0.025
+    friction_offset_threshold: 0.04
+    max_depenetration_velocity: 1.0
+    max_gpu_contact_pairs: 1048576
+    num_position_iterations: 4
+    num_subscenes: ${....num_subscenes}  # 0
+    num_threads: ${....num_threads}  # 0
+    num_velocity_iterations: 1
+    rest_offset: 0.001
+    solver_type: ${....solver_type}  # 1
+    use_gpu: ${contains:"cuda",${....sim_device}}  # False
+
+env:
+  numEnvs: ${resolve_default:256,${...num_envs}}
+  numActions: 4  # 4 channels AETR
+  numAgents: 1
+  numObservations: 120  # 18 [p, R, v, w] + 17 * 2 [waypoint] + 4 [action] + 64 [image encoded]
+  controlFrequencyInv: 10  # physics steps per action, this makes policy frequency running @ 25Hz
+  obsImgMode: dce
+  maxEpisodeLength: 100  # step 25 Hz, episode max 4 s
+  enableStrictCollision: False  # if False, crashing and waypoint passing are allowed to happen at the same time
+  enableDebugVis: False  # enable waypoint visualization, which also appears in camera sensors
+  enableVirtualWalls: True
+  enableCameraSensors: True
+  cameraEnableTensors: True
+  cameraWidth: 480
+  cameraHeight: 270
+  cameraHfov: 90
+  cameraBodyPos: [ 0.08, 0.0, 0.015 ]
+  cameraAngleDeg: 30
+  cameraDepthMax: 20
+  logging:
+    enable: False
+    experimentName: ${...name}
+    logMainCam: False  # if True, enableCameraSensors and logging.enable should be True
+    logExtraCams: False  # if True, enableCameraSensors and logging.enable should be True
+    maxNumEpisodes: 10
+    numStepsPerSave: 50
+    extraCameraWidth: 256
+    extraCameraHeight: 256
+    extraCameraHfov: 90
+  viewer:
+    camPos: [ -20, -20, 30 ]
+    camTarget: [ 20, 20, 10 ]
+
+initRandOpt:
+  randDroneOptions:
+    next_wp_id_max: 1
+    dist_along_line_min: 0.0
+    dist_along_line_max: 0.1
+    drone_rotation_x_max: 3.14
+    dist_to_line_max: 1.0
+    lin_vel_x_max: 1.0  # m/s
+    lin_vel_y_max: 1.0
+    lin_vel_z_max: 1.0
+    ang_vel_x_max: 1.0  # rad/s
+    ang_vel_y_max: 1.0
+    ang_vel_z_max: 1.0
+    aileron_max: 0.25
+    elevator_max: 0.25
+    rudder_max: 0.25
+    throttle_min: -1.0
+    throttle_max: -0.5
+  randCameraOptions:
+    d_x_max: 0.01  # 1 cm
+    d_y_max: 0
+    d_z_max: 0.01  # 1 cm
+    d_angle_max: 5  # deg
+
+mdp:
+  observation:
+    dim_action: ${...env.numActions}
+    pos_max: 40.0
+    vel_max: 20.0
+    ang_vel_max: 12  # should be synced with betaflight max rate
+    dist_to_corner_max: 20.0
+  reward:
+    k_progress: 1.0
+    k_perception: 0.02
+    k_cam_dev: -10.0
+    k_cmd_ang_vel: -4e-4
+    k_cmd_diff: -2e-4
+    k_collision: -10.0
+    k_guidance: 1.0  # or 0.0
+    k_rejection: 2.0
+    k_waypoint: 5.0
+    k_timeout: -10.0
+    guidance_x_thresh: 3.0
+    guidance_tol: 0.2
+    enable_normalization: False
+  extra_reward:
+    k_vel_lateral: -1e-3
+    k_vel_backward: -5e-3
+
+droneSim:
+  num_rotors: 4
+  rotors_x: [ -0.078665, 0.078665, -0.078665, 0.078665 ]
+  rotors_y: [ 0.097143, 0.097143, -0.097143, -0.097143 ]
+  rotors_dir: [ 1, -1, -1, 1 ]
+  drone_asset_options:
+    arm_length_front: 0.125
+    arm_length_back: 0.125
+    arm_thickness: 0.01
+    arm_front_angle: 1.780236
+    motor_diameter: 0.023
+    motor_height: 0.006
+    central_body_pos: [ 0.0, 0.0, 0.015 ]
+    central_body_dim: [ 0.15, 0.05, 0.05 ]
+    propeller_diameter: 0.12954
+    propeller_height: 0.01
+    mass: 0.76
+    center_of_mass: [ 0.0, 0.0, 0.0 ]
+    diagonal_inertia: [ 0.0025, 0.0021, 0.0043 ]
+    principle_axes_q: [ 1.0, 0.0, 0.0, 0.0 ]
+    disable_visuals: False
+  simpleBetaflight:
+    dt: ${...sim.dt}
+    center_sensitivity: [ 100.0, 100.0, 100.0 ]
+    max_rate: [ 670.0, 670.0, 670.0 ]
+    rate_expo: [ 0.0, 0.0, 0.0 ]
+    kp: [ 70.0, 70.0, 125.0 ]
+    ki: [ 0.5, 0.5, 25.0 ]
+    kd: [ 1.0, 1.0, 0.0 ]
+    kff: [ 0.0, 0.0, 0.0 ]
+    iterm_lim: [ 5.0, 5.0, 5.0 ]
+    pid_sum_lim: [ 1000.0, 1000.0, 1000.0 ]
+    dterm_lpf_cutoff: 1000
+    rotors_x: ${..rotors_x}
+    rotors_y: ${..rotors_y}
+    rotors_dir: ${..rotors_dir}
+    pid_sum_mixer_scale: 1000.0
+    output_idle: 0.05
+    throttle_boost_gain: 0.0  # disable throttle boost
+    throttle_boost_freq: 125.0
+    thrust_linearization_gain: 0.4
+  rotorPolyLag:
+    dt: ${...sim.dt}
+    num_rotors: ${..num_rotors}
+    rotors_dir: ${..rotors_dir}
+    spinup_time_constant: 0.033
+    slowdown_time_constant: 0.033
+    k_rpm_quadratic: -13421.95
+    k_rpm_linear: 37877.42
+    rotor_diagonal_inertia: [ 0.0, 0.0, 9.3575e-6 ]
+    rotor_principle_axes_q: [ 1.0, 0.0, 0.0, 0.0 ]
+  propellerPoly:
+    num_props: ${..num_rotors}
+    k_force_quadratic: 2.1549e-8
+    k_force_linear: -4.5101e-5
+    k_torque_quadratic: 4.74078e-10
+    k_torque_linear: -9.92222e-7
+  bodyDragPoly:
+    air_density: 1.204
+    a_trans: [ 1.5e-2, 1.5e-2, 3.0e-2 ]
+    k_trans_quadratic: [ 1.04, 1.04, 1.04 ]
+    k_trans_linear: [ 0.0, 0.0, 0.0 ]
+    a_rot: [ 1e-2, 1e-2, 1e-2 ]
+    k_rot_quadratic: [ 0.0, 0.0, 0.0 ]
+    k_rot_linear: [ 0.0, 0.0, 0.0 ]
+  wrenchSum:
+    num_positions: ${..num_rotors}
+    position_x: ${..rotors_x}
+    position_y: ${..rotors_y}
+    position_z: [ 0.0, 0.0, 0.0, 0.0 ]

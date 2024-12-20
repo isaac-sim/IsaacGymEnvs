@@ -31,3 +31,6 @@ runs/
 outputs/
 *.hydra*
 /isaacgymenvs/wandb
+isaacgymenvs/tasks/drone_racing/assets/export
+.ipynb_checkpoints
+recorded_frames

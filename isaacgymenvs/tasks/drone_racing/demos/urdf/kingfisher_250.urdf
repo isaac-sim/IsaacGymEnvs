@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<robot name="kingfisher_250">
+    <link name="base">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+            <mass value="0.752"/>
+            <inertia ixx="0.0025" ixy="0.0" ixz="0.0" iyy="0.0021" iyz="0.0" izz="0.0043"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <box size="0.15 0.05 0.05"/>
+            </geometry>
+            <origin xyz="0.0 0.0 0.015" rpy="0.0 0.0 0.0"/>
+        </visual>
+        <visual>
+            <geometry>
+                <box size="0.25  0.023 0.01 "/>
+            </geometry>
+            <origin xyz="0.0 0.0 -0.005" rpy="0.0 0.0 0.8901179185171081"/>
+        </visual>
+        <visual>
+            <geometry>
+                <box size="0.25  0.023 0.01 "/>
+            </geometry>
+            <origin xyz="0.0 -0.0 -0.005" rpy="0.0 0.0 -0.8901179185171081"/>
+        </visual>
+        <visual>
+            <geometry>
+                <cylinder radius="0.0115" length="0.016"/>
+            </geometry>
+            <origin xyz="-0.07866504888122973 -0.09714324518212132 -0.002" rpy="0.0 0.0 0.0"/>
+        </visual>
+        <visual>
+            <geometry>
+                <cylinder radius="0.06477" length="0.01"/>
+            </geometry>
+            <origin xyz="-0.07866504888122973 -0.09714324518212132 0.011" rpy="0.0 0.0 0.0"/>
+        </visual>
+        <visual>
+            <geometry>
+                <cylinder radius="0.0115" length="0.016"/>
+            </geometry>
+            <origin xyz="0.07866504888122969 -0.09714324518212136 -0.002" rpy="0.0 0.0 0.0"/>
+        </visual>
+        <visual>
+            <geometry>
+                <cylinder radius="0.06477" length="0.01"/>
+            </geometry>
+            <material name="red"/>
+            <origin xyz="0.07866504888122969 -0.09714324518212136 0.011" rpy="0.0 0.0 0.0"/>
+        </visual>
+        <visual>
+            <geometry>
+                <cylinder radius="0.0115" length="0.016"/>
+            </geometry>
+            <origin xyz="-0.07866504888122966 0.09714324518212138 -0.002" rpy="0.0 0.0 0.0"/>
+        </visual>
+        <visual>
+            <geometry>
+                <cylinder radius="0.06477" length="0.01"/>
+            </geometry>
+            <origin xyz="-0.07866504888122966 0.09714324518212138 0.011" rpy="0.0 0.0 0.0"/>
+        </visual>
+        <visual>
+            <geometry>
+                <cylinder radius="0.0115" length="0.016"/>
+            </geometry>
+            <origin xyz="0.07866504888122969 0.09714324518212136 -0.002" rpy="0.0 0.0 0.0"/>
+        </visual>
+        <visual>
+            <geometry>
+                <cylinder radius="0.06477" length="0.01"/>
+            </geometry>
+            <material name="red"/>
+            <origin xyz="0.07866504888122969 0.09714324518212136 0.011" rpy="0.0 0.0 0.0"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.2868701  0.32382649 0.05      "/>
+            </geometry>
+            <origin xyz="0.0 0.0 0.015" rpy="0.0 0.0 0.0"/>
+        </collision>
+    </link>
+    <material name="red">
+        <color rgba="1. 0. 0. 1."/>
+    </material>
+</robot>

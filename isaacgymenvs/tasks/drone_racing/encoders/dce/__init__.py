@@ -1,0 +1,2 @@
+from .vae_image_encoder import VAEImageEncoder
+from .vae_image_encoder_config import VAEImageEncoderConfig

@@ -344,3 +344,16 @@ Please cite this work as:
 	year = {2023}
 }
 ```
+
+**Note** if you use the drone racing implementations, please cite the following paper:
+```
+@misc{liu2024droneracing,
+      title={Learning Generalizable Policy for Obstacle-Aware Autonomous Drone Racing}, 
+      author={Yueqian Liu},
+      year={2024},
+      eprint={2411.04246},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2411.04246}, 
+}
+```
