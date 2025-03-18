@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<robot name="ball">
+  <link name="ball">
+    <visual>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="{{ base_mesh }}" scale="{{ radius }} {{ radius }} {{ radius }}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="{{ radius }}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <density value="400.0"/>
+    </inertial>
+  </link>
+</robot>

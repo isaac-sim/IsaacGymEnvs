@@ -39,6 +39,8 @@ from isaacgym import gymapi, gymtorch, gymutil
 from torch import Tensor
 
 from isaacgymenvs.tasks.allegro_kuka.allegro_kuka_utils import DofParameters, populate_dof_properties
+from isaacgymenvs.tasks.allegro_kuka.generate_balls import generate_default_ball, generate_small_balls, \
+    generate_big_balls
 from isaacgymenvs.tasks.base.vec_task import VecTask
 from isaacgymenvs.tasks.allegro_kuka.generate_cuboids import (
     generate_big_cuboids,
@@ -49,7 +51,7 @@ from isaacgymenvs.tasks.allegro_kuka.generate_cuboids import (
 from isaacgymenvs.utils.torch_jit_utils import *
 
 
-class AllegroKukaBase(VecTask):
+class AllegroKukaJuggleBase(VecTask):
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
 
@@ -137,9 +139,11 @@ class AllegroKukaBase(VecTask):
 
         # whether to sample random object dimensions
         self.randomize_object_dimensions = self.cfg["env"]["randomizeObjectDimensions"]
-        self.with_small_cuboids = self.cfg["env"]["withSmallCuboids"]
-        self.with_big_cuboids = self.cfg["env"]["withBigCuboids"]
-        self.with_sticks = self.cfg["env"]["withSticks"]
+        self.with_small_balls = self.cfg["env"]["withSmallBalls"]
+        self.with_big_balls = self.cfg["env"]["withBigBalls"]
+        # self.with_sticks = self.cfg["env"]["withSticks"]
+
+        self.num_balls = self.cfg["env"]["numBalls"]
 
         self.with_dof_force_sensors = False
         # create fingertip force-torque sensors
@@ -151,7 +155,7 @@ class AllegroKukaBase(VecTask):
             print("New episode length: ", self.max_episode_length)
 
         self.object_type = self.cfg["env"]["objectType"]
-        assert self.object_type in ["block"]
+        assert self.object_type in ["ball"]
 
         self.asset_files_dict = {
             "block": "urdf/objects/cube_multicolor.urdf",  # 0.05m box
@@ -189,14 +193,14 @@ class AllegroKukaBase(VecTask):
         palm_pos_size = 3
         palm_rot_vel_angvel_size = 10
 
-        obj_rot_vel_angvel_size = 10
+        obj_rot_vel_angvel_size = 10 * self.num_balls
 
         fingertip_rel_pos_size = 3 * self.num_allegro_fingertips
 
-        keypoint_info_size = self.num_keypoints * 3 + self.num_keypoints * 3
-        object_scales_size = 3
-        max_keypoint_dist_size = 1
-        lifted_object_flag_size = 1
+        keypoint_info_size = (self.num_keypoints * 3) * self.num_balls
+        object_scales_size = 1 * self.num_balls
+        max_keypoint_dist_size = 1 * self.num_balls
+        lifted_object_flag_size = 1 * self.num_balls
         progress_obs_size = 1 + 1
         closest_fingertip_distance_size = self.num_allegro_fingertips
         reward_obs_size = 1
@@ -331,17 +335,19 @@ class AllegroKukaBase(VecTask):
         self.action_torques = torch.zeros((self.num_envs, self.num_bodies, 3), dtype=torch.float, device=self.device)
 
         self.obj_keypoint_pos = torch.zeros(
-            (self.num_envs, self.num_keypoints, 3), dtype=torch.float, device=self.device
+            (self.num_envs, self.num_balls, self.num_keypoints, 3), dtype=torch.float, device=self.device
         )
-        self.goal_keypoint_pos = torch.zeros(
-            (self.num_envs, self.num_keypoints, 3), dtype=torch.float, device=self.device
-        )
+        # self.goal_keypoint_pos = torch.zeros(
+        #     (self.num_envs, self.num_keypoints, 3), dtype=torch.float, device=self.device
+        # )
+
+        self.goal_height = 1.4
 
         # how many steps we were within the goal tolerance
-        self.near_goal_steps = torch.zeros(self.num_envs, dtype=torch.int, device=self.device)
+        # self.near_goal_steps = torch.zeros(self.num_envs, dtype=torch.int, device=self.device)
 
-        self.lifted_object = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
-        self.closest_keypoint_max_dist = -torch.ones(self.num_envs, dtype=torch.float, device=self.device)
+        self.lifted_object = torch.zeros((self.num_envs, self.num_balls), dtype=torch.bool, device=self.device)
+        # self.closest_keypoint_max_dist = -torch.ones(self.num_envs, dtype=torch.float, device=self.device)
 
         self.closest_fingertip_dist = -torch.ones(
             [self.num_envs, self.num_allegro_fingertips], dtype=torch.float, device=self.device
@@ -399,20 +405,82 @@ class AllegroKukaBase(VecTask):
     def _object_keypoint_offsets(self):
         raise NotImplementedError()
 
-    def _object_start_pose(self, allegro_pose, table_pose_dy, table_pose_dz):
-        object_start_pose = gymapi.Transform()
-        object_start_pose.p = gymapi.Vec3()
-        object_start_pose.p.x = allegro_pose.p.x
+    def _object_start_poses(self, allegro_pose, table_pose_dy, table_pose_dz, arrangement="line", spacing=0.1):
+        """
+        Generate a list of start poses for each ball, arranged in a specific pattern.
 
+        Args:
+            allegro_pose (gymapi.Transform): Reference pose (typically the robot hand).
+            table_pose_dy (float): Base Y offset from the hand to the table.
+            table_pose_dz (float): Base Z offset from the hand to the table.
+            arrangement (str): Arrangement type ('grid', 'line', 'circle', or 'random').
+            spacing (float): Distance between objects.
+
+        Returns:
+            List[gymapi.Transform]: List of object start poses.
+        """
+        object_start_poses = []
+
+        # Adjust the base offsets
         pose_dy, pose_dz = table_pose_dy, table_pose_dz + 0.25
 
-        object_start_pose.p.y = allegro_pose.p.y + pose_dy
-        object_start_pose.p.z = allegro_pose.p.z + pose_dz
+        if arrangement == "grid":
+            # Define grid size based on the number of balls
+            grid_size = int(self.num_balls ** 0.5)  # Approximate square grid
+            for i in range(grid_size):
+                for j in range(grid_size):
+                    if len(object_start_poses) >= self.num_balls:
+                        break  # Stop when all balls are placed
 
-        return object_start_pose
+                    pose = gymapi.Transform()
+                    pose.p = gymapi.Vec3()
+
+                    pose.p.x = allegro_pose.p.x + i * spacing
+                    pose.p.y = allegro_pose.p.y + pose_dy + j * spacing
+                    pose.p.z = allegro_pose.p.z + pose_dz
+
+                    object_start_poses.append(pose)
+
+        elif arrangement == "line":
+            for i in range(self.num_balls):
+                pose = gymapi.Transform()
+                pose.p = gymapi.Vec3()
+
+                pose.p.x = allegro_pose.p.x
+                pose.p.y = allegro_pose.p.y + pose_dy + i * spacing
+                pose.p.z = allegro_pose.p.z + pose_dz
+
+                object_start_poses.append(pose)
+
+        elif arrangement == "circle":
+            radius = spacing * self.num_balls / (2 * 3.1416)  # Approximate a circular layout
+            for i in range(self.num_balls):
+                angle = (2 * 3.1416 * i) / self.num_balls  # Evenly distribute in a circle
+
+                pose = gymapi.Transform()
+                pose.p = gymapi.Vec3()
+
+                pose.p.x = allegro_pose.p.x + radius * torch.cos(torch.tensor(angle))
+                pose.p.y = allegro_pose.p.y + pose_dy + radius * torch.sin(torch.tensor(angle))
+                pose.p.z = allegro_pose.p.z + pose_dz
+
+                object_start_poses.append(pose)
+
+        elif arrangement == "random":
+            for i in range(self.num_balls):
+                pose = gymapi.Transform()
+                pose.p = gymapi.Vec3()
+
+                pose.p.x = allegro_pose.p.x + (torch.rand(1).item() - 0.5) * spacing * 2
+                pose.p.y = allegro_pose.p.y + pose_dy + (torch.rand(1).item() - 0.5) * spacing * 2
+                pose.p.z = allegro_pose.p.z + pose_dz + (torch.rand(1).item() - 0.2) * spacing * 0.5
+
+                object_start_poses.append(pose)
+
+        return object_start_poses
 
     def _main_object_assets_and_scales(self, object_asset_root, tmp_assets_dir):
-        object_asset_files, object_asset_scales = self._box_asset_files_and_scales(object_asset_root, tmp_assets_dir)
+        object_asset_files, object_asset_scales = self._ball_asset_files_and_scales(object_asset_root, tmp_assets_dir)
         if not self.randomize_object_dimensions:
             object_asset_files = object_asset_files[:1]
             object_asset_scales = object_asset_scales[:1]
@@ -505,7 +573,7 @@ class AllegroKukaBase(VecTask):
         plane_params.normal = gymapi.Vec3(0.0, 0.0, 1.0)
         self.gym.add_ground(self.sim, plane_params)
 
-    def _box_asset_files_and_scales(self, object_assets_root, generated_assets_dir):
+    def _ball_asset_files_and_scales(self, object_assets_root, generated_assets_dir):
         files = []
         scales = []
 
@@ -519,16 +587,16 @@ class AllegroKukaBase(VecTask):
 
         objects_rel_path = os.path.dirname(self.asset_files_dict[self.object_type])
         objects_dir = join(object_assets_root, objects_rel_path)
-        base_mesh = join(objects_dir, "meshes", "cube_multicolor.obj")
+        base_mesh = join(objects_dir, "meshes", "ball.obj")
 
-        generate_default_cube(generated_assets_dir, base_mesh, self.object_base_size)
+        generate_default_ball(generated_assets_dir, base_mesh, self.object_base_size)
 
-        if self.with_small_cuboids:
-            generate_small_cuboids(generated_assets_dir, base_mesh, self.object_base_size)
-        if self.with_big_cuboids:
-            generate_big_cuboids(generated_assets_dir, base_mesh, self.object_base_size)
-        if self.with_sticks:
-            generate_sticks(generated_assets_dir, base_mesh, self.object_base_size)
+        if self.with_small_balls:
+            generate_small_balls(generated_assets_dir, base_mesh, self.object_base_size)
+        if self.with_big_balls:
+            generate_big_balls(generated_assets_dir, base_mesh, self.object_base_size)
+        # if self.with_sticks:
+        #     generate_sticks(generated_assets_dir, base_mesh, self.object_base_size)
 
         filenames = os.listdir(generated_assets_dir)
         filenames = sorted(filenames)
@@ -634,7 +702,7 @@ class AllegroKukaBase(VecTask):
         max_agg_shapes += additional_shapes
 
         # set up object and goal positions
-        self.object_start_pose = self._object_start_pose(allegro_pose, table_pose_dy, table_pose_dz)
+        self.object_start_poses = self._object_start_poses(allegro_pose, table_pose_dy, table_pose_dz)
 
         self.allegro_hands = []
         self.envs = []
@@ -678,41 +746,42 @@ class AllegroKukaBase(VecTask):
                 if self.with_dof_force_sensors:
                     self.gym.enable_actor_dof_force_sensors(env_ptr, allegro_actor)
 
-            # add object
-            object_asset_idx = i % len(object_assets)
-            object_asset = object_assets[object_asset_idx]
+            for j in range(self.num_balls):
+                # add object
+                object_asset_idx = i % len(object_assets)
+                object_asset = object_assets[object_asset_idx]
 
-            object_handle = self.gym.create_actor(env_ptr, object_asset, self.object_start_pose, "object", i, 0, 0)
-            object_init_state.append(
-                [
-                    self.object_start_pose.p.x,
-                    self.object_start_pose.p.y,
-                    self.object_start_pose.p.z,
-                    self.object_start_pose.r.x,
-                    self.object_start_pose.r.y,
-                    self.object_start_pose.r.z,
-                    self.object_start_pose.r.w,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                ]
-            )
-            object_idx = self.gym.get_actor_index(env_ptr, object_handle, gymapi.DOMAIN_SIM)
-            object_indices.append(object_idx)
+                object_handle = self.gym.create_actor(env_ptr, object_asset, self.object_start_poses[j], f"ball_{j}", i, 0, 0)
+                object_init_state.append(
+                    [
+                        self.object_start_poses[j].p.x,
+                        self.object_start_poses[j].p.y,
+                        self.object_start_poses[j].p.z,
+                        self.object_start_poses[j].r.x,
+                        self.object_start_poses[j].r.y,
+                        self.object_start_poses[j].r.z,
+                        self.object_start_poses[j].r.w,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                    ]
+                )
+                object_idx = self.gym.get_actor_index(env_ptr, object_handle, gymapi.DOMAIN_SIM)
+                object_indices.append(object_idx)
 
-            object_scale = self.object_asset_scales[object_asset_idx]
-            object_scales.append(object_scale)
-            object_offsets = []
-            for keypoint in self.keypoints_offsets:
-                keypoint = copy(keypoint)
-                for coord_idx in range(3):
-                    keypoint[coord_idx] *= object_scale[coord_idx] * self.object_base_size * self.keypoint_scale / 2
-                object_offsets.append(keypoint)
+                object_scale = self.object_asset_scales[object_asset_idx]
+                object_scales.append(object_scale)
+                object_offsets = []
+                for keypoint in self.keypoints_offsets:
+                    keypoint = copy(keypoint)
+                    for coord_idx in range(3):
+                        keypoint[coord_idx] *= object_scale[coord_idx] * self.object_base_size * self.keypoint_scale / 2
+                    object_offsets.append(keypoint)
 
-            object_keypoint_offsets.append(object_offsets)
+                object_keypoint_offsets.append(object_offsets)
 
             # table object
             table_handle = self.gym.create_actor(env_ptr, table_asset, table_pose, "table_object", i, 0, 0)
@@ -732,21 +801,21 @@ class AllegroKukaBase(VecTask):
         self.object_rb_masses = [prop.mass for prop in object_rb_props]
 
         self.object_init_state = to_torch(object_init_state, device=self.device, dtype=torch.float).view(
-            self.num_envs, 13
+            self.num_envs, self.num_balls, 13
         )
-        self.goal_states = self.object_init_state.clone()
-        self.goal_states[:, self.up_axis_idx] -= 0.04
-        self.goal_init_state = self.goal_states.clone()
+        # self.goal_states = self.object_init_state.clone()
+        # self.goal_states[:, self.up_axis_idx] -= 0.04
+        # self.goal_init_state = self.goal_states.clone()
 
         self.allegro_fingertip_handles = to_torch(self.allegro_fingertip_handles, dtype=torch.long, device=self.device)
         self.object_rb_handles = to_torch(self.object_rb_handles, dtype=torch.long, device=self.device)
         self.object_rb_masses = to_torch(self.object_rb_masses, dtype=torch.float, device=self.device)
 
         self.allegro_hand_indices = to_torch(self.allegro_hand_indices, dtype=torch.long, device=self.device)
-        self.object_indices = to_torch(object_indices, dtype=torch.long, device=self.device)
+        self.object_indices = to_torch(object_indices, dtype=torch.long, device=self.device).view(self.num_envs, self.num_balls)
 
-        self.object_scales = to_torch(object_scales, dtype=torch.float, device=self.device)
-        self.object_keypoint_offsets = to_torch(object_keypoint_offsets, dtype=torch.float, device=self.device)
+        self.object_scales = to_torch(object_scales, dtype=torch.float, device=self.device).view(self.num_envs, self.num_balls, 3)
+        self.object_keypoint_offsets = to_torch(object_keypoint_offsets, dtype=torch.float, device=self.device).view(self.num_envs, self.num_balls, -1, 3)
 
         self._after_envs_created()
 
@@ -1006,9 +1075,9 @@ class AllegroKukaBase(VecTask):
         self.object_linvel = self.root_state_tensor[self.object_indices, 7:10]
         self.object_angvel = self.root_state_tensor[self.object_indices, 10:13]
 
-        self.goal_pose = self.goal_states[:, 0:7]
-        self.goal_pos = self.goal_states[:, 0:3]
-        self.goal_rot = self.goal_states[:, 3:7]
+        # self.goal_pose = self.goal_states[:, 0:7]
+        # self.goal_pos = self.goal_states[:, 0:3]
+        # self.goal_rot = self.goal_states[:, 3:7]
 
         self.palm_center_offset = torch.from_numpy(self.palm_offset).to(self.device).repeat((self.num_envs, 1))
         self._palm_state = self.rigid_body_states[:, self.allegro_palm_handle][:, 0:13]
@@ -1036,9 +1105,9 @@ class AllegroKukaBase(VecTask):
                 self.fingertip_rot[:, i], self.fingertip_offsets[:, i]
             )
 
-        obj_pos_repeat = self.object_pos.unsqueeze(1).repeat(1, self.num_allegro_fingertips, 1)
-        self.fingertip_pos_rel_object = self.fingertip_pos_offset - obj_pos_repeat
-        self.curr_fingertip_distances = torch.norm(self.fingertip_pos_rel_object, dim=-1)
+        obj_pos_repeat = self.object_pos.unsqueeze(2).repeat(1, 1, self.num_allegro_fingertips, 1)
+        self.fingertip_pos_rel_object = self.fingertip_pos_offset.unsqueeze(1) - obj_pos_repeat
+        self.curr_fingertip_distances = torch.norm(self.fingertip_pos_rel_object, dim=-1).min(dim=1)[0]
 
         # when episode ends or target changes we reset this to -1, this will initialize it to the actual distance on the 1st frame of the episode
         self.closest_fingertip_dist = torch.where(
@@ -1054,30 +1123,30 @@ class AllegroKukaBase(VecTask):
         if self.fingertip_pos_rel_object_prev is None:
             self.fingertip_pos_rel_object_prev = self.fingertip_pos_rel_object.clone()
 
-        for i in range(self.num_keypoints):
-            breakpoint()
-            self.obj_keypoint_pos[:, i] = self.object_pos + quat_rotate(
-                self.object_rot, self.object_keypoint_offsets[:, i]
-            )
-            self.goal_keypoint_pos[:, i] = self.goal_pos + quat_rotate(
-                self.goal_rot, self.object_keypoint_offsets[:, i]
-            )
+        for i in range(self.num_balls):
+            for j in range(self.num_keypoints):
+                self.obj_keypoint_pos[:, i, j] = self.object_pos[:, i] + quat_rotate(
+                    self.object_rot[:, i], self.object_keypoint_offsets[:, i, j]
+                )
+                # self.goal_keypoint_pos[:, i] = self.goal_pos + quat_rotate(
+                #     self.goal_rot, self.object_keypoint_offsets[:, i]
+                # )
 
-        self.keypoints_rel_goal = self.obj_keypoint_pos - self.goal_keypoint_pos
+        # self.keypoints_rel_goal = self.obj_keypoint_pos - self.goal_keypoint_pos
 
-        palm_center_repeat = self.palm_center_pos.unsqueeze(1).repeat(1, self.num_keypoints, 1)
+        palm_center_repeat = self.palm_center_pos.unsqueeze(1).unsqueeze(1)
         self.keypoints_rel_palm = self.obj_keypoint_pos - palm_center_repeat
 
-        self.keypoint_distances_l2 = torch.norm(self.keypoints_rel_goal, dim=-1)
+        # self.keypoint_distances_l2 = torch.norm(self.keypoints_rel_goal, dim=-1)
 
         # furthest keypoint from the goal
-        self.keypoints_max_dist = self.keypoint_distances_l2.max(dim=-1).values
+        # self.keypoints_max_dist = self.keypoint_distances_l2.max(dim=-1).values
 
         # this is the closest the keypoint had been to the target in the current episode (for the furthest keypoint of all)
         # make sure we initialize this value before using it for obs or rewards
-        self.closest_keypoint_max_dist = torch.where(
-            self.closest_keypoint_max_dist < 0.0, self.keypoints_max_dist, self.closest_keypoint_max_dist
-        )
+        # self.closest_keypoint_max_dist = torch.where(
+        #     self.closest_keypoint_max_dist < 0.0, self.keypoints_max_dist, self.closest_keypoint_max_dist
+        # )
 
         if self.obs_type == "full_state":
             full_state_size, reward_obs_ofs = self.compute_full_state(self.obs_buf)
@@ -1176,16 +1245,44 @@ class AllegroKukaBase(VecTask):
         if self.clamp_abs_observations > 0:
             obs_buf.clamp_(-self.clamp_abs_observations, self.clamp_abs_observations)
 
-    def get_random_quat(self, env_ids):
-        # https://github.com/KieranWynn/pyquaternion/blob/master/pyquaternion/quaternion.py
-        # https://github.com/KieranWynn/pyquaternion/blob/master/pyquaternion/quaternion.py#L261
+    # def get_random_quat(self, env_ids):
+    #     # https://github.com/KieranWynn/pyquaternion/blob/master/pyquaternion/quaternion.py
+    #     # https://github.com/KieranWynn/pyquaternion/blob/master/pyquaternion/quaternion.py#L261
+    #
+    #     uvw = torch_rand_float(0, 1.0, (len(env_ids), 3), device=self.device)
+    #     q_w = torch.sqrt(1.0 - uvw[:, 0]) * (torch.sin(2 * np.pi * uvw[:, 1]))
+    #     q_x = torch.sqrt(1.0 - uvw[:, 0]) * (torch.cos(2 * np.pi * uvw[:, 1]))
+    #     q_y = torch.sqrt(uvw[:, 0]) * (torch.sin(2 * np.pi * uvw[:, 2]))
+    #     q_z = torch.sqrt(uvw[:, 0]) * (torch.cos(2 * np.pi * uvw[:, 2]))
+    #     new_rot = torch.cat((q_x.unsqueeze(-1), q_y.unsqueeze(-1), q_z.unsqueeze(-1), q_w.unsqueeze(-1)), dim=-1)
+    #
+    #     return new_rot
 
-        uvw = torch_rand_float(0, 1.0, (len(env_ids), 3), device=self.device)
-        q_w = torch.sqrt(1.0 - uvw[:, 0]) * (torch.sin(2 * np.pi * uvw[:, 1]))
-        q_x = torch.sqrt(1.0 - uvw[:, 0]) * (torch.cos(2 * np.pi * uvw[:, 1]))
-        q_y = torch.sqrt(uvw[:, 0]) * (torch.sin(2 * np.pi * uvw[:, 2]))
-        q_z = torch.sqrt(uvw[:, 0]) * (torch.cos(2 * np.pi * uvw[:, 2]))
-        new_rot = torch.cat((q_x.unsqueeze(-1), q_y.unsqueeze(-1), q_z.unsqueeze(-1), q_w.unsqueeze(-1)), dim=-1)
+    def get_random_quat(self, shape, device=None):
+        """
+        Generate a random unit quaternion for any arbitrary shape.
+
+        Args:
+            shape (tuple): The desired shape of the output tensor (e.g., (batch_size,) or (num_envs, num_objects)).
+            device (torch.device, optional): The device to store the tensor (default: self.device).
+
+        Returns:
+            torch.Tensor: A tensor of shape (*shape, 4) representing random quaternions.
+        """
+        if device is None:
+            device = self.device  # Default to self.device if not specified
+
+        # Generate random numbers in [0,1] with the required shape
+        uvw = torch_rand_float2(0, 1.0, (*shape, 3), device=device)
+
+        # Compute quaternion components
+        q_w = torch.sqrt(1.0 - uvw[..., 0]) * torch.sin(2 * np.pi * uvw[..., 1])
+        q_x = torch.sqrt(1.0 - uvw[..., 0]) * torch.cos(2 * np.pi * uvw[..., 1])
+        q_y = torch.sqrt(uvw[..., 0]) * torch.sin(2 * np.pi * uvw[..., 2])
+        q_z = torch.sqrt(uvw[..., 0]) * torch.cos(2 * np.pi * uvw[..., 2])
+
+        # Stack to form quaternion (last dimension is 4 for quaternion components)
+        new_rot = torch.stack((q_x, q_y, q_z, q_w), dim=-1)
 
         return new_rot
 
@@ -1193,27 +1290,27 @@ class AllegroKukaBase(VecTask):
         self._reset_target(env_ids)
 
         self.reset_goal_buf[env_ids] = 0
-        self.near_goal_steps[env_ids] = 0
-        self.closest_keypoint_max_dist[env_ids] = -1
+        # self.near_goal_steps[env_ids] = 0
+        # self.closest_keypoint_max_dist[env_ids] = -1
 
     def reset_object_pose(self, env_ids):
         obj_indices = self.object_indices[env_ids]
 
         # reset object
-        rand_pos_floats = torch_rand_float(-1.0, 1.0, (len(env_ids), 3), device=self.device)
+        rand_pos_floats = torch_rand_float2(-1.0, 1.0, (len(env_ids), self.num_balls, 3), device=self.device)
         self.root_state_tensor[obj_indices] = self.object_init_state[env_ids].clone()
 
         # indices 0..2 correspond to the object position
         self.root_state_tensor[obj_indices, 0:1] = (
-            self.object_init_state[env_ids, 0:1] + self.reset_position_noise_x * rand_pos_floats[:, 0:1]
+            self.object_init_state[env_ids, :, 0:1] + self.reset_position_noise_x * rand_pos_floats[:, :, 0:1]
         )
         self.root_state_tensor[obj_indices, 1:2] = (
-            self.object_init_state[env_ids, 1:2] + self.reset_position_noise_y * rand_pos_floats[:, 1:2]
+            self.object_init_state[env_ids, :, 1:2] + self.reset_position_noise_y * rand_pos_floats[:, :, 1:2]
         )
         self.root_state_tensor[obj_indices, 2:3] = (
-            self.object_init_state[env_ids, 2:3] + self.reset_position_noise_z * rand_pos_floats[:, 2:3]
+            self.object_init_state[env_ids, :, 2:3] + self.reset_position_noise_z * rand_pos_floats[:, :, 2:3]
         )
-        new_object_rot = self.get_random_quat(env_ids)
+        new_object_rot = self.get_random_quat((len(env_ids), self.num_balls))
 
         # indices 3,4,5,6 correspond to the rotation quaternion
         self.root_state_tensor[obj_indices, 3:7] = new_object_rot
@@ -1337,12 +1434,12 @@ class AllegroKukaBase(VecTask):
         self.lifted_object[env_ids] = False
 
         # -1 here indicates that the value is not initialized
-        self.closest_keypoint_max_dist[env_ids] = -1
+        # self.closest_keypoint_max_dist[env_ids] = -1
 
         self.closest_fingertip_dist[env_ids] = -1
         self.furthest_hand_dist[env_ids] = -1
 
-        self.near_goal_steps[env_ids] = 0
+        # self.near_goal_steps[env_ids] = 0
 
         for key in self.rewards_episode.keys():
             self.rewards_episode[key][env_ids] = 0

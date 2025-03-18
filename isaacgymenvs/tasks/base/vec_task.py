@@ -508,8 +508,10 @@ class VecTask(Env):
                 self.gym.write_viewer_image_to_file(self.viewer, join(self.record_frames_dir, f"frame_{self.control_steps}.png"))
 
             if self.virtual_display and mode == "rgb_array":
-                img = self.virtual_display.grab()
-                return np.array(img)
+                img = np.array(self.virtual_display.grab())
+                if img.shape[0] != SCREEN_CAPTURE_RESOLUTION[1]:
+                    img = np.pad(img, ((0, 3), (0, 0), (0, 0)), mode='constant', constant_values=0)
+                return img
 
     def __parse_sim_params(self, physics_engine: str, config_sim: Dict[str, Any]) -> gymapi.SimParams:
         """Parse the config dictionary for physics stepping settings.

@@ -47,12 +47,12 @@ wandb_name: ${train.params.config.name}
 wandb_entity: ''
 wandb_project: 'isaacgymenvs'
 wandb_tags: []
-wandb_logcode_dir: '' 
+wandb_logcode_dir: '.'
 
-capture_video: False
-capture_video_freq: 1464
-capture_video_len: 100
-force_render: True
+capture_video: True
+capture_video_freq: 20000
+capture_video_len: 600
+force_render: False
 
 # disables rendering
 headless: False

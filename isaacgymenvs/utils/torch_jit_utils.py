@@ -217,6 +217,11 @@ def torch_rand_float(lower, upper, shape, device):
     # type: (float, float, Tuple[int, int], str) -> Tensor
     return (upper - lower) * torch.rand(*shape, device=device) + lower
 
+@torch.jit.script
+def torch_rand_float2(lower, upper, shape, device):
+    # type: (float, float, Tuple[int, int, int], str) -> Tensor
+    return (upper - lower) * torch.rand(*shape, device=device) + lower
+
 
 @torch.jit.script
 def torch_random_dir_2(shape, device):
