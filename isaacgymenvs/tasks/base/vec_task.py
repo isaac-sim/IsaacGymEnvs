@@ -63,6 +63,39 @@ def _create_sim_once(gym, *args, **kwargs):
         EXISTING_SIM = gym.create_sim(*args, **kwargs)
         return EXISTING_SIM
 
+def fix_resolution(img, desired_resolution):
+    """
+    Ensures that 'img' is at least as large as 'desired_resolution' (width, height).
+    If img is smaller, it will add padding (filled with zeros) on the bottom/right edges.
+    """
+    desired_width, desired_height = desired_resolution  # e.g. SCREEN_CAPTURE_RESOLUTION = (width, height)
+
+    current_height, current_width = img.shape[:2]
+
+    # Pad height if needed
+    if current_height < desired_height:
+        missing_height = desired_height - current_height
+        img = np.pad(
+            img,
+            ((0, missing_height), (0, 0), (0, 0)),  # pad only on the bottom
+            mode='constant',
+            constant_values=0
+        )
+
+    # Pad width if needed
+    # Make sure to re-check shape because the height padding may have changed it
+    current_height, current_width = img.shape[:2]
+    if current_width < desired_width:
+        missing_width = desired_width - current_width
+        img = np.pad(
+            img,
+            ((0, 0), (0, missing_width), (0, 0)),  # pad only on the right
+            mode='constant',
+            constant_values=0
+        )
+
+    return img
+
 
 class Env(ABC):
     def __init__(self, config: Dict[str, Any], rl_device: str, sim_device: str, graphics_device_id: int, headless: bool): 
@@ -509,8 +542,9 @@ class VecTask(Env):
 
             if self.virtual_display and mode == "rgb_array":
                 img = np.array(self.virtual_display.grab())
-                if img.shape[0] != SCREEN_CAPTURE_RESOLUTION[1]:
-                    img = np.pad(img, ((0, 3), (0, 0), (0, 0)), mode='constant', constant_values=0)
+                # if img.shape[0] != SCREEN_CAPTURE_RESOLUTION[1]:
+                #     img = np.pad(img, ((0, 3), (0, 0), (0, 0)), mode='constant', constant_values=0)
+                img = fix_resolution(img, SCREEN_CAPTURE_RESOLUTION)
                 return img
 
     def __parse_sim_params(self, physics_engine: str, config_sim: Dict[str, Any]) -> gymapi.SimParams:

@@ -6,11 +6,38 @@ episodeLength: 600
 forceScale: 0.0  # random forces don't allow us to throw precisely so we turn them off
 
 # adds a small pause every time we hit a target
-successSteps: 2
+maxConsecutiveSuccesses: 10
 
-withSmallBalls: True
-withBigBalls: True
+withSmallBalls: False
+withBigBalls: False
 
 objectType: "ball"
 
-numBalls: 2
+liftingRewScale: 20.0
+liftingBonus: 300.0
+liftingBonusThreshold: 0.15  # when the object is lifted this distance (in meters) above the table, the agent gets the lifting bonus
+distanceDeltaRewScale: 50.0
+reachGoalBonus: 1000.0
+kukaActionsPenaltyScale: 0.003
+allegroActionsPenaltyScale: 0.0003
+
+handDeltaPenaltyScale: 100.0
+jugglePenaltyScale: 5.0
+juggleRewardScale: 30
+handHeightPenaltyScale: 100.0
+fallPenaltyScale: 5.0
+
+numBalls: 1
+juggleMinHeight: 0.41
+juggleSuccessHeight: 1.25
+handMaxHeight: 1.1
+envSpacing: 1.5
+
+
+# Done:	Make Juggle Height Reward One Time
+#
+#Done: 	Max Height on hand
+#
+#Done:   One Ball -> learn to catch and throw repeatedly
+#
+#Done: 	Hand Delta Penalty only in x, y

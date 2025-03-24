@@ -1055,7 +1055,6 @@ class AllegroKukaBase(VecTask):
             self.fingertip_pos_rel_object_prev = self.fingertip_pos_rel_object.clone()
 
         for i in range(self.num_keypoints):
-            breakpoint()
             self.obj_keypoint_pos[:, i] = self.object_pos + quat_rotate(
                 self.object_rot, self.object_keypoint_offsets[:, i]
             )

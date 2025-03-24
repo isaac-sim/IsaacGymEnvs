@@ -49,7 +49,7 @@ def generate_assets(
 
     idx = 0
     for radius in scales:
-        volume = 4/3 * math.pi * radius**3 / (100 * 100 * 100)
+        volume = radius**3 / (100 * 100 * 100)
         if volume > max_volume:
             continue
         if volume < min_volume:
@@ -75,8 +75,8 @@ def generate_assets(
             fobj.write(asset)
 
 def generate_default_ball(assets_dir, base_mesh, base_ball_size_m):
-    scales = [100]
-    min_volume = max_volume = 1.0
+    scales = [1000]
+    min_volume = max_volume = 1000.0
     generate_assets(scales, min_volume, max_volume, assets_dir, base_mesh, base_ball_size_m, [])
 
 

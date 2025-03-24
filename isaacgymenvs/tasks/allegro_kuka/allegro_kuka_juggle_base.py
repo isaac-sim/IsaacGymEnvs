@@ -79,12 +79,21 @@ class AllegroKukaJuggleBase(VecTask):
         self.randomization_params = self.cfg["task"]["randomization_params"]
 
         self.distance_delta_rew_scale = self.cfg["env"]["distanceDeltaRewScale"]
+        self.hand_delta_penalty_scale = self.cfg["env"]["handDeltaPenaltyScale"]
         self.lifting_rew_scale = self.cfg["env"]["liftingRewScale"]
         self.lifting_bonus = self.cfg["env"]["liftingBonus"]
         self.lifting_bonus_threshold = self.cfg["env"]["liftingBonusThreshold"]
-        self.keypoint_rew_scale = self.cfg["env"]["keypointRewScale"]
+        # self.keypoint_rew_scale = self.cfg["env"]["keypointRewScale"]
+        self.juggle_penalty_scale = self.cfg["env"]["jugglePenaltyScale"]
+        self.juggle_reward_scale = self.cfg["env"]["juggleRewardScale"]
+        self.hand_height_penalty_scale = self.cfg["env"]["handHeightPenaltyScale"]
+        self.fall_penalty_scale = self.cfg["env"]["fallPenaltyScale"]
         self.kuka_actions_penalty_scale = self.cfg["env"]["kukaActionsPenaltyScale"]
         self.allegro_actions_penalty_scale = self.cfg["env"]["allegroActionsPenaltyScale"]
+
+        self.juggle_min_height = self.cfg["env"]["juggleMinHeight"]
+        self.juggle_success_height = self.cfg["env"]["juggleSuccessHeight"]
+        self.hand_max_height = self.cfg["env"]["handMaxHeight"]
 
         self.dof_params: DofParameters = DofParameters.from_cfg(self.cfg)
 
@@ -159,7 +168,7 @@ class AllegroKukaJuggleBase(VecTask):
 
         self.asset_files_dict = {
             "block": "urdf/objects/cube_multicolor.urdf",  # 0.05m box
-            "table": "urdf/table_narrow.urdf",
+            "table": "urdf/table_wide.urdf",
             "bucket": "urdf/objects/bucket.urdf",
             "lightbulb": "lightbulb/A60_E27_SI.urdf",
             "socket": "E27SocketSimple.urdf",
@@ -198,11 +207,12 @@ class AllegroKukaJuggleBase(VecTask):
         fingertip_rel_pos_size = 3 * self.num_allegro_fingertips
 
         keypoint_info_size = (self.num_keypoints * 3) * self.num_balls
-        object_scales_size = 1 * self.num_balls
+        object_scales_size = 3 * self.num_balls
         max_keypoint_dist_size = 1 * self.num_balls
         lifted_object_flag_size = 1 * self.num_balls
         progress_obs_size = 1 + 1
-        closest_fingertip_distance_size = self.num_allegro_fingertips
+        juggle_state_size = 1 * self.num_balls
+        closest_fingertip_distance_size = self.num_allegro_fingertips * self.num_balls
         reward_obs_size = 1
 
         self.full_state_size = (
@@ -215,9 +225,10 @@ class AllegroKukaJuggleBase(VecTask):
             + fingertip_rel_pos_size
             + keypoint_info_size
             + object_scales_size
-            + max_keypoint_dist_size
+            # + max_keypoint_dist_size
             + lifted_object_flag_size
             + progress_obs_size
+            + juggle_state_size
             + closest_fingertip_distance_size
             + reward_obs_size
             # + self.num_allegro_actions
@@ -247,8 +258,8 @@ class AllegroKukaJuggleBase(VecTask):
         )
 
         if self.viewer is not None:
-            cam_pos = gymapi.Vec3(10.0, 5.0, 1.0)
-            cam_target = gymapi.Vec3(6.0, 5.0, 0.0)
+            cam_pos = gymapi.Vec3(10.0, 7.0, 1.0)
+            cam_target = gymapi.Vec3(14.0, 7.0, 0.0)
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
 
         # volume to sample target position from
@@ -322,6 +333,9 @@ class AllegroKukaJuggleBase(VecTask):
         self.total_successes = 0
         self.total_resets = 0
 
+        self.juggle_state = torch.zeros(self.num_envs, self.num_balls, dtype=torch.float, device=self.device)
+        self.prev_juggle_state = torch.zeros_like(self.juggle_state)
+
         # object apply random forces parameters
         self.force_decay = to_torch(self.force_decay, dtype=torch.float, device=self.device)
         self.force_prob_range = to_torch(self.force_prob_range, dtype=torch.float, device=self.device)
@@ -350,24 +364,32 @@ class AllegroKukaJuggleBase(VecTask):
         # self.closest_keypoint_max_dist = -torch.ones(self.num_envs, dtype=torch.float, device=self.device)
 
         self.closest_fingertip_dist = -torch.ones(
-            [self.num_envs, self.num_allegro_fingertips], dtype=torch.float, device=self.device
+            [self.num_envs, self.num_balls, self.num_allegro_fingertips], dtype=torch.float, device=self.device
         )
-        self.furthest_hand_dist = -torch.ones([self.num_envs], dtype=torch.float, device=self.device)
+        self.furthest_hand_dist = -torch.ones([self.num_envs, self.num_balls], dtype=torch.float, device=self.device)
 
         self.finger_rew_coeffs = torch.ones(
-            [self.num_envs, self.num_allegro_fingertips], dtype=torch.float, device=self.device
+            [self.num_envs, self.num_balls, self.num_allegro_fingertips], dtype=torch.float, device=self.device
         )
 
         reward_keys = [
             "raw_fingertip_delta_rew",
             "raw_hand_delta_penalty",
             "raw_lifting_rew",
-            "raw_keypoint_rew",
+            # "raw_keypoint_rew",
+            "raw_juggle_penalty",
+            "raw_juggle_rew",
+            "raw_hand_height_penalty",
+            "raw_fall_penalty",
             "fingertip_delta_rew",
             "hand_delta_penalty",
             "lifting_rew",
             "lift_bonus_rew",
-            "keypoint_rew",
+            # "keypoint_rew",
+            "juggle_penalty",
+            "juggle_reward",
+            "hand_height_penalty",
+            "fall_penalty",
             "bonus_rew",
             "kuka_actions_penalty",
             "allegro_actions_penalty",
@@ -405,7 +427,7 @@ class AllegroKukaJuggleBase(VecTask):
     def _object_keypoint_offsets(self):
         raise NotImplementedError()
 
-    def _object_start_poses(self, allegro_pose, table_pose_dy, table_pose_dz, arrangement="line", spacing=0.1):
+    def _object_start_poses(self, allegro_pose, table_pose_dy, table_pose_dz, arrangement="line", spacing=0.15):
         """
         Generate a list of start poses for each ball, arranged in a specific pattern.
 
@@ -446,8 +468,8 @@ class AllegroKukaJuggleBase(VecTask):
                 pose = gymapi.Transform()
                 pose.p = gymapi.Vec3()
 
-                pose.p.x = allegro_pose.p.x
-                pose.p.y = allegro_pose.p.y + pose_dy + i * spacing
+                pose.p.x = allegro_pose.p.x - 0.1 + i * spacing
+                pose.p.y = allegro_pose.p.y + pose_dy
                 pose.p.z = allegro_pose.p.z + pose_dz
 
                 object_start_poses.append(pose)
@@ -525,6 +547,7 @@ class AllegroKukaJuggleBase(VecTask):
         pass
 
     def _extra_reset_rules(self, resets):
+        resets = torch.where((self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1), torch.ones_like(resets), resets)
         return resets
 
     def _reset_target(self, env_ids: Tensor) -> None:
@@ -675,9 +698,17 @@ class AllegroKukaJuggleBase(VecTask):
         allegro_pose.p = gymapi.Vec3(*get_axis_params(0.0, self.up_axis_idx)) + gymapi.Vec3(0.0, 0.8, 0)
         allegro_pose.r = gymapi.Quat(0, 0, 0, 1)
 
-        object_assets, object_rb_count, object_shapes_count = self._load_main_object_asset()
-        max_agg_bodies += object_rb_count
-        max_agg_shapes += object_shapes_count
+        # object_assets, object_rb_count, object_shapes_count = self._load_main_object_asset()
+        radius = [0.03]
+        ball_options = gymapi.AssetOptions()
+        ball_options.density = 200
+
+        object_assets = [self.gym.create_sphere(self.sim, radius[i], ball_options) for i in range(len(radius))]
+        object_rb_count = self.gym.get_asset_rigid_body_count(object_assets[0])
+        object_shapes_count = self.gym.get_asset_rigid_shape_count(object_assets[0])
+
+        max_agg_bodies += object_rb_count * self.num_balls
+        max_agg_shapes += object_shapes_count * self.num_balls
 
         # load auxiliary objects
         table_asset_options = gymapi.AssetOptions()
@@ -752,6 +783,8 @@ class AllegroKukaJuggleBase(VecTask):
                 object_asset = object_assets[object_asset_idx]
 
                 object_handle = self.gym.create_actor(env_ptr, object_asset, self.object_start_poses[j], f"ball_{j}", i, 0, 0)
+                self.gym.set_rigid_body_color(env_ptr, object_handle, 0, gymapi.MESH_VISUAL,
+                                              gymapi.Vec3(0.99, 0.66, 0.25))
                 object_init_state.append(
                     [
                         self.object_start_poses[j].p.x,
@@ -772,7 +805,8 @@ class AllegroKukaJuggleBase(VecTask):
                 object_idx = self.gym.get_actor_index(env_ptr, object_handle, gymapi.DOMAIN_SIM)
                 object_indices.append(object_idx)
 
-                object_scale = self.object_asset_scales[object_asset_idx]
+                # object_scale = self.object_asset_scales[object_asset_idx]
+                object_scale = [1, 1, 1]
                 object_scales.append(object_scale)
                 object_offsets = []
                 for keypoint in self.keypoints_offsets:
@@ -834,9 +868,12 @@ class AllegroKukaJuggleBase(VecTask):
 
         # again, positive is closer, negative is further away
         # here we use index of the 1st finger, when the distance is large it doesn't matter which one we use
-        hand_deltas_furthest = self.furthest_hand_dist - self.curr_fingertip_distances[:, 0]
+        fingertip_pos_rel_object_xy = self.fingertip_pos_rel_object
+        fingertip_pos_rel_object_xy[:, :, :, 2] = 0
+        fingertip_pos_rel_object_xy = torch.norm(fingertip_pos_rel_object_xy, dim=-1)
+        hand_deltas_furthest = self.furthest_hand_dist - fingertip_pos_rel_object_xy[:, :, 0]
         # update the values if finger tips got further away from the object
-        self.furthest_hand_dist = torch.maximum(self.furthest_hand_dist, self.curr_fingertip_distances[:, 0])
+        self.furthest_hand_dist = torch.maximum(self.furthest_hand_dist, (self.object_linvel[:, :, 2] < 0).float() * fingertip_pos_rel_object_xy[:, :, 0])
 
         # clip between zero and +inf to turn deltas into rewards
         fingertip_deltas = torch.clip(fingertip_deltas_closest, 0, 10)
@@ -848,16 +885,16 @@ class AllegroKukaJuggleBase(VecTask):
 
         # clip between zero and -inf to turn deltas into penalties
         hand_delta_penalty = torch.clip(hand_deltas_furthest, -10, 0)
-        hand_delta_penalty *= ~lifted_object
+        hand_delta_penalty *= ~lifted_object * (self.object_linvel[:, :, 2] < 0).float()
         # multiply by the number of fingers so two rewards are on the same scale
         hand_delta_penalty *= self.num_allegro_fingertips
 
-        return fingertip_delta_rew, hand_delta_penalty
+        return fingertip_delta_rew.sum(dim=1), hand_delta_penalty.sum(dim=1)
 
     def _lifting_reward(self) -> Tuple[Tensor, Tensor, Tensor]:
         """Reward for lifting the object off the table."""
 
-        z_lift = 0.05 + self.object_pos[:, 2] - self.object_init_state[:, 2]
+        z_lift = 0.05 + self.object_pos[:, :, 2] - self.object_init_state[:, :, 2]
         lifting_rew = torch.clip(z_lift, 0, 0.5)
 
         # this flag tells us if we lifted an object above a certain height compared to the initial position
@@ -878,7 +915,7 @@ class AllegroKukaJuggleBase(VecTask):
 
         # update the flag that describes whether we lifted an object above the table or not
         self.lifted_object = lifted_object
-        return lifting_rew, lift_bonus_rew, lifted_object
+        return lifting_rew.sum(dim=1), lift_bonus_rew.sum(dim=1), lifted_object
 
     def _keypoint_reward(self, lifted_object: Tensor) -> Tensor:
         # this is positive if we got closer, negative if we're further away
@@ -908,7 +945,7 @@ class AllegroKukaJuggleBase(VecTask):
         return -1 * kuka_actions_penalty, -1 * allegro_actions_penalty
 
     def _compute_resets(self, is_success):
-        resets = torch.where(self.object_pos[:, 2] < 0.1, torch.ones_like(self.reset_buf), self.reset_buf)  # fall
+        resets = torch.where((self.object_pos[:, :, 2] < 0.1).any(dim=1), torch.ones_like(self.reset_buf), self.reset_buf)  # fall
         if self.max_consecutive_successes > 0:
             # Reset progress buffer if max_consecutive_successes > 0
             self.progress_buf = torch.where(is_success > 0, torch.zeros_like(self.progress_buf), self.progress_buf)
@@ -923,15 +960,21 @@ class AllegroKukaJuggleBase(VecTask):
     def compute_kuka_reward(self) -> Tuple[Tensor, Tensor]:
         lifting_rew, lift_bonus_rew, lifted_object = self._lifting_reward()
         fingertip_delta_rew, hand_delta_penalty = self._distance_delta_rewards(lifted_object)
-        keypoint_rew = self._keypoint_reward(lifted_object)
+        # keypoint_rew = self._keypoint_reward(lifted_object)
+        juggle_penalty = -(self.object_pos[:, :, 2] < self.juggle_min_height).sum(dim=1).float()
+        hand_height_penalty = -(self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1).float()
+        fall_penalty = -(self.object_pos[:, :, 2] < 0.1).any(dim=1).float()
+        # juggle_penalty = juggle_penalty - 100 * (self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1) - 5 * (self.object_pos[:, :, 2] < 0.1).any(dim=1)
+        juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0)).sum(dim=1).float()
 
-        keypoint_success_tolerance = self.success_tolerance * self.keypoint_scale
+        # keypoint_success_tolerance = self.success_tolerance * self.keypoint_scale
 
         # noinspection PyTypeChecker
-        near_goal: Tensor = self.keypoints_max_dist <= keypoint_success_tolerance
-        self.near_goal_steps += near_goal
+        # near_goal: Tensor = self.keypoints_max_dist <= keypoint_success_tolerance
+        # self.near_goal_steps += near_goal
 
-        is_success = self.near_goal_steps >= self.success_steps
+        # is_success = self.near_goal_steps >= self.success_steps
+        is_success = (self.object_pos[:, :, 2] > self.juggle_success_height).sum(dim=1)
         goal_resets = is_success
         self.successes += is_success
 
@@ -940,28 +983,41 @@ class AllegroKukaJuggleBase(VecTask):
         self.rewards_episode["raw_fingertip_delta_rew"] += fingertip_delta_rew
         self.rewards_episode["raw_hand_delta_penalty"] += hand_delta_penalty
         self.rewards_episode["raw_lifting_rew"] += lifting_rew
-        self.rewards_episode["raw_keypoint_rew"] += keypoint_rew
+        self.rewards_episode["raw_juggle_penalty"] += juggle_penalty
+        self.rewards_episode["raw_juggle_rew"] += juggle_reward
+        self.rewards_episode["raw_hand_height_penalty"] += hand_height_penalty
+        self.rewards_episode["raw_fall_penalty"] += fall_penalty
+        # self.rewards_episode["raw_keypoint_rew"] += keypoint_rew
 
         fingertip_delta_rew *= self.distance_delta_rew_scale
-        hand_delta_penalty *= self.distance_delta_rew_scale * 0  # currently disabled
+        hand_delta_penalty *= self.hand_delta_penalty_scale # * 0  # currently disabled
         lifting_rew *= self.lifting_rew_scale
-        keypoint_rew *= self.keypoint_rew_scale
+        # keypoint_rew *= self.keypoint_rew_scale
+        juggle_penalty *= self.juggle_penalty_scale
+        juggle_reward *= self.juggle_reward_scale
+        hand_height_penalty *= self.hand_height_penalty_scale
+        fall_penalty *= self.fall_penalty_scale
+
 
         kuka_actions_penalty, allegro_actions_penalty = self._action_penalties()
 
         # Success bonus: orientation is within `success_tolerance` of goal orientation
         # We spread out the reward over "success_steps"
-        bonus_rew = near_goal * (self.reach_goal_bonus / self.success_steps)
+        # bonus_rew = near_goal * (self.reach_goal_bonus / self.success_steps)
 
         reward = (
             fingertip_delta_rew
             + hand_delta_penalty  # + sign here because hand_delta_penalty is negative
             + lifting_rew
             + lift_bonus_rew
-            + keypoint_rew
+            # + keypoint_rew
+            + juggle_penalty
+            + juggle_reward
+            + hand_height_penalty
+            + fall_penalty
             + kuka_actions_penalty
             + allegro_actions_penalty
-            + bonus_rew
+            # + bonus_rew
         )
 
         self.rew_buf[:] = reward
@@ -983,10 +1039,14 @@ class AllegroKukaJuggleBase(VecTask):
             (hand_delta_penalty, "hand_delta_penalty"),
             (lifting_rew, "lifting_rew"),
             (lift_bonus_rew, "lift_bonus_rew"),
-            (keypoint_rew, "keypoint_rew"),
+            # (keypoint_rew, "keypoint_rew"),
             (kuka_actions_penalty, "kuka_actions_penalty"),
             (allegro_actions_penalty, "allegro_actions_penalty"),
-            (bonus_rew, "bonus_rew"),
+            (juggle_penalty, "juggle_penalty"),
+            (juggle_reward, "juggle_reward"),
+            (hand_height_penalty, "hand_height_penalty"),
+            (fall_penalty, "fall_penalty"),
+            # (bonus_rew, "bonus_rew"),
         ]
 
         episode_cumulative = dict()
@@ -1107,14 +1167,14 @@ class AllegroKukaJuggleBase(VecTask):
 
         obj_pos_repeat = self.object_pos.unsqueeze(2).repeat(1, 1, self.num_allegro_fingertips, 1)
         self.fingertip_pos_rel_object = self.fingertip_pos_offset.unsqueeze(1) - obj_pos_repeat
-        self.curr_fingertip_distances = torch.norm(self.fingertip_pos_rel_object, dim=-1).min(dim=1)[0]
+        self.curr_fingertip_distances = torch.norm(self.fingertip_pos_rel_object, dim=-1)
 
         # when episode ends or target changes we reset this to -1, this will initialize it to the actual distance on the 1st frame of the episode
         self.closest_fingertip_dist = torch.where(
             self.closest_fingertip_dist < 0.0, self.curr_fingertip_distances, self.closest_fingertip_dist
         )
         self.furthest_hand_dist = torch.where(
-            self.furthest_hand_dist < 0.0, self.curr_fingertip_distances[:, 0], self.furthest_hand_dist
+            self.furthest_hand_dist < 0.0, self.curr_fingertip_distances[:, :, 0], self.furthest_hand_dist
         )
 
         palm_center_repeat = self.palm_center_pos.unsqueeze(1).repeat(1, self.num_allegro_fingertips, 1)
@@ -1147,6 +1207,9 @@ class AllegroKukaJuggleBase(VecTask):
         # self.closest_keypoint_max_dist = torch.where(
         #     self.closest_keypoint_max_dist < 0.0, self.keypoints_max_dist, self.closest_keypoint_max_dist
         # )
+
+        self.prev_juggle_state = self.juggle_state
+        self.juggle_state = ((self.object_pose[:, :, 2] > self.juggle_success_height).float() - (self.object_pos[:, :, 2] < self.juggle_min_height).float())
 
         if self.obs_type == "full_state":
             full_state_size, reward_obs_ofs = self.compute_full_state(self.obs_buf)
@@ -1188,8 +1251,8 @@ class AllegroKukaJuggleBase(VecTask):
         ofs += 10
 
         # object rot, linvel, ang vel
-        buf[:, ofs : ofs + 10] = self.object_state[:, 3:13]
-        ofs += 10
+        buf[:, ofs : ofs + 10 * self.num_balls] = self.object_state[:, :, 3:13].reshape(self.num_envs, -1)
+        ofs += 10 * self.num_balls
 
         # fingertip pos relative to the palm of the hand
         fingertip_rel_pos_size = 3 * self.num_allegro_fingertips
@@ -1199,40 +1262,43 @@ class AllegroKukaJuggleBase(VecTask):
         ofs += fingertip_rel_pos_size
 
         # keypoint distances relative to the palm of the hand
-        keypoint_rel_pos_size = 3 * self.num_keypoints
+        keypoint_rel_pos_size = self.num_balls * 3 * self.num_keypoints
         buf[:, ofs : ofs + keypoint_rel_pos_size] = self.keypoints_rel_palm.reshape(
             self.num_envs, keypoint_rel_pos_size
         )
         ofs += keypoint_rel_pos_size
 
         # keypoint distances relative to the goal
-        buf[:, ofs : ofs + keypoint_rel_pos_size] = self.keypoints_rel_goal.reshape(
-            self.num_envs, keypoint_rel_pos_size
-        )
-        ofs += keypoint_rel_pos_size
+        # buf[:, ofs : ofs + keypoint_rel_pos_size] = self.keypoints_rel_goal.reshape(
+        #     self.num_envs, keypoint_rel_pos_size
+        # )
+        # ofs += keypoint_rel_pos_size
 
         # object scales
-        buf[:, ofs : ofs + 3] = self.object_scales
-        ofs += 3
+        buf[:, ofs : ofs + 3 * self.num_balls] = self.object_scales.reshape(self.num_envs, -1)
+        ofs += 3 * self.num_balls
 
         # closest distance to the furthest keypoint, achieved so far in this episode
-        buf[:, ofs : ofs + 1] = self.closest_keypoint_max_dist.unsqueeze(-1)
-        ofs += 1
+        # buf[:, ofs : ofs + 1] = self.closest_keypoint_max_dist.unsqueeze(-1)
+        # ofs += 1
 
         # closest distance between a fingertip and an object achieved since last target reset
         # this should help the critic predict the anticipated fingertip reward
-        buf[:, ofs : ofs + self.num_allegro_fingertips] = self.closest_fingertip_dist
-        ofs += self.num_allegro_fingertips
+        buf[:, ofs : ofs + self.num_balls * self.num_allegro_fingertips] = self.closest_fingertip_dist.reshape(self.num_envs, -1)
+        ofs += self.num_balls * self.num_allegro_fingertips
 
         # indicates whether we already lifted the object from the table or not, should help the critic be more accurate
-        buf[:, ofs : ofs + 1] = self.lifted_object.unsqueeze(-1)
-        ofs += 1
+        buf[:, ofs : ofs + 1 * self.num_balls] = self.lifted_object.reshape(self.num_envs, -1)
+        ofs += 1 * self.num_balls
 
         # this should help the critic predict the future rewards better and anticipate the episode termination
         buf[:, ofs : ofs + 1] = torch.log(self.progress_buf / 10 + 1).unsqueeze(-1)
         ofs += 1
         buf[:, ofs : ofs + 1] = torch.log(self.successes + 1).unsqueeze(-1)
         ofs += 1
+
+        buf[:, ofs : ofs + 1 * self.num_balls] = self.juggle_state.reshape(self.num_envs, -1)
+        ofs += 1 * self.num_balls
 
         # this is where we will add the reward observation
         reward_obs_ofs = ofs
@@ -1290,6 +1356,8 @@ class AllegroKukaJuggleBase(VecTask):
         self._reset_target(env_ids)
 
         self.reset_goal_buf[env_ids] = 0
+        self.closest_fingertip_dist[env_ids] = -1
+        # self.furthest_hand_dist[env_ids] = -1
         # self.near_goal_steps[env_ids] = 0
         # self.closest_keypoint_max_dist[env_ids] = -1
 
