@@ -26,6 +26,7 @@ jugglePenaltyScale: 5.0
 juggleRewardScale: 30
 handHeightPenaltyScale: 100.0
 fallPenaltyScale: 5.0
+outOfBoundsPenaltyScale: 5.0
 
 numBalls: 1
 juggleMinHeight: 0.6

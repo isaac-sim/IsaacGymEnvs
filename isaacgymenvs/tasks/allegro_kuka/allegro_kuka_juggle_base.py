@@ -88,6 +88,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.juggle_reward_scale = self.cfg["env"]["juggleRewardScale"]
         self.hand_height_penalty_scale = self.cfg["env"]["handHeightPenaltyScale"]
         self.fall_penalty_scale = self.cfg["env"]["fallPenaltyScale"]
+        self.out_of_bounds_penalty_scale = self.cfg["env"]["outOfBoundsPenaltyScale"]
         self.kuka_actions_penalty_scale = self.cfg["env"]["kukaActionsPenaltyScale"]
         self.allegro_actions_penalty_scale = self.cfg["env"]["allegroActionsPenaltyScale"]
 
@@ -381,6 +382,7 @@ class AllegroKukaJuggleBase(VecTask):
             "raw_juggle_rew",
             "raw_hand_height_penalty",
             "raw_fall_penalty",
+            "raw_out_of_bounds_penalty",
             "fingertip_delta_rew",
             "hand_delta_penalty",
             "lifting_rew",
@@ -390,6 +392,7 @@ class AllegroKukaJuggleBase(VecTask):
             "juggle_reward",
             "hand_height_penalty",
             "fall_penalty",
+            "out_of_bounds_penalty",
             "bonus_rew",
             "kuka_actions_penalty",
             "allegro_actions_penalty",
@@ -548,6 +551,7 @@ class AllegroKukaJuggleBase(VecTask):
 
     def _extra_reset_rules(self, resets):
         resets = torch.where((self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1), torch.ones_like(resets), resets)
+        resets = torch.where((torch.abs(self.object_pos) > self.cfg["env"]["envSpacing"]).any(dim=(-1, -2)), torch.ones_like(resets), resets)
         return resets
 
     def _reset_target(self, env_ids: Tensor) -> None:
@@ -964,6 +968,7 @@ class AllegroKukaJuggleBase(VecTask):
         juggle_penalty = -(self.object_pos[:, :, 2] < self.juggle_min_height).sum(dim=1).float()
         hand_height_penalty = -(self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1).float()
         fall_penalty = -(self.object_pos[:, :, 2] < 0.1).any(dim=1).float()
+        out_of_bounds_penalty = -(torch.abs(self.object_pos) > self.cfg["env"]["envSpacing"]).any(dim=(-1, -2)).float()
         # juggle_penalty = juggle_penalty - 100 * (self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1) - 5 * (self.object_pos[:, :, 2] < 0.1).any(dim=1)
         juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0)).sum(dim=1).float()
 
@@ -987,6 +992,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.rewards_episode["raw_juggle_rew"] += juggle_reward
         self.rewards_episode["raw_hand_height_penalty"] += hand_height_penalty
         self.rewards_episode["raw_fall_penalty"] += fall_penalty
+        self.rewards_episode["out_of_bounds_penalty"] += out_of_bounds_penalty
         # self.rewards_episode["raw_keypoint_rew"] += keypoint_rew
 
         fingertip_delta_rew *= self.distance_delta_rew_scale
@@ -997,6 +1003,7 @@ class AllegroKukaJuggleBase(VecTask):
         juggle_reward *= self.juggle_reward_scale
         hand_height_penalty *= self.hand_height_penalty_scale
         fall_penalty *= self.fall_penalty_scale
+        out_of_bounds_penalty *= self.out_of_bounds_penalty_scale
 
 
         kuka_actions_penalty, allegro_actions_penalty = self._action_penalties()
@@ -1015,6 +1022,7 @@ class AllegroKukaJuggleBase(VecTask):
             + juggle_reward
             + hand_height_penalty
             + fall_penalty
+            + out_of_bounds_penalty
             + kuka_actions_penalty
             + allegro_actions_penalty
             # + bonus_rew
@@ -1046,6 +1054,7 @@ class AllegroKukaJuggleBase(VecTask):
             (juggle_reward, "juggle_reward"),
             (hand_height_penalty, "hand_height_penalty"),
             (fall_penalty, "fall_penalty"),
+            (out_of_bounds_penalty, "out_of_bounds_penalty"),
             # (bonus_rew, "bonus_rew"),
         ]
 

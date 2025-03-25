@@ -16,6 +16,7 @@ task.env.jugglePenaltyScale: "mutate_float"
 task.env.juggleRewardScale: "mutate_float"
 task.env.handHeightPenaltyScale: "mutate_float"
 task.env.fallPenaltyScale: "mutate_float"
+task.env.outOfBoundsPenaltyScale: "mutate_float"
 
 # Could be additionally mutated
 #train.params.config.learning_rate: "mutate_float"
