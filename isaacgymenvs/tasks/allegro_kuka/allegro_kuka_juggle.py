@@ -118,7 +118,7 @@ class AllegroKukaJuggle(AllegroKukaJuggleBase):
     #     )
 
     def _true_objective(self) -> Tensor:
-        true_objective = tolerance_successes_objective(
-            self.success_tolerance, self.initial_tolerance, self.target_tolerance, self.successes
-        )
-        return true_objective
+        # true_objective = tolerance_successes_objective(
+        #     self.success_tolerance, self.initial_tolerance, self.target_tolerance, self.successes
+        # )
+        return self.successes
