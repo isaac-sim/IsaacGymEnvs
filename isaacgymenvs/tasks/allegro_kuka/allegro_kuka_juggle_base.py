@@ -992,7 +992,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.rewards_episode["raw_juggle_rew"] += juggle_reward
         self.rewards_episode["raw_hand_height_penalty"] += hand_height_penalty
         self.rewards_episode["raw_fall_penalty"] += fall_penalty
-        self.rewards_episode["out_of_bounds_penalty"] += out_of_bounds_penalty
+        self.rewards_episode["raw_out_of_bounds_penalty"] += out_of_bounds_penalty
         # self.rewards_episode["raw_keypoint_rew"] += keypoint_rew
 
         fingertip_delta_rew *= self.distance_delta_rew_scale
