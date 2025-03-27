@@ -91,7 +91,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.out_of_bounds_penalty_scale = self.cfg["env"]["outOfBoundsPenaltyScale"]
         self.kuka_actions_penalty_scale = self.cfg["env"]["kukaActionsPenaltyScale"]
         self.allegro_actions_penalty_scale = self.cfg["env"]["allegroActionsPenaltyScale"]
-        self.downward_toss_reward_scale = self.cfg["env"]["downwardTossRewardScale"]
+        # self.downward_toss_reward_scale = self.cfg["env"]["downwardTossRewardScale"]
 
         self.juggle_min_height = self.cfg["env"]["juggleMinHeight"]
         self.juggle_success_height = self.cfg["env"]["juggleSuccessHeight"]
