@@ -91,6 +91,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.out_of_bounds_penalty_scale = self.cfg["env"]["outOfBoundsPenaltyScale"]
         self.kuka_actions_penalty_scale = self.cfg["env"]["kukaActionsPenaltyScale"]
         self.allegro_actions_penalty_scale = self.cfg["env"]["allegroActionsPenaltyScale"]
+        self.downward_toss_reward_scale = self.cfg["env"]["downwardTossRewardScale"]
 
         self.juggle_min_height = self.cfg["env"]["juggleMinHeight"]
         self.juggle_success_height = self.cfg["env"]["juggleSuccessHeight"]
@@ -971,6 +972,13 @@ class AllegroKukaJuggleBase(VecTask):
         out_of_bounds_penalty = -(torch.abs(self.object_pos) > self.cfg["env"]["envSpacing"]).any(dim=(-1, -2)).float()
         # juggle_penalty = juggle_penalty - 100 * (self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1) - 5 * (self.object_pos[:, :, 2] < 0.1).any(dim=1)
         juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0)).sum(dim=1).float()
+        
+    
+        #downward toss
+        is_downward_toss = ( (self.object_pos[:, :, 2] < self.cfg["env"]["envSpacing"]) & (self.object_pos[:, :, 2] > self.fall_dist) & (self.object_linvel[:, :, 2] <= 0))
+        downward_toss_reward = is_downward_toss.sum(dim=1).float()
+
+
 
         # keypoint_success_tolerance = self.success_tolerance * self.keypoint_scale
 
@@ -994,6 +1002,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.rewards_episode["raw_fall_penalty"] += fall_penalty
         self.rewards_episode["raw_out_of_bounds_penalty"] += out_of_bounds_penalty
         # self.rewards_episode["raw_keypoint_rew"] += keypoint_rew
+        self.rewards_episode["raw_downward_toss_reward"] += downward_toss_reward #downard toss
 
         fingertip_delta_rew *= self.distance_delta_rew_scale
         hand_delta_penalty *= self.hand_delta_penalty_scale # * 0  # currently disabled
@@ -1004,7 +1013,7 @@ class AllegroKukaJuggleBase(VecTask):
         hand_height_penalty *= self.hand_height_penalty_scale
         fall_penalty *= self.fall_penalty_scale
         out_of_bounds_penalty *= self.out_of_bounds_penalty_scale
-
+        downward_toss_reward *= self.downward_toss_reward_scale #downward toss
 
         kuka_actions_penalty, allegro_actions_penalty = self._action_penalties()
 
@@ -1025,6 +1034,7 @@ class AllegroKukaJuggleBase(VecTask):
             + out_of_bounds_penalty
             + kuka_actions_penalty
             + allegro_actions_penalty
+            + downward_toss_reward
             # + bonus_rew
         )
 
@@ -1055,6 +1065,7 @@ class AllegroKukaJuggleBase(VecTask):
             (hand_height_penalty, "hand_height_penalty"),
             (fall_penalty, "fall_penalty"),
             (out_of_bounds_penalty, "out_of_bounds_penalty"),
+            (downward_toss_reward, "downward_toss_reward"), #downward toss
             # (bonus_rew, "bonus_rew"),
         ]
 
