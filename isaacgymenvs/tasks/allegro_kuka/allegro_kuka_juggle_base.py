@@ -91,11 +91,13 @@ class AllegroKukaJuggleBase(VecTask):
         self.out_of_bounds_penalty_scale = self.cfg["env"]["outOfBoundsPenaltyScale"]
         self.kuka_actions_penalty_scale = self.cfg["env"]["kukaActionsPenaltyScale"]
         self.allegro_actions_penalty_scale = self.cfg["env"]["allegroActionsPenaltyScale"]
+        self.has_thrown_reward_scale = self.cfg["env"]["hasThrownRewardScale"]
         # self.downward_toss_reward_scale = self.cfg["env"]["downwardTossRewardScale"]
 
         self.juggle_min_height = self.cfg["env"]["juggleMinHeight"]
         self.juggle_success_height = self.cfg["env"]["juggleSuccessHeight"]
         self.hand_max_height = self.cfg["env"]["handMaxHeight"]
+        self.has_thrown_threshold = self.cfg["env"]["hasThrownThreshold"]
 
         self.dof_params: DofParameters = DofParameters.from_cfg(self.cfg)
 
@@ -216,6 +218,7 @@ class AllegroKukaJuggleBase(VecTask):
         juggle_state_size = 1 * self.num_balls
         closest_fingertip_distance_size = self.num_allegro_fingertips * self.num_balls
         reward_obs_size = 1
+        has_thrown_size = 1 * self.num_balls
 
         self.full_state_size = (
             num_dof_pos
@@ -234,6 +237,7 @@ class AllegroKukaJuggleBase(VecTask):
             + closest_fingertip_distance_size
             + reward_obs_size
             # + self.num_allegro_actions
+            + has_thrown_size
         )
 
         num_states = self.full_state_size
@@ -338,6 +342,9 @@ class AllegroKukaJuggleBase(VecTask):
         self.juggle_state = torch.zeros(self.num_envs, self.num_balls, dtype=torch.float, device=self.device)
         self.prev_juggle_state = torch.zeros_like(self.juggle_state)
 
+        self.has_thrown  = torch.zeros(self.num_envs, self.num_balls, dtype=torch.float, device=self.device)
+        self.prev_has_thrown = torch.zeros_like(self.has_thrown)
+
         # object apply random forces parameters
         self.force_decay = to_torch(self.force_decay, dtype=torch.float, device=self.device)
         self.force_prob_range = to_torch(self.force_prob_range, dtype=torch.float, device=self.device)
@@ -397,6 +404,7 @@ class AllegroKukaJuggleBase(VecTask):
             "bonus_rew",
             "kuka_actions_penalty",
             "allegro_actions_penalty",
+            "has_thrown_reward",
         ]
 
         self.rewards_episode = {
@@ -980,8 +988,11 @@ make it so that juggling is positive velociy and rising edge
         # juggle_penalty = juggle_penalty - 100 * (self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1) - 5 * (self.object_pos[:, :, 2] < 0.1).any(dim=1)
         # juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0)).sum(dim=1).float()
         
-        #one time upwards toss reward
-        juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0) & (self.object_linvel[:, :, 2] > 0)).sum(dim=1).float()
+        #one time toss reward
+        juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0)).sum(dim=1).float()
+
+        #new throw signal (positive velocity + change in delta)
+        has_thrown_reward = ((self.has_thrown == 1) & (self.prev_has_thrown == 0)).sum(dim=1).float()
 
 
         # downward toss reward
@@ -1010,7 +1021,7 @@ make it so that juggling is positive velociy and rising edge
         self.rewards_episode["raw_fall_penalty"] += fall_penalty
         self.rewards_episode["raw_out_of_bounds_penalty"] += out_of_bounds_penalty
         # self.rewards_episode["raw_keypoint_rew"] += keypoint_rew
-        
+        self.rewards_episode["raw_has_thrown_reward"] += has_thrown_reward
 
         fingertip_delta_rew *= self.distance_delta_rew_scale
         hand_delta_penalty *= self.hand_delta_penalty_scale # * 0  # currently disabled
@@ -1021,7 +1032,7 @@ make it so that juggling is positive velociy and rising edge
         hand_height_penalty *= self.hand_height_penalty_scale
         fall_penalty *= self.fall_penalty_scale
         out_of_bounds_penalty *= self.out_of_bounds_penalty_scale
-        
+        has_thrown_reward *= self.has_thrown_reward_scale
 
         kuka_actions_penalty, allegro_actions_penalty = self._action_penalties()
 
@@ -1042,7 +1053,7 @@ make it so that juggling is positive velociy and rising edge
             + out_of_bounds_penalty
             + kuka_actions_penalty
             + allegro_actions_penalty
-            
+            + has_thrown_reward
             # + bonus_rew
         )
 
@@ -1073,6 +1084,7 @@ make it so that juggling is positive velociy and rising edge
             (hand_height_penalty, "hand_height_penalty"),
             (fall_penalty, "fall_penalty"),
             (out_of_bounds_penalty, "out_of_bounds_penalty"),
+            (has_thrown_reward, "has_thrown_reward"),
             # (bonus_rew, "bonus_rew"),
         ]
 
@@ -1238,6 +1250,10 @@ make it so that juggling is positive velociy and rising edge
         self.prev_juggle_state = self.juggle_state
         self.juggle_state = ((self.object_pose[:, :, 2] > self.juggle_success_height).float() - (self.object_pos[:, :, 2] < self.juggle_min_height).float())
 
+        self.prev_has_thrown = self.has_thrown
+        self.has_thrown = (((self.fingertip_pos_rel_object[:, :, 0]).float() > self.has_thrown_threshold) & (self.object_linvel[:, :, 2] >= 0)).float() 
+
+
         if self.obs_type == "full_state":
             full_state_size, reward_obs_ofs = self.compute_full_state(self.obs_buf)
             assert (
@@ -1327,9 +1343,18 @@ make it so that juggling is positive velociy and rising edge
         buf[:, ofs : ofs + 1 * self.num_balls] = self.juggle_state.reshape(self.num_envs, -1)
         ofs += 1 * self.num_balls
 
+        # has thrown and has thrown previous into the observation buffer
+        buf[:, ofs : ofs + 1 * self.num_balls] = self.has_thrown.reshape(self.num_envs, -1)
+        ofs += 1 * self.num_balls
+
+        buf[:, ofs : ofs + 1 * self.num_balls] = self.prev_has_thrown.reshape(self.num_envs, -1)
+        ofs += 1 * self.num_balls
+
         # this is where we will add the reward observation
         reward_obs_ofs = ofs
         ofs += 1
+
+
 
         assert ofs == self.full_state_size
         return ofs, reward_obs_ofs
