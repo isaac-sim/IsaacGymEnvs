@@ -218,7 +218,7 @@ class AllegroKukaJuggleBase(VecTask):
         juggle_state_size = 1 * self.num_balls
         closest_fingertip_distance_size = self.num_allegro_fingertips * self.num_balls
         reward_obs_size = 1
-        has_thrown_size = 1 * self.num_balls
+        has_thrown_size = 2 * 1 * self.num_balls #has thrown and prev has thrown
 
         self.full_state_size = (
             num_dof_pos
