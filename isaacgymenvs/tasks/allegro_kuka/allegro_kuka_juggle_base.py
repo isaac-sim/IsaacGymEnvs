@@ -970,11 +970,7 @@ class AllegroKukaJuggleBase(VecTask):
     def _true_objective(self):
         raise NotImplementedError()
 
-'''
-What do we have to fix:
-make it so that juggling is positive velociy and rising edge
 
-'''
 
 
     def compute_kuka_reward(self) -> Tuple[Tensor, Tensor]:
