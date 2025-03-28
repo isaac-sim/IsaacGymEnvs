@@ -1336,6 +1336,9 @@ class AllegroKukaJuggleBase(VecTask):
         buf[:, ofs : ofs + 1] = torch.log(self.successes + 1).unsqueeze(-1)
         ofs += 1
 
+
+        print(">>>>>>>>>>>> juggling state shape: ", self.juggle_state.shape)
+
         buf[:, ofs : ofs + 1 * self.num_balls] = self.juggle_state.reshape(self.num_envs, -1)
         ofs += 1 * self.num_balls
 
