@@ -404,7 +404,7 @@ class AllegroKukaJuggleBase(VecTask):
             "bonus_rew",
             "kuka_actions_penalty",
             "allegro_actions_penalty",
-            "has_thrown_reward",
+            "raw_has_thrown_reward",
         ]
 
         self.rewards_episode = {
