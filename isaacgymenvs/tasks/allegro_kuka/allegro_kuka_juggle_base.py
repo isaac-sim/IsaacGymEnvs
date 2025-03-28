@@ -962,20 +962,30 @@ class AllegroKukaJuggleBase(VecTask):
     def _true_objective(self):
         raise NotImplementedError()
 
+'''
+What do we have to fix:
+make it so that juggling is positive velociy and rising edge
+
+'''
+
+
     def compute_kuka_reward(self) -> Tuple[Tensor, Tensor]:
         lifting_rew, lift_bonus_rew, lifted_object = self._lifting_reward()
-        fingertip_delta_rew, hand_delta_penalty = self._distance_delta_rewards(lifted_object)
+        fingertip_delta_rew, hand_delta_penalty = self._distance_delta_rewards(lifted_object) #delta x y
         # keypoint_rew = self._keypoint_reward(lifted_object)
         juggle_penalty = -(self.object_pos[:, :, 2] < self.juggle_min_height).sum(dim=1).float()
-        hand_height_penalty = -(self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1).float()
+        hand_height_penalty = -(self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1).float() 
         fall_penalty = -(self.object_pos[:, :, 2] < 0.1).any(dim=1).float()
         out_of_bounds_penalty = -(torch.abs(self.object_pos) > self.cfg["env"]["envSpacing"]).any(dim=(-1, -2)).float()
         # juggle_penalty = juggle_penalty - 100 * (self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1) - 5 * (self.object_pos[:, :, 2] < 0.1).any(dim=1)
         # juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0)).sum(dim=1).float()
         
-        
+        #one time upwards toss reward
+        juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0) & (self.object_linvel[:, :, 2] > 0)).sum(dim=1).float()
+
+
         # downward toss reward
-        juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1) & (self.object_linvel[:, :, 2] <= 0)).sum(dim=1).float() 
+        # juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1) & (self.object_linvel[:, :, 2] <= 0)).sum(dim=1).float() 
 
 
         # keypoint_success_tolerance = self.success_tolerance * self.keypoint_scale
