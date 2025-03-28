@@ -985,7 +985,7 @@ class AllegroKukaJuggleBase(VecTask):
         # juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0)).sum(dim=1).float()
         
         #one time toss reward
-        juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0)).sum(dim=1).float()
+        juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1)).sum(dim=1).float()
 
         #new throw signal (positive velocity + change in delta)
         has_thrown_reward = ((self.has_thrown == 1) & (self.prev_has_thrown == 0)).sum(dim=1).float()
