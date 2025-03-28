@@ -1340,6 +1340,10 @@ class AllegroKukaJuggleBase(VecTask):
         ofs += 1 * self.num_balls
 
         # has thrown and has thrown previous into the observation buffer
+        print(">>>>>>>>>>>> has thrown shape: " self.has_thrown.shape)
+        print(">>>>>>>>>>>> prev has thrown shape: " self.prev_has_thrown.shape)
+        
+        
         buf[:, ofs : ofs + 1 * self.num_balls] = self.has_thrown.reshape(self.num_envs, -1)
         ofs += 1 * self.num_balls
 
