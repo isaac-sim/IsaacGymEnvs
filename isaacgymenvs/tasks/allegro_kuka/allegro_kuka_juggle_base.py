@@ -1247,6 +1247,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.juggle_state = ((self.object_pose[:, :, 2] > self.juggle_success_height).float() - (self.object_pos[:, :, 2] < self.juggle_min_height).float())
 
         self.prev_has_thrown = self.has_thrown
+        breakpoint()
         self.has_thrown = (((self.fingertip_pos_rel_object[:, :, 0]).float() > self.has_thrown_threshold) & (self.object_linvel[:, :, 2] >= 0)).float() 
 
 
