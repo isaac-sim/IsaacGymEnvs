@@ -35,6 +35,7 @@ from copy import copy
 from os.path import join
 from typing import List, Tuple
 
+import torch
 from isaacgym import gymapi, gymtorch, gymutil
 from torch import Tensor
 
@@ -218,7 +219,7 @@ class AllegroKukaJuggleBase(VecTask):
         juggle_state_size = 1 * self.num_balls
         closest_fingertip_distance_size = self.num_allegro_fingertips * self.num_balls
         reward_obs_size = 1
-        has_thrown_size = 2 * 1 * self.num_balls #has thrown and prev has thrown
+        has_thrown_size = 1 * self.num_balls #has thrown and prev has thrown
 
         self.full_state_size = (
             num_dof_pos
@@ -343,7 +344,8 @@ class AllegroKukaJuggleBase(VecTask):
         self.prev_juggle_state = torch.zeros_like(self.juggle_state)
 
         self.has_thrown  = torch.zeros(self.num_envs, self.num_balls, dtype=torch.float, device=self.device)
-        self.prev_has_thrown = torch.zeros_like(self.has_thrown)
+        self.prev_beyond_throw_thresh = torch.zeros_like(self.has_thrown).bool()
+        self.beyond_throw_thresh = torch.zeros_like(self.has_thrown).bool()
 
         # object apply random forces parameters
         self.force_decay = to_torch(self.force_decay, dtype=torch.float, device=self.device)
@@ -1004,7 +1006,7 @@ class AllegroKukaJuggleBase(VecTask):
         juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1)).sum(dim=1).float()
 
         #new throw signal (positive velocity + change in delta)
-        has_thrown_reward = ((self.has_thrown == 1) & (self.prev_has_thrown == 0)).sum(dim=1).float()
+        has_thrown_reward = self.has_thrown.sum(dim=1).float()
 
 
         # downward toss reward
@@ -1262,12 +1264,11 @@ class AllegroKukaJuggleBase(VecTask):
         self.prev_juggle_state = self.juggle_state
         self.juggle_state = ((self.object_pose[:, :, 2] > self.juggle_success_height).float() - (self.object_pos[:, :, 2] < self.juggle_min_height).float())
 
-
-        self.prev_has_thrown = self.has_thrown
-        # breakpoint()
-        # self.has_thrown = (((self.fingertip_pos_rel_object[:, :, 0]).float() > self.has_thrown_threshold) & (self.object_linvel[:, :, 2] >= 0)).float() 
-        self.has_thrown = ((-self.fingertip_pos_rel_object[:, :, :, 2] > self.has_thrown_threshold).all(dim=-1) & (self.object_linvel[:, :, 2] > 0.05)).float()
-        # breakpoint()
+        self.prev_beyond_throw_thresh = self.beyond_throw_thresh
+        self.beyond_throw_thresh = (-self.fingertip_pos_rel_object[:, :, :, 2] > self.has_thrown_threshold).all(dim=-1)
+        # self.has_thrown = (((self.fingertip_pos_rel_object[:, :, 0]).float() > self.has_thrown_threshold) & (self.object_linvel[:, :, 2] >= 0)).float()
+        self.has_thrown = (~self.prev_beyond_throw_thresh & self.beyond_throw_thresh & (
+                    self.object_linvel[:, :, 2] > 0.05)).float()
 
         if self.obs_type == "full_state":
             full_state_size, reward_obs_ofs = self.compute_full_state(self.obs_buf)
@@ -1369,8 +1370,8 @@ class AllegroKukaJuggleBase(VecTask):
         buf[:, ofs : ofs + 1 * self.num_balls] = self.has_thrown.reshape(self.num_envs, -1)
         ofs += 1 * self.num_balls
 
-        buf[:, ofs : ofs + 1 * self.num_balls] = self.prev_has_thrown.reshape(self.num_envs, -1)
-        ofs += 1 * self.num_balls
+        # buf[:, ofs : ofs + 1 * self.num_balls] = self.prev_has_thrown.reshape(self.num_envs, -1)
+        # ofs += 1 * self.num_balls
 
         # this is where we will add the reward observation
         reward_obs_ofs = ofs
