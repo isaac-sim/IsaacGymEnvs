@@ -977,7 +977,21 @@ class AllegroKukaJuggleBase(VecTask):
 
     def compute_kuka_reward(self) -> Tuple[Tensor, Tensor]:
         lifting_rew, lift_bonus_rew, lifted_object = self._lifting_reward()
-        fingertip_delta_rew, hand_delta_penalty = self._distance_delta_rewards(lifted_object) #delta x y
+        # fingertip_delta_rew, hand_delta_penalty = self._distance_delta_rewards(lifted_object) #delta x y
+        fingertip_delta_rew, _ = self._distance_delta_rewards(lifted_object) #delta x y
+        
+
+        # fingertip_pos_rel_object
+        fingertip_pos_rel_object_xy = self.fingertip_pos_rel_object
+        fingertip_pos_rel_object_xy[:, :, :, 2] = 0
+        # fingertip_pos_rel_object_xy = torch.norm(fingertip_pos_rel_object_xy, dim=-1)
+
+        fingertip_pos_rel_object_xy_prev = self.fingertip_pos_rel_object_prev
+        fingertip_pos_rel_object_xy_prev[:, :, :, 2] = 0
+        # fingertip_pos_rel_object_xy_prev = torch.norm(fingertip_pos_rel_object_xy_prev, dim=-1)
+
+        hand_delta_penalty = torch.norm(fingertip_pos_rel_object_xy - fingertip_pos_rel_object_xy_prev, dim=-1)
+
         # keypoint_rew = self._keypoint_reward(lifted_object)
         juggle_penalty = -(self.object_pos[:, :, 2] < self.juggle_min_height).sum(dim=1).float()
         hand_height_penalty = -(self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1).float() 
@@ -1248,6 +1262,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.prev_juggle_state = self.juggle_state
         self.juggle_state = ((self.object_pose[:, :, 2] > self.juggle_success_height).float() - (self.object_pos[:, :, 2] < self.juggle_min_height).float())
 
+
         self.prev_has_thrown = self.has_thrown
         # breakpoint()
         # self.has_thrown = (((self.fingertip_pos_rel_object[:, :, 0]).float() > self.has_thrown_threshold) & (self.object_linvel[:, :, 2] >= 0)).float() 
@@ -1341,14 +1356,14 @@ class AllegroKukaJuggleBase(VecTask):
         ofs += 1
 
 
-        print(">>>>>>>>>>>> juggling state shape: ", self.juggle_state.shape)
+        # print(">>>>>>>>>>>> juggling state shape: ", self.juggle_state.shape)
 
         buf[:, ofs : ofs + 1 * self.num_balls] = self.juggle_state.reshape(self.num_envs, -1)
         ofs += 1 * self.num_balls
 
         # has thrown and has thrown previous into the observation buffer
-        print(">>>>>>>>>>>> has thrown shape: ", self.has_thrown.shape)
-        print(">>>>>>>>>>>> prev has thrown shape: ", self.prev_has_thrown.shape)
+        # print(">>>>>>>>>>>> has thrown shape: ", self.has_thrown.shape)
+        # print(">>>>>>>>>>>> prev has thrown shape: ", self.prev_has_thrown.shape)
         
         
         buf[:, ofs : ofs + 1 * self.num_balls] = self.has_thrown.reshape(self.num_envs, -1)
@@ -1415,7 +1430,8 @@ class AllegroKukaJuggleBase(VecTask):
         self._reset_target(env_ids)
 
         self.reset_goal_buf[env_ids] = 0
-        self.closest_fingertip_dist[env_ids] = -1
+        # self.closest_fingertip_dist[env_ids] = -1
+
         # self.furthest_hand_dist[env_ids] = -1
         # self.near_goal_steps[env_ids] = 0
         # self.closest_keypoint_max_dist[env_ids] = -1
