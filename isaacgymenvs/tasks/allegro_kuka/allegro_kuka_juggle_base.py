@@ -391,6 +391,7 @@ class AllegroKukaJuggleBase(VecTask):
             "raw_hand_height_penalty",
             "raw_fall_penalty",
             "raw_out_of_bounds_penalty",
+            "raw_has_thrown_reward",
             "fingertip_delta_rew",
             "hand_delta_penalty",
             "lifting_rew",
@@ -404,7 +405,8 @@ class AllegroKukaJuggleBase(VecTask):
             "bonus_rew",
             "kuka_actions_penalty",
             "allegro_actions_penalty",
-            "raw_has_thrown_reward",
+            "has_thrown_reward",
+            
         ]
 
         self.rewards_episode = {
