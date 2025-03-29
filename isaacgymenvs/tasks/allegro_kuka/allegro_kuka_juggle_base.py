@@ -990,7 +990,7 @@ class AllegroKukaJuggleBase(VecTask):
         fingertip_pos_rel_object_xy_prev[:, :, :, 2] = 0
         # fingertip_pos_rel_object_xy_prev = torch.norm(fingertip_pos_rel_object_xy_prev, dim=-1)
 
-        hand_delta_penalty = torch.norm(fingertip_pos_rel_object_xy[:, :, 0] - fingertip_pos_rel_object_xy_prev[:, :, 0], dim=-1).sum(dim=-1)
+        hand_delta_penalty = (torch.norm(fingertip_pos_rel_object_xy[:, :, 0], dim=-1) - torch.norm(fingertip_pos_rel_object_xy_prev[:, :, 0], dim=-1)).sum(dim=-1)
 
         # keypoint_rew = self._keypoint_reward(lifted_object)
         juggle_penalty = -(self.object_pos[:, :, 2] < self.juggle_min_height).sum(dim=1).float()
