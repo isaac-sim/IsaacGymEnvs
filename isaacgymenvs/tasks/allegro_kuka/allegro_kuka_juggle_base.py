@@ -975,7 +975,7 @@ class AllegroKukaJuggleBase(VecTask):
         return -1 * kuka_actions_penalty, -1 * allegro_actions_penalty
 
     def _compute_resets(self, is_success):
-        resets = torch.where((self.object_pos[:, :, 2] < self.fall_thresholds).any(dim=1), torch.ones_like(self.reset_buf), self.reset_buf)  # fall
+        resets = torch.where((self.object_pos[:, :, 2] < self.fall_thresholds[:, None]).any(dim=1), torch.ones_like(self.reset_buf), self.reset_buf)  # fall
         if self.max_consecutive_successes > 0:
             # Reset progress buffer if max_consecutive_successes > 0
             self.progress_buf = torch.where(is_success > 0, torch.zeros_like(self.progress_buf), self.progress_buf)
@@ -1011,7 +1011,7 @@ class AllegroKukaJuggleBase(VecTask):
         # keypoint_rew = self._keypoint_reward(lifted_object)
         juggle_penalty = -(self.object_pos[:, :, 2] < self.juggle_min_height).sum(dim=1).float()
         hand_height_penalty = -(self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1).float() 
-        fall_penalty = -(self.object_pos[:, :, 2] < self.fall_thresholds).any(dim=1).float()
+        fall_penalty = -(self.object_pos[:, :, 2] < self.fall_thresholds[:, None]).any(dim=1).float()
         out_of_bounds_penalty = -(torch.abs(self.object_pos) > self.cfg["env"]["envSpacing"]).any(dim=(-1, -2)).float()
         # juggle_penalty = juggle_penalty - 100 * (self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1) - 5 * (self.object_pos[:, :, 2] < 0.1).any(dim=1)
         # juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0)).sum(dim=1).float()
