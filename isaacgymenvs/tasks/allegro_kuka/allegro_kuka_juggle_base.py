@@ -1038,7 +1038,7 @@ class AllegroKukaJuggleBase(VecTask):
         # Step 5: Sum along the last dimension
         catching_reward = final_clamped_diff.sum(dim=-1)
         print("Catching Reward:\n", catching_reward[0])
-        self.best_catching_velocity = torch.clamp(torch.max(self.object_linvel[:, :, 2], dim=-1)[0], -5.0, 0.05)
+        self.best_catching_velocity = torch.clamp(torch.maximum(self.best_catching_velocity, self.object_linvel[:, :, 2]), -5.0, 0.05)
 
         print("-" * 40)
 
