@@ -93,6 +93,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.kuka_actions_penalty_scale = self.cfg["env"]["kukaActionsPenaltyScale"]
         self.allegro_actions_penalty_scale = self.cfg["env"]["allegroActionsPenaltyScale"]
         self.has_thrown_reward_scale = self.cfg["env"]["hasThrownRewardScale"]
+        self.catching_reward_scale = self.cfg["env"]["catchingRewardScale"]
         # self.downward_toss_reward_scale = self.cfg["env"]["downwardTossRewardScale"]
 
         self.juggle_min_height = self.cfg["env"]["juggleMinHeight"]
@@ -347,6 +348,10 @@ class AllegroKukaJuggleBase(VecTask):
         self.prev_beyond_throw_thresh = torch.zeros_like(self.has_thrown).bool()
         self.beyond_throw_thresh = torch.zeros_like(self.has_thrown).bool()
 
+        self.best_catching_velocity = torch.ones(self.num_envs, self.num_balls, dtype=torch.float, device=self.device) * 0.05
+
+        self.fall_thresholds = torch.ones(self.num_envs, dtype=torch.float, device=self.device) * 0.1
+
         # object apply random forces parameters
         self.force_decay = to_torch(self.force_decay, dtype=torch.float, device=self.device)
         self.force_prob_range = to_torch(self.force_prob_range, dtype=torch.float, device=self.device)
@@ -394,6 +399,7 @@ class AllegroKukaJuggleBase(VecTask):
             "raw_fall_penalty",
             "raw_out_of_bounds_penalty",
             "raw_has_thrown_reward",
+            "raw_catching_reward",
             "fingertip_delta_rew",
             "hand_delta_penalty",
             "lifting_rew",
@@ -408,6 +414,7 @@ class AllegroKukaJuggleBase(VecTask):
             "kuka_actions_penalty",
             "allegro_actions_penalty",
             "has_thrown_reward",
+            "catching_reward",
             
         ]
 
@@ -962,7 +969,7 @@ class AllegroKukaJuggleBase(VecTask):
         return -1 * kuka_actions_penalty, -1 * allegro_actions_penalty
 
     def _compute_resets(self, is_success):
-        resets = torch.where((self.object_pos[:, :, 2] < 0.1).any(dim=1), torch.ones_like(self.reset_buf), self.reset_buf)  # fall
+        resets = torch.where((self.object_pos[:, :, 2] < self.fall_thresholds).any(dim=1), torch.ones_like(self.reset_buf), self.reset_buf)  # fall
         if self.max_consecutive_successes > 0:
             # Reset progress buffer if max_consecutive_successes > 0
             self.progress_buf = torch.where(is_success > 0, torch.zeros_like(self.progress_buf), self.progress_buf)
@@ -997,17 +1004,21 @@ class AllegroKukaJuggleBase(VecTask):
         # keypoint_rew = self._keypoint_reward(lifted_object)
         juggle_penalty = -(self.object_pos[:, :, 2] < self.juggle_min_height).sum(dim=1).float()
         hand_height_penalty = -(self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1).float() 
-        fall_penalty = -(self.object_pos[:, :, 2] < 0.1).any(dim=1).float()
+        fall_penalty = -(self.object_pos[:, :, 2] < self.fall_thresholds).any(dim=1).float()
         out_of_bounds_penalty = -(torch.abs(self.object_pos) > self.cfg["env"]["envSpacing"]).any(dim=(-1, -2)).float()
         # juggle_penalty = juggle_penalty - 100 * (self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1) - 5 * (self.object_pos[:, :, 2] < 0.1).any(dim=1)
         # juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0)).sum(dim=1).float()
         
         #one time toss reward
         juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1)).sum(dim=1).float()
+        self.fall_thresholds = torch.where(((self.juggle_state == 0) & (self.prev_juggle_state == 1)).any(dim=-1), torch.ones_like(self.fall_thresholds) * 0.4, self.fall_thresholds)
+        self.best_catching_velocity = torch.where(((self.juggle_state == 0) & (self.prev_juggle_state == 1)).any(dim=-1), torch.ones_like(self.best_catching_velocity) * -5.0, self.best_catching_velocity)
 
         #new throw signal (positive velocity + change in delta)
         has_thrown_reward = self.has_thrown.sum(dim=1).float()
 
+        catching_reward = torch.clamp(torch.clamp(self.object_linvel[:, :, 2], -5.0, 0.05) - self.best_catching_velocity, 0.0, 10.0).sum(dim=-1)
+        self.best_catching_velocity = torch.clamp(torch.max(self.object_linvel[:, :, 2], dim=-1)[0], -5.0, 0.05)
 
         # downward toss reward
         # juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1) & (self.object_linvel[:, :, 2] <= 0)).sum(dim=1).float() 
@@ -1036,6 +1047,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.rewards_episode["raw_out_of_bounds_penalty"] += out_of_bounds_penalty
         # self.rewards_episode["raw_keypoint_rew"] += keypoint_rew
         self.rewards_episode["raw_has_thrown_reward"] += has_thrown_reward
+        self.rewards_episode["raw_catching_reward"] += catching_reward
 
         fingertip_delta_rew *= self.distance_delta_rew_scale
         hand_delta_penalty *= self.hand_delta_penalty_scale # * 0  # currently disabled
@@ -1047,6 +1059,7 @@ class AllegroKukaJuggleBase(VecTask):
         fall_penalty *= self.fall_penalty_scale
         out_of_bounds_penalty *= self.out_of_bounds_penalty_scale
         has_thrown_reward *= self.has_thrown_reward_scale
+        catching_reward *= self.catching_reward_scale
 
         kuka_actions_penalty, allegro_actions_penalty = self._action_penalties()
 
@@ -1069,6 +1082,7 @@ class AllegroKukaJuggleBase(VecTask):
             + allegro_actions_penalty
             + has_thrown_reward
             # + bonus_rew
+            + catching_reward
         )
 
         self.rew_buf[:] = reward
@@ -1100,6 +1114,7 @@ class AllegroKukaJuggleBase(VecTask):
             (out_of_bounds_penalty, "out_of_bounds_penalty"),
             (has_thrown_reward, "has_thrown_reward"),
             # (bonus_rew, "bonus_rew"),
+            (catching_reward, "catching_reward")
         ]
 
         episode_cumulative = dict()
