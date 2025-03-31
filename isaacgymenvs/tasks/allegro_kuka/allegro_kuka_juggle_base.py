@@ -221,6 +221,8 @@ class AllegroKukaJuggleBase(VecTask):
         closest_fingertip_distance_size = self.num_allegro_fingertips * self.num_balls
         reward_obs_size = 1
         has_thrown_size = 1 * self.num_balls #has thrown and prev has thrown
+        hand_delta_size = 1 * self.num_balls
+        best_catching_velocity_size = 1 * self.num_balls
 
         self.full_state_size = (
             num_dof_pos
@@ -240,6 +242,8 @@ class AllegroKukaJuggleBase(VecTask):
             + reward_obs_size
             # + self.num_allegro_actions
             + has_thrown_size
+            + hand_delta_size
+            + best_catching_velocity_size
         )
 
         num_states = self.full_state_size
@@ -343,6 +347,8 @@ class AllegroKukaJuggleBase(VecTask):
 
         self.juggle_state = torch.zeros(self.num_envs, self.num_balls, dtype=torch.float, device=self.device)
         self.prev_juggle_state = torch.zeros_like(self.juggle_state)
+
+        self.hand_delta = torch.zeros(self.num_envs, self.num_balls, dtype=torch.float, device=self.device)
 
         self.has_thrown  = torch.zeros(self.num_envs, self.num_balls, dtype=torch.float, device=self.device)
         self.prev_beyond_throw_thresh = torch.zeros_like(self.has_thrown).bool()
@@ -999,7 +1005,8 @@ class AllegroKukaJuggleBase(VecTask):
         fingertip_pos_rel_object_xy_prev[:, :, :, 2] = 0
         # fingertip_pos_rel_object_xy_prev = torch.norm(fingertip_pos_rel_object_xy_prev, dim=-1)
 
-        hand_delta_penalty = (torch.norm(fingertip_pos_rel_object_xy_prev, dim=-1) - torch.norm(fingertip_pos_rel_object_xy, dim=-1)).mean(dim=-1).sum(dim=-1)
+        self.hand_delta = (torch.norm(fingertip_pos_rel_object_xy_prev, dim=-1) - torch.norm(fingertip_pos_rel_object_xy, dim=-1)).mean(dim=-1)
+        hand_delta_penalty = self.hand_delta.sum(dim=-1)
 
         # keypoint_rew = self._keypoint_reward(lifted_object)
         juggle_penalty = -(self.object_pos[:, :, 2] < self.juggle_min_height).sum(dim=1).float()
@@ -1405,6 +1412,12 @@ class AllegroKukaJuggleBase(VecTask):
         
         
         buf[:, ofs : ofs + 1 * self.num_balls] = self.has_thrown.reshape(self.num_envs, -1)
+        ofs += 1 * self.num_balls
+
+        buf[:, ofs : ofs + 1 * self.num_balls] = self.hand_delta.reshape(self.num_envs, -1)
+        ofs += 1 * self.num_balls
+
+        buf[:, ofs : ofs + 1 * self.num_balls] = self.best_catching_velocity.reshape(self.num_envs, -1)
         ofs += 1 * self.num_balls
 
         # buf[:, ofs : ofs + 1 * self.num_balls] = self.prev_has_thrown.reshape(self.num_envs, -1)
