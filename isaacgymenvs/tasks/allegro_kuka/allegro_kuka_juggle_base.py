@@ -1446,7 +1446,7 @@ class AllegroKukaJuggleBase(VecTask):
         self._reset_target(env_ids)
 
         self.reset_goal_buf[env_ids] = 0
-        self.closest_fingertip_dist[env_ids] = -1
+        # self.closest_fingertip_dist[env_ids] = -1
 
         # self.furthest_hand_dist[env_ids] = -1
         # self.near_goal_steps[env_ids] = 0
