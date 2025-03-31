@@ -1017,8 +1017,30 @@ class AllegroKukaJuggleBase(VecTask):
         #new throw signal (positive velocity + change in delta)
         has_thrown_reward = self.has_thrown.sum(dim=1).float()
 
-        catching_reward = torch.clamp(torch.clamp(self.object_linvel[:, :, 2], -5.0, 0.05) - self.best_catching_velocity, 0.0, 10.0).sum(dim=-1)
+        # Step 1: Extract the z-component of the object's linear velocity
+        z_velocity = self.object_linvel[:, :, 2]
+        print("Z Velocity:\n", z_velocity[0, 0])
+
+        # Step 2: Clamp z_velocity between -5.0 and 0.05
+        clamped_velocity = torch.clamp(z_velocity, -5.0, 0.05)
+        print("Clamped Z Velocity (-5.0, 0.05):\n", clamped_velocity[0, 0])
+
+        print("Best Catching Velocity: ", self.best_catching_velocity[0, 0])
+
+        # Step 3: Subtract best_catching_velocity
+        velocity_diff = clamped_velocity - self.best_catching_velocity
+        print("Velocity Difference (clamped - best_catching_velocity):\n", velocity_diff[0, 0])
+
+        # Step 4: Clamp the difference between 0.0 and 10.0
+        final_clamped_diff = torch.clamp(velocity_diff, 0.0, 10.0)
+        print("Final Clamped Difference (0.0, 10.0):\n", final_clamped_diff[0, 0])
+
+        # Step 5: Sum along the last dimension
+        catching_reward = final_clamped_diff.sum(dim=-1)
+        print("Catching Reward:\n", catching_reward[0, 0])
         self.best_catching_velocity = torch.clamp(torch.max(self.object_linvel[:, :, 2], dim=-1)[0], -5.0, 0.05)
+
+        print("-" * 40)
 
         # downward toss reward
         # juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1) & (self.object_linvel[:, :, 2] <= 0)).sum(dim=1).float() 
