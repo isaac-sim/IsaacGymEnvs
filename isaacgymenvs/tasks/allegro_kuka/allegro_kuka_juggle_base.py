@@ -1012,7 +1012,7 @@ class AllegroKukaJuggleBase(VecTask):
         #one time toss reward
         juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1)).sum(dim=1).float()
         self.fall_thresholds = torch.where(((self.juggle_state == 0) & (self.prev_juggle_state == 1)).any(dim=-1), torch.ones_like(self.fall_thresholds) * 0.4, self.fall_thresholds)
-        self.best_catching_velocity = torch.where(((self.juggle_state == 0) & (self.prev_juggle_state == 1)).any(dim=-1), torch.ones_like(self.best_catching_velocity) * -5.0, self.best_catching_velocity)
+        self.best_catching_velocity = torch.where(((self.juggle_state == 0) & (self.prev_juggle_state == 1)), torch.ones_like(self.best_catching_velocity) * -5.0, self.best_catching_velocity)
 
         #new throw signal (positive velocity + change in delta)
         has_thrown_reward = self.has_thrown.sum(dim=1).float()
