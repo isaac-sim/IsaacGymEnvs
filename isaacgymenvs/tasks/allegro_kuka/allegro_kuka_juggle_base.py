@@ -223,6 +223,7 @@ class AllegroKukaJuggleBase(VecTask):
         has_thrown_size = 1 * self.num_balls #has thrown and prev has thrown
         hand_delta_size = 1 * self.num_balls
         best_catching_velocity_size = 1 * self.num_balls
+        best_lifting_height_size = 1 * self.num_balls
 
         self.full_state_size = (
             num_dof_pos
@@ -244,6 +245,7 @@ class AllegroKukaJuggleBase(VecTask):
             + has_thrown_size
             + hand_delta_size
             + best_catching_velocity_size
+            + best_lifting_height_size
         )
 
         num_states = self.full_state_size
@@ -355,6 +357,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.beyond_throw_thresh = torch.zeros_like(self.has_thrown).bool()
 
         self.best_catching_velocity = torch.ones(self.num_envs, self.num_balls, dtype=torch.float, device=self.device) * 0.05
+        self.best_lifting_height = torch.ones(self.num_envs, self.num_balls, dtype=torch.float, device=self.device) * -1.0
 
         self.fall_thresholds = torch.ones(self.num_envs, dtype=torch.float, device=self.device) * 0.1
 
@@ -924,11 +927,13 @@ class AllegroKukaJuggleBase(VecTask):
     def _lifting_reward(self) -> Tuple[Tensor, Tensor, Tensor]:
         """Reward for lifting the object off the table."""
 
-        z_lift = 0.05 + self.object_pos[:, :, 2] - self.object_init_state[:, :, 2]
-        lifting_rew = torch.clip(z_lift, 0, 0.5)
+        obj_height = torch.clip(self.object_pos[:, :, 2], 0.0, self.lifting_bonus_threshold)
+        lifting_rew = torch.clip(obj_height - self.best_lifting_height, 0.0)
+        self.best_lifting_height = torch.clip(torch.maximum(torch.ones_like(self.best_lifting_height) * self.best_lifting_height, self.object_pos[:, :, 2]), max=self.lifting_bonus_threshold)
+        # lifting_rew = torch.clip(z_lift, 0, 0.5)
 
         # this flag tells us if we lifted an object above a certain height compared to the initial position
-        lifted_object = (z_lift > self.lifting_bonus_threshold) | self.lifted_object
+        lifted_object = (self.object_pos[:, :, 2] > self.lifting_bonus_threshold) | self.lifted_object
 
         # Since we stop rewarding the agent for height after the object is lifted, we should give it large positive reward
         # to compensate for "lost" opportunity to get more lifting reward for sitting just below the threshold.
@@ -945,6 +950,7 @@ class AllegroKukaJuggleBase(VecTask):
 
         # update the flag that describes whether we lifted an object above the table or not
         self.lifted_object = lifted_object
+        print(f"Lifting Reward: {lifting_rew[0, 0]}")
         return lifting_rew.sum(dim=1), lift_bonus_rew.sum(dim=1), lifted_object
 
     def _keypoint_reward(self, lifted_object: Tensor) -> Tensor:
@@ -1026,28 +1032,28 @@ class AllegroKukaJuggleBase(VecTask):
 
         # Step 1: Extract the z-component of the object's linear velocity
         z_velocity = self.object_linvel[:, :, 2]
-        print("Z Velocity:\n", z_velocity[0, 0])
+        # print("Z Velocity:\n", z_velocity[0, 0])
 
         # Step 2: Clamp z_velocity between -5.0 and 0.05
         clamped_velocity = torch.clamp(z_velocity, -5.0, 0.05)
-        print("Clamped Z Velocity (-5.0, 0.05):\n", clamped_velocity[0, 0])
+        # print("Clamped Z Velocity (-5.0, 0.05):\n", clamped_velocity[0, 0])
 
-        print("Best Catching Velocity: ", self.best_catching_velocity[0, 0])
+        # print("Best Catching Velocity: ", self.best_catching_velocity[0, 0])
 
         # Step 3: Subtract best_catching_velocity
         velocity_diff = clamped_velocity - self.best_catching_velocity
-        print("Velocity Difference (clamped - best_catching_velocity):\n", velocity_diff[0, 0])
+        # print("Velocity Difference (clamped - best_catching_velocity):\n", velocity_diff[0, 0])
 
         # Step 4: Clamp the difference between 0.0 and 10.0
         final_clamped_diff = torch.clamp(velocity_diff, 0.0, 10.0)
-        print("Final Clamped Difference (0.0, 10.0):\n", final_clamped_diff[0, 0])
+        # print("Final Clamped Difference (0.0, 10.0):\n", final_clamped_diff[0, 0])
 
         # Step 5: Sum along the last dimension
         catching_reward = final_clamped_diff.sum(dim=-1)
-        print("Catching Reward:\n", catching_reward[0])
+        # print("Catching Reward:\n", catching_reward[0])
         self.best_catching_velocity = torch.clamp(torch.maximum(self.best_catching_velocity, self.object_linvel[:, :, 2]), -5.0, 0.05)
 
-        print("-" * 40)
+        # print("-" * 40)
 
         # downward toss reward
         # juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1) & (self.object_linvel[:, :, 2] <= 0)).sum(dim=1).float() 
@@ -1274,6 +1280,10 @@ class AllegroKukaJuggleBase(VecTask):
             self.furthest_hand_dist < 0.0, self.curr_fingertip_distances[:, :, 0], self.furthest_hand_dist
         )
 
+        self.best_lifting_height = torch.where(
+            self.best_lifting_height < 0.0, self.object_init_state[:, :, 2], self.best_lifting_height
+        )
+
         palm_center_repeat = self.palm_center_pos.unsqueeze(1).repeat(1, self.num_allegro_fingertips, 1)
         self.fingertip_pos_rel_palm = self.fingertip_pos_offset - palm_center_repeat
 
@@ -1418,6 +1428,9 @@ class AllegroKukaJuggleBase(VecTask):
         ofs += 1 * self.num_balls
 
         buf[:, ofs : ofs + 1 * self.num_balls] = self.best_catching_velocity.reshape(self.num_envs, -1)
+        ofs += 1 * self.num_balls
+
+        buf[:, ofs : ofs + 1 * self.num_balls] = self.best_lifting_height.reshape(self.num_envs, -1)
         ofs += 1 * self.num_balls
 
         # buf[:, ofs : ofs + 1 * self.num_balls] = self.prev_has_thrown.reshape(self.num_envs, -1)
@@ -1632,6 +1645,7 @@ class AllegroKukaJuggleBase(VecTask):
 
         self.closest_fingertip_dist[env_ids] = -1
         self.furthest_hand_dist[env_ids] = -1
+        self.best_lifting_height[env_ids] = -1
 
         # self.near_goal_steps[env_ids] = 0
 
