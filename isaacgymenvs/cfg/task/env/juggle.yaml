@@ -34,7 +34,7 @@ upwardHandRewardScale: 50.0
 numBalls: 1
 juggleMinHeight: 0.6
 juggleSuccessHeight: 1.3
-handMaxHeight: 1.1
+handMaxHeight: 0.9
 envSpacing: 1.5
 
 hasThrownThreshold: 0.3 #for thrown signal
