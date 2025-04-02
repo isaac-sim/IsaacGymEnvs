@@ -94,6 +94,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.allegro_actions_penalty_scale = self.cfg["env"]["allegroActionsPenaltyScale"]
         self.has_thrown_reward_scale = self.cfg["env"]["hasThrownRewardScale"]
         self.catching_reward_scale = self.cfg["env"]["catchingRewardScale"]
+        self.upward_hand_reward_scale = self.cfg["env"]["upwardHandRewardScale"]
         # self.downward_toss_reward_scale = self.cfg["env"]["downwardTossRewardScale"]
 
         self.juggle_min_height = self.cfg["env"]["juggleMinHeight"]
@@ -409,6 +410,7 @@ class AllegroKukaJuggleBase(VecTask):
             "raw_out_of_bounds_penalty",
             "raw_has_thrown_reward",
             "raw_catching_reward",
+            "raw_upward_hand_reward",
             "fingertip_delta_rew",
             "hand_delta_penalty",
             "lifting_rew",
@@ -424,7 +426,7 @@ class AllegroKukaJuggleBase(VecTask):
             "allegro_actions_penalty",
             "has_thrown_reward",
             "catching_reward",
-            
+            "upward_hand_reward",
         ]
 
         self.rewards_episode = {
@@ -1030,6 +1032,9 @@ class AllegroKukaJuggleBase(VecTask):
         #new throw signal (positive velocity + change in delta)
         has_thrown_reward = self.has_thrown.sum(dim=1).float()
 
+        # Upward hand reward
+        upward_hand_reward = (self.has_thrown.any(dim=-1)[:, None] & (self.fingertip_pos[:, :, 2] > self.palm_center_pos[:, 2][:, None])).float().sum(dim=-1)
+
         # Step 1: Extract the z-component of the object's linear velocity
         z_velocity = self.object_linvel[:, :, 2]
         # print("Z Velocity:\n", z_velocity[0, 0])
@@ -1083,6 +1088,7 @@ class AllegroKukaJuggleBase(VecTask):
         # self.rewards_episode["raw_keypoint_rew"] += keypoint_rew
         self.rewards_episode["raw_has_thrown_reward"] += has_thrown_reward
         self.rewards_episode["raw_catching_reward"] += catching_reward
+        self.rewards_episode["upward_hand_reward"] += upward_hand_reward
 
         fingertip_delta_rew *= self.distance_delta_rew_scale
         hand_delta_penalty *= self.hand_delta_penalty_scale # * 0  # currently disabled
@@ -1095,6 +1101,7 @@ class AllegroKukaJuggleBase(VecTask):
         out_of_bounds_penalty *= self.out_of_bounds_penalty_scale
         has_thrown_reward *= self.has_thrown_reward_scale
         catching_reward *= self.catching_reward_scale
+        upward_hand_reward *= self.upward_hand_reward_scale
 
         kuka_actions_penalty, allegro_actions_penalty = self._action_penalties()
 
@@ -1118,6 +1125,7 @@ class AllegroKukaJuggleBase(VecTask):
             + has_thrown_reward
             # + bonus_rew
             + catching_reward
+            + upward_hand_reward
         )
 
         self.rew_buf[:] = reward
@@ -1149,7 +1157,8 @@ class AllegroKukaJuggleBase(VecTask):
             (out_of_bounds_penalty, "out_of_bounds_penalty"),
             (has_thrown_reward, "has_thrown_reward"),
             # (bonus_rew, "bonus_rew"),
-            (catching_reward, "catching_reward")
+            (catching_reward, "catching_reward"),
+            (upward_hand_reward, "upward_hand_reward"),
         ]
 
         episode_cumulative = dict()
