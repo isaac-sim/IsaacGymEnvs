@@ -929,13 +929,13 @@ class AllegroKukaJuggleBase(VecTask):
     def _lifting_reward(self) -> Tuple[Tensor, Tensor, Tensor]:
         """Reward for lifting the object off the table."""
 
-        obj_height = torch.clip(self.object_pos[:, :, 2], 0.0, self.lifting_bonus_threshold)
+        obj_height = torch.clip(self.object_pos[:, :, 2], torch.zeros_like(self.object_pos[:, :, 2]), self.object_init_state[:, :, 2] + self.lifting_bonus_threshold)
         lifting_rew = torch.clip(obj_height - self.best_lifting_height, 0.0)
-        self.best_lifting_height = torch.clip(torch.maximum(torch.ones_like(self.best_lifting_height) * self.best_lifting_height, self.object_pos[:, :, 2]), max=self.lifting_bonus_threshold)
+        self.best_lifting_height = torch.clip(torch.maximum(self.best_lifting_height, self.object_pos[:, :, 2]), max=self.object_init_state[:, :, 2] + self.lifting_bonus_threshold)
         # lifting_rew = torch.clip(z_lift, 0, 0.5)
 
         # this flag tells us if we lifted an object above a certain height compared to the initial position
-        lifted_object = (self.object_pos[:, :, 2] > self.lifting_bonus_threshold) | self.lifted_object
+        lifted_object = (0.05 + self.object_pos[:, :, 2] - self.object_init_state[:, :, 2] > self.lifting_bonus_threshold) | self.lifted_object
 
         # Since we stop rewarding the agent for height after the object is lifted, we should give it large positive reward
         # to compensate for "lost" opportunity to get more lifting reward for sitting just below the threshold.
@@ -952,7 +952,7 @@ class AllegroKukaJuggleBase(VecTask):
 
         # update the flag that describes whether we lifted an object above the table or not
         self.lifted_object = lifted_object
-        print(f"Lifting Reward: {lifting_rew[0, 0]}")
+        print(f"Lifting Reward: {lifting_rew[0, 0]}, {lift_bonus_rew[0, 0]}")
         return lifting_rew.sum(dim=1), lift_bonus_rew.sum(dim=1), lifted_object
 
     def _keypoint_reward(self, lifted_object: Tensor) -> Tensor:
