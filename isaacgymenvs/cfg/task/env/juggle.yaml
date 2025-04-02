@@ -13,7 +13,7 @@ withBigBalls: False
 
 objectType: "ball"
 
-liftingRewScale: 20.0
+liftingRewScale: 200.0
 liftingBonus: 300.0
 liftingBonusThreshold: 0.15  # when the object is lifted this distance (in meters) above the table, the agent gets the lifting bonus
 distanceDeltaRewScale: 50.0

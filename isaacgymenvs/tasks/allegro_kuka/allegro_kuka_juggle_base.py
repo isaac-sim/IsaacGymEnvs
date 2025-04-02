@@ -357,7 +357,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.prev_beyond_throw_thresh = torch.zeros_like(self.has_thrown).bool()
         self.beyond_throw_thresh = torch.zeros_like(self.has_thrown).bool()
 
-        self.best_catching_velocity = torch.ones(self.num_envs, self.num_balls, dtype=torch.float, device=self.device) * 0.05
+        self.best_catching_velocity = torch.ones(self.num_envs, self.num_balls, dtype=torch.float, device=self.device) * -5.0
         self.best_lifting_height = torch.ones(self.num_envs, self.num_balls, dtype=torch.float, device=self.device) * -1.0
 
         self.fall_thresholds = torch.ones(self.num_envs, dtype=torch.float, device=self.device) * 0.1
@@ -1654,6 +1654,7 @@ class AllegroKukaJuggleBase(VecTask):
 
         self.closest_fingertip_dist[env_ids] = -1
         self.furthest_hand_dist[env_ids] = -1
+        self.best_catching_velocity[env_ids] = -5.0
         self.best_lifting_height[env_ids] = -1
 
         # self.near_goal_steps[env_ids] = 0
