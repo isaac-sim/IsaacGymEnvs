@@ -952,7 +952,7 @@ class AllegroKukaJuggleBase(VecTask):
 
         # update the flag that describes whether we lifted an object above the table or not
         self.lifted_object = lifted_object
-        print(f"Lifting Reward: {lifting_rew[0, 0]}, {lift_bonus_rew[0, 0]}")
+        # print(f"Lifting Reward: {lifting_rew[0, 0]}, {lift_bonus_rew[0, 0]}")
         return lifting_rew.sum(dim=1), lift_bonus_rew.sum(dim=1), lifted_object
 
     def _keypoint_reward(self, lifted_object: Tensor) -> Tensor:
