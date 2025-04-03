@@ -1,7 +1,7 @@
 subtask: "juggle"
 
 #evalStats: True  # extra evaluation-time statistics
-episodeLength: 600
+episodeLength: 300
 
 forceScale: 0.0  # random forces don't allow us to throw precisely so we turn them off
 
