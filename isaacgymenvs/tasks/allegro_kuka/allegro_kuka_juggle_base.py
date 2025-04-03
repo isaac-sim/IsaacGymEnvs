@@ -582,7 +582,9 @@ class AllegroKukaJuggleBase(VecTask):
 
     def _extra_reset_rules(self, resets):
         resets = torch.where((self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1), torch.ones_like(resets), resets)
+        print(f"Resets Due to Max Height: {(self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1).sum()}")
         resets = torch.where((torch.abs(self.object_pos) > self.cfg["env"]["envSpacing"]).any(dim=(-1, -2)), torch.ones_like(resets), resets)
+        print(f"Resets Due to Out of Bounds: {(torch.abs(self.object_pos) > self.cfg['env']['envSpacing']).any(dim=(-1, -2)).sum()}")
         return resets
 
     def _reset_target(self, env_ids: Tensor) -> None:
@@ -903,9 +905,9 @@ class AllegroKukaJuggleBase(VecTask):
 
         # again, positive is closer, negative is further away
         # here we use index of the 1st finger, when the distance is large it doesn't matter which one we use
-        hand_deltas_furthest = self.furthest_hand_dist - self.curr_fingertip_distances[:, 0]
+        hand_deltas_furthest = self.furthest_hand_dist - self.curr_fingertip_distances[:, :, 0]
         # update the values if finger tips got further away from the object
-        self.furthest_hand_dist = torch.maximum(self.furthest_hand_dist, self.curr_fingertip_distances[:, 0])
+        self.furthest_hand_dist = torch.maximum(self.furthest_hand_dist, self.curr_fingertip_distances[:, :, 0])
 
         # clip between zero and +inf to turn deltas into rewards
         fingertip_deltas = torch.clip(fingertip_deltas_closest, 0, 10)
@@ -978,12 +980,16 @@ class AllegroKukaJuggleBase(VecTask):
 
     def _compute_resets(self, is_success):
         resets = torch.where((self.object_pos[:, :, 2] < self.fall_thresholds[:, None]).any(dim=1), torch.ones_like(self.reset_buf), self.reset_buf)  # fall
+        print(f"Resets Due to Falling: {(self.object_pos[:, :, 2] < self.fall_thresholds[:, None]).any(dim=1).sum()}")
         if self.max_consecutive_successes > 0:
             # Reset progress buffer if max_consecutive_successes > 0
             self.progress_buf = torch.where(is_success > 0, torch.zeros_like(self.progress_buf), self.progress_buf)
             resets = torch.where(self.successes >= self.max_consecutive_successes, torch.ones_like(resets), resets)
+            print(f"Resets Due to Success: {(self.successes >= self.max_consecutive_successes).sum()}")
         resets = torch.where(self.progress_buf >= self.max_episode_length - 1, torch.ones_like(resets), resets)
+        print(f"Resets Due to Progress Buf: {(self.progress_buf >= self.max_episode_length).sum()}")
         resets = self._extra_reset_rules(resets)
+        print("=" * 40)
         return resets
 
     def _true_objective(self):
@@ -1020,7 +1026,7 @@ class AllegroKukaJuggleBase(VecTask):
         
         #one time toss reward
         juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1)).sum(dim=1).float()
-        self.fall_thresholds = torch.where(((self.juggle_state == 0) & (self.prev_juggle_state == 1)).any(dim=-1), torch.ones_like(self.fall_thresholds) * 0.63, self.fall_thresholds)
+        self.fall_thresholds = torch.where(((self.juggle_state == 0) & (self.prev_juggle_state == 1)).any(dim=-1), torch.ones_like(self.fall_thresholds) * 0.4, self.fall_thresholds)
         self.best_catching_velocity = torch.where(((self.juggle_state == 0) & (self.prev_juggle_state == 1)), torch.ones_like(self.best_catching_velocity) * -2.0, self.best_catching_velocity)
 
         #new throw signal (positive velocity + change in delta)
@@ -1034,7 +1040,7 @@ class AllegroKukaJuggleBase(VecTask):
         # print("Z Velocity:\n", z_velocity[0, 0])
 
         # Step 2: Clamp z_velocity between -5.0 and 0.05
-        clamped_velocity = torch.clamp(z_velocity, -5.0, 0.05)
+        clamped_velocity = torch.clamp(z_velocity, -2.0, 0.15)
         # print("Clamped Z Velocity (-5.0, 0.05):\n", clamped_velocity[0, 0])
 
         # print("Best Catching Velocity: ", self.best_catching_velocity[0, 0])
@@ -1050,7 +1056,7 @@ class AllegroKukaJuggleBase(VecTask):
         # Step 5: Sum along the last dimension
         catching_reward = final_clamped_diff.sum(dim=-1)
         # print("Catching Reward:\n", catching_reward[0])
-        self.best_catching_velocity = torch.clamp(torch.maximum(self.best_catching_velocity, self.object_linvel[:, :, 2]), -2.0, 0.05)
+        self.best_catching_velocity = torch.clamp(torch.maximum(self.best_catching_velocity, self.object_linvel[:, :, 2]), -2.0, 0.15)
 
         # print("-" * 40)
 
@@ -1648,6 +1654,7 @@ class AllegroKukaJuggleBase(VecTask):
 
         self.closest_fingertip_dist[env_ids] = -1
         self.furthest_hand_dist[env_ids] = -1
+        self.fall_thresholds[env_ids] = 0.1
 
         # self.near_goal_steps[env_ids] = 0
 
