@@ -21,7 +21,7 @@ reachGoalBonus: 1000.0
 kukaActionsPenaltyScale: 0.003
 allegroActionsPenaltyScale: 0.0003
 
-handDeltaPenaltyScale: 0.0
+handDeltaPenaltyScale: 20.0
 jugglePenaltyScale: 0.0 #5.0 #removing this term for now (p_1)
 juggleRewardScale: 30.0
 handHeightPenaltyScale: 100.0
@@ -29,7 +29,7 @@ fallPenaltyScale: 5.0
 outOfBoundsPenaltyScale: 15.0
 hasThrownRewardScale: 20.0 #TODO: return back to reorder
 catchingRewardScale: 50.0
-upwardHandRewardScale: 50.0
+upwardHandRewardScale: 0.0
 
 numBalls: 1
 juggleMinHeight: 0.6
