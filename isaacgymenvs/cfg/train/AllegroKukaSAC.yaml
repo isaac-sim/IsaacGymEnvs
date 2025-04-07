@@ -22,10 +22,10 @@ params:
     log_std_bounds: [-5, 2]
 
   load_checkpoint: False
-  load_path: nn/Ant.pth
+  load_path: nn/AllegroKuka.pth
 
   config:
-    name: ${resolve_default:AntSAC,${....experiment}}
+    name: ${resolve_default:AllegroKukaSAC,${....experiment}}
     env_name: rlgpu
     multi_gpu: ${....multi_gpu}
     normalize_input: True
