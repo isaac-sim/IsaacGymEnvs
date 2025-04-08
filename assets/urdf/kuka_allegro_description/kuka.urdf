@@ -248,8 +248,8 @@
     <child link="iiwa7_link_7"/>
     <origin rpy="-1.57079632679 3.14159265359 0" xyz="0 0.081 0.06070"/>
     <axis xyz="0 0 1"/>
-    <limit effort="300" lower="-6.28319" upper="6.28319" velocity="10"/>
-    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-6.27" soft_upper_limit="6.27"/>
+    <limit effort="300" lower="-6.27" upper="6.27" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-6.26" soft_upper_limit="6.26"/>
     <dynamics damping="0.5"/>
   </joint>
   <link name="iiwa7_link_7">

@@ -1,0 +1,231 @@
+defaults:
+  - _self_
+  - env: reorientation
+
+name: AllegroKuka
+
+physics_engine: ${..physics_engine}
+
+env:
+  subtask: ""
+
+  # if given, will override the device setting in gym.
+  numEnvs: ${resolve_default:8192,${...num_envs}}
+
+  envSpacing: 1.2
+  episodeLength: 600
+  enableDebugVis: False
+  evalStats: False  # extra evaluation-time statistics
+
+  clampAbsObservations: 10.0
+
+  stiffnessScale: 1.0
+  forceLimitScale: 1.0
+  useRelativeControl: False
+  dofSpeedScale: 10.0
+  actionsMovingAverage: 1.0
+  controlFrequencyInv: 1 # 60 Hz
+
+  resetPositionNoiseX: 0.1
+  resetPositionNoiseY: 0.1
+  resetPositionNoiseZ: 0.02
+  resetRotationNoise: 1.0
+  resetDofPosRandomIntervalFingers: 0.1
+  resetDofPosRandomIntervalArm: 0.1
+  resetDofVelRandomInterval: 0.5
+
+  # Random forces applied to the object
+  forceScale: 2.0
+  forceProbRange: [0.001, 0.1]
+  forceDecay: 0.99
+  forceDecayInterval: 0.08
+
+  liftingRewScale: 20.0
+  liftingBonus: 300.0
+  liftingBonusThreshold: 0.15  # when the object is lifted this distance (in meters) above the table, the agent gets the lifting bonus
+  keypointRewScale: 200.0
+  distanceDeltaRewScale: 50.0
+  reachGoalBonus: 1000.0
+  kukaActionsPenaltyScale: 0.003
+  allegroActionsPenaltyScale: 0.0003
+  fallDistance: 0.24
+  fallPenalty: 0.0
+
+  privilegedActions: False
+  privilegedActionsTorque: 0.02
+
+  # Physics v1, pretty much default settings we used from the start of the project
+  dofFriction: -1.0  # negative values are ignored and the default friction from URDF file is used
+
+  # gain of PD controller (?)
+  allegroStiffness: 40.0
+  kukaStiffness: 40.0
+
+  allegroEffort: 0.35  # this is what was used in sim-to-real experiment. Motor torque in Newton*meters
+  kukaEffort: [300, 300, 300, 300, 300, 300, 300]  # see Physics v2
+
+  allegroDamping: 5.0
+  kukaDamping: 5.0
+
+  allegroArmature: 0
+  kukaArmature: 0
+
+  keypointScale: 1.5
+  objectBaseSize: 0.05
+
+  randomizeObjectDimensions: True
+  withSmallCuboids: True
+  withBigCuboids: True
+  withSticks: True
+
+  objectType: "block"
+  observationType: "full_state"
+  successTolerance: 0.075
+  targetSuccessTolerance: 0.01
+  toleranceCurriculumIncrement: 0.9  # multiplicative
+  toleranceCurriculumInterval: 3000  # in env steps across all agents, with 8192 this is 3000 * 8192 = 24.6M env steps
+  maxConsecutiveSuccesses: 50
+  successSteps: 1  # how many steps we should be within the tolerance before we declare a success
+
+  saveStates: False
+  saveStatesFile: "rootTensorsDofStates.bin"
+
+  loadInitialStates: False
+  loadStatesFile: "rootTensorsDofStates.bin"
+
+  asset:
+    # Whis was the original kuka_allegro asset.
+    # This URDF has some issues, i.e. weights of fingers are too high and the mass of the Allegro hand is too
+    # high in general. But in turn this leads to smoother movements and better looking behaviors.
+    # Additionally, collision shapes of fingertips are more primitive (just rough convex hulls), which
+    # gives a bit more FPS.
+    kukaAllegro: "urdf/kuka_allegro_description/kuka_allegro_touch_sensor.urdf"
+
+    # This is the URDF which has more accurate collision shapes and weights.
+    # I believe since the hand is much lighter, the policy has more control over the movement of both arm and
+    # fingers which leads to faster training (better sample efficiency). But overall the resulting
+    # behaviors look too fast and a bit unrealistic.
+    # For sim-to-real experiments this needs to be addressed. Overall, v2 is a "Better" URDF, and it should not
+    # lead to behaviors that would be worse for sim-to-real experiments. Most likely the problem is elsewhere,
+    # for example the max torques might be too high, or the armature of the motors is too low.
+    # The exercise of finding the right URDF and other parameters is left for the sim-to-real part of the project.
+    # kukaAllegro: "urdf/kuka_allegro_description/kuka_allegro_v2.urdf"
+
+    assetFileNameBlock: "urdf/objects/cube_multicolor.urdf"
+
+task:
+  randomize: False
+  randomization_params:
+    frequency: 480   # Define how many simulation steps between generating new randomizations
+
+    observations:
+      range: [0, .002] # range for the white noise
+      range_correlated: [0, .001 ] # range for correlated noise, refreshed with freq `frequency`
+      operation: "additive"
+      distribution: "gaussian"
+      schedule: "linear"   # "constant" is to turn on noise after `schedule_steps` num steps
+      schedule_steps: 40000
+    actions:
+      range: [0., .05]
+      range_correlated: [0, .015] # range for correlated noise, refreshed with freq `frequency`
+      operation: "additive"
+      distribution: "gaussian"
+      schedule: "linear"  # "linear" will linearly interpolate between no rand and max rand
+      schedule_steps: 40000
+
+    sim_params:
+    gravity:
+      range: [0, 0.4]
+      operation: "additive"
+      distribution: "gaussian"
+      schedule: "linear"  # "linear" will linearly interpolate between no rand and max rand
+      schedule_steps: 40000
+
+    actor_params:
+      allegro:
+        color: True
+        dof_properties:
+          damping:
+            range: [0.3, 3.0]
+            operation: "scaling"
+            distribution: "loguniform"
+            schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            schedule_steps: 30000
+          stiffness:
+            range: [0.75, 1.5]
+            operation: "scaling"
+            distribution: "loguniform"
+            schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            schedule_steps: 30000
+          lower:
+            range: [0, 0.01]
+            operation: "additive"
+            distribution: "gaussian"
+            schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            schedule_steps: 30000
+          upper:
+            range: [0, 0.01]
+            operation: "additive"
+            distribution: "gaussian"
+            schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            schedule_steps: 30000
+        rigid_body_properties:
+          mass:
+            range: [0.5, 1.5]
+            operation: "scaling"
+            distribution: "uniform"
+            schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            schedule_steps: 30000
+        rigid_shape_properties:
+          friction:
+            num_buckets: 250
+            range: [0.7, 1.3]
+            operation: "scaling"
+            distribution: "uniform"
+            schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            schedule_steps: 30000
+      object:
+        scale:
+          range: [0.5, 2.0]
+          operation: "scaling"
+          distribution: "uniform"
+          schedule: "linear"  # "linear" will scale the current random sample by ``min(current num steps, schedule_steps) / schedule_steps`
+          schedule_steps: 1
+        rigid_body_properties:
+          mass:
+            range: [0.5, 1.5]
+            operation: "scaling"
+            distribution: "uniform"
+            schedule: "linear"  # "linear" will scale the current random sample by ``min(current num steps, schedule_steps) / schedule_steps`
+            schedule_steps: 30000
+        rigid_shape_properties:
+          friction:
+            num_buckets: 250
+            range: [0.7, 1.3]
+            operation: "scaling"
+            distribution: "uniform"
+            schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            schedule_steps: 30000
+
+sim:
+  substeps: 2
+  dt: 0.01667 # 1/60
+  up_axis: "z"
+  use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
+  num_client_threads: 8
+
+  gravity: [0.0, 0.0, -9.81]
+  physx:
+    num_threads: 6
+    solver_type: 1  # 0: pgs, 1: tgs
+    num_position_iterations: 8
+    num_velocity_iterations: 0
+
+    max_gpu_contact_pairs: 8388608 # 8*1024*1024
+    num_subscenes: ${....num_subscenes}
+    contact_offset: 0.002
+    rest_offset: 0.0
+    bounce_threshold_velocity: 0.2
+    max_depenetration_velocity: 1000.0
+    default_buffer_size_multiplier: 25.0
+    contact_collection: 0 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (broken - do not use!)
