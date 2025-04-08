@@ -1045,7 +1045,7 @@ class AllegroKukaJuggleBase(VecTask):
         print(f"Has thrown: {self.has_thrown[0]}")
 
         # Upward hand reward
-        upward_hand_reward = (lifted_object & (self.fingertip_pos[:, :, 2] > self.palm_center_pos[:, 2][:, None])).float().sum(dim=-1)
+        upward_hand_reward = (lifted_object.any(dim=-1)[:, None] & (self.fingertip_pos[:, :, 2] > self.palm_center_pos[:, 2][:, None])).float().sum(dim=-1)
 
         # Step 1: Extract the z-component of the object's linear velocity
         z_velocity = self.object_linvel[:, :, 2]
