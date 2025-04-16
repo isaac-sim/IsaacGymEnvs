@@ -466,7 +466,7 @@ class AllegroKukaJuggleBase(VecTask):
     def _object_keypoint_offsets(self):
         raise NotImplementedError()
 
-    def _object_start_poses(self, allegro_pose, table_pose_dy, table_pose_dz, arrangement="line", spacing=0.15):
+    def _object_start_poses(self, allegro_pose, table_pose_dy, table_pose_dz, arrangement="line", spacing=0.25):
         """
         Generate a list of start poses for each ball, arranged in a specific pattern.
 
@@ -1006,11 +1006,9 @@ class AllegroKukaJuggleBase(VecTask):
         
         # finger tips are within thresh of both balls
         # env,
-        closeness_thresh = 0.01
+        closeness_thresh = 0.1
         closeness_dist = torch.norm(self.fingertip_pos[:, :, None, 2] - self.object_pos[:, None, :, 2], dim = -1) #TODO check dimensions . -1 should be last deimsnions
-        resets = torch.where( (closeness_dist < closeness_thresh).any(dim =(1,2)), # 1, 2 should check the env and ball dimensions
-                             torch.ones_like(self.reset_buf), 
-                             self.reset_buf) 
+        resets = torch.where((self.fingertip_pos_rel_object.norm(dim=-1) < closeness_thresh).any(dim=(-1, -2)), torch.ones_like(self.reset_buf), self.reset_buf)
         # resets = torch.where((self.object_pos[:, :, 2] < self.fall_thresholds).any(dim=1), torch.ones_like(self.reset_buf), self.reset_buf)  # close to two balls
         # balsl out of bounds: resets = torch.where((torch.abs(self.object_pos) > self.cfg["env"]["envSpacing"]).any(dim=(-1, -2)), torch.ones_like(resets), resets)
         # print(f"Resets Due to Too close to 2 balls: {(self.object_pos[:, :, 2] < self.fall_thresholds).any(dim=1).sum()}")
