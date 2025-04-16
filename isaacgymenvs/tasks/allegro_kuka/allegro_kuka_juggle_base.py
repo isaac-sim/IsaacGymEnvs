@@ -1029,8 +1029,15 @@ class AllegroKukaJuggleBase(VecTask):
         fingertip_pos_rel_object_xy_prev[:, :, :, 2] = 0
         # fingertip_pos_rel_object_xy_prev = torch.norm(fingertip_pos_rel_object_xy_prev, dim=-1)
 
-        self.hand_delta = (torch.norm(fingertip_pos_rel_object_xy_prev, dim=-1) - torch.norm(fingertip_pos_rel_object_xy, dim=-1)).mean(dim=-1)
-        hand_delta_penalty = self.hand_delta.sum(dim=-1)
+        lowest_obj_indices = self.object_pos[:, :, 2].min(dim=-1)[1]
+        self.hand_delta = (torch.norm(fingertip_pos_rel_object_xy_prev.mean(dim=-2), dim=-1) - torch.norm(fingertip_pos_rel_object_xy.mean(dim=-2), dim=-1))
+        hand_delta_penalty = self.hand_delta[torch.arange(self.num_envs), lowest_obj_indices]
+        print(f"Object Heights: {self.object_pos[0, :, 2]}")
+        print(f"Lowest Object Idx: {lowest_obj_indices[0]}")
+        print(f"Object XY: {fingertip_pos_rel_object_xy.mean(dim=-2)[0]}")
+        print(f"Palm Location: {self.palm_center_pos[0]}")
+        print(f"Hand Delta Penalty: {hand_delta_penalty[0]}")
+        print("=" * 40)
 
         # keypoint_rew = self._keypoint_reward(lifted_object)
         juggle_penalty = -(self.object_pos[:, :, 2] < self.juggle_min_height).sum(dim=1).float()
@@ -1077,12 +1084,12 @@ class AllegroKukaJuggleBase(VecTask):
         # print("-" * 40)
         highest_obj_height, highest_obj_idx = torch.where(self.has_thrown.bool(), torch.zeros_like(self.object_pos[:, :, 2]), self.object_pos[:, :, 2]).max(dim=-1)
         juggle_rhythm_reward = torch.clamp(self.has_thrown.any(dim=1).float() * (highest_obj_height - 0.5 - torch.clamp(self.object_linvel[torch.arange(self.num_envs), highest_obj_idx, 2], 0.0)), 0.0)
-        print(f"Has Thrown: {self.has_thrown.any(dim=1)[0]}, All Balls: {self.has_thrown[0]}")
-        print(f"Fingertip Heights: {self.fingertip_pos[0, :, 2]}")
-        print(f"Max Height: {self.object_pos[:, :, 2].max(dim=-1)[0][0]}, All Heights: {self.object_pos[:, :, 2][0]}")
-        print(f"Linear Velocity: {self.object_linvel[0, highest_obj_idx[0], 2]}, All velocities: {self.object_linvel[0, :, 2]}")
-        print(f"Juggle Rhythm Reward: {juggle_rhythm_reward[0]}")
-        print("=" * 40)
+        # print(f"Has Thrown: {self.has_thrown.any(dim=1)[0]}, All Balls: {self.has_thrown[0]}")
+        # print(f"Fingertip Heights: {self.fingertip_pos[0, :, 2]}")
+        # print(f"Max Height: {self.object_pos[:, :, 2].max(dim=-1)[0][0]}, All Heights: {self.object_pos[:, :, 2][0]}")
+        # print(f"Linear Velocity: {self.object_linvel[0, highest_obj_idx[0], 2]}, All velocities: {self.object_linvel[0, :, 2]}")
+        # print(f"Juggle Rhythm Reward: {juggle_rhythm_reward[0]}")
+        # print("=" * 40)
 
         # downward toss reward
         # juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1) & (self.object_linvel[:, :, 2] <= 0)).sum(dim=1).float() 

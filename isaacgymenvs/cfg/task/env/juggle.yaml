@@ -30,7 +30,7 @@ outOfBoundsPenaltyScale: 15.0
 hasThrownRewardScale: 400.0 #TODO: return back to reorder
 catchingRewardScale: 50.0
 upwardHandRewardScale: 0.2
-juggleRhythmRewardScale: 600.0
+juggleRhythmRewardScale: 0.0
 
 numBalls: 2
 juggleMinHeight: 0.6
