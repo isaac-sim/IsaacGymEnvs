@@ -1100,10 +1100,10 @@ class AllegroKukaJuggleBase(VecTask):
 
         
         vel_xy = self.object_linvel[:, :, :2].norm(dim=-1) # magnitiude of velocity in xy plane = sqrt(v_x^2 + v_y^2), so gonna use norm
-        vel_z = self.object_linvel[:, :, 2].abs() # z velocity just the last dim, we only care for dir so i'm doing abs()
+        abs_vel_z = self.object_linvel[:, :, 2].abs() # z velocity just the last dim, we only care for dir so i'm doing abs()
 
         
-        direction_score = ( vel_z / (vel_xy + 1e-4) ) * vel_z # reward should be higher if v_z>v_xy, but also prioritize high vertical speed over sidewas
+        direction_score = ( abs_vel_z / (vel_xy + 1e-4) ) * abs_vel_z # reward should be higher if v_z>v_xy, but also prioritize high vertical speed over sidewas
 
         # only give rew if its not touching hand , so to not bias the lift part? todo; verify this is sound?
         # [num_envs, num_balls, num_fingers, 3] --> collapse dx/dy/dz into 1 dim -> take the min of the norms across all fingers -> check that its > thresh -> hence must be thrown
@@ -1114,7 +1114,39 @@ class AllegroKukaJuggleBase(VecTask):
 
         # ------------------------------------
 
+        # --------- airtime value (TODO: need to add it into reward caluclations, this is just the dynamics pt)
+        ''' math;
+        z(t) = z_0 + (v_z * t) - (0.5 * g * t^2) = 0    <--- whne hits ground
+        (0.5 g t^2) - (v_z * t) - z_0 = 0
 
+        a = 0.5 * g
+        b = -v_z
+        c = -z_0
+
+        discrim = b^2 - 4ac
+        = v_z^2 - 4 * (0.5 * g) * (-z_0)
+        = v_z^2 + 2 * g * z_0
+
+        quadratic formula:  
+        t = (-b +/- sqrt(discrim)) / 2a
+        ~= (v_z + sqrt(discrim)) / g
+
+        
+        '''
+
+
+        z_0 = self.object_pos[:, :, 2]
+        vel_z = self.object_linvel[:, :, 2]
+        g = 9.81  #TODO: fix and grab from config.
+        discrim = vel_z**2 + (2 * g * z_0)
+        sqrt_discrim = torch.sqrt(torch.clamp(discrim, min=0.0))
+        time_to_ground = (vel_z + sqrt_discrim) / g
+
+        # edge case in case we're already on the ground. don't think it's possible bc term condition, but in case
+        time_to_ground = torch.where(z_0 <= 0, torch.zeros_like(time_to_ground), time_to_ground)
+
+
+        # ------------------------------------
 
 
 
