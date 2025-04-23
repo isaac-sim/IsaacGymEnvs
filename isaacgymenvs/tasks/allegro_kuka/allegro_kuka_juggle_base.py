@@ -97,6 +97,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.upward_hand_reward_scale = self.cfg["env"]["upwardHandRewardScale"]
         self.juggle_rhythm_reward_scale = self.cfg["env"]["juggleRhythmRewardScale"]
         # self.downward_toss_reward_scale = self.cfg["env"]["downwardTossRewardScale"]
+        self.vertical_juggle_reward_scale = self.cfg["env"]["verticalJuggleRewardScale"]
 
         self.juggle_min_height = self.cfg["env"]["juggleMinHeight"]
         self.juggle_success_height = self.cfg["env"]["juggleSuccessHeight"]
@@ -426,6 +427,7 @@ class AllegroKukaJuggleBase(VecTask):
             "raw_catching_reward",
             "raw_upward_hand_reward",
             "raw_juggle_rhythm_reward",
+            "raw_vertical_juggle_reward",
             "fingertip_delta_rew",
             "hand_delta_penalty",
             "lifting_rew",
@@ -443,6 +445,8 @@ class AllegroKukaJuggleBase(VecTask):
             "catching_reward",
             "upward_hand_reward",
             "juggle_rhythm_reward",
+            "vertical_juggle_reward",
+
         ]
 
         self.rewards_episode = {
@@ -1129,6 +1133,60 @@ class AllegroKukaJuggleBase(VecTask):
         # print("Catching Reward:\n", catching_reward[0])
         self.best_catching_velocity = torch.clamp(torch.maximum(self.best_catching_velocity, self.object_linvel[:, :, 2]), -2.0, 3.0)
 
+        # -------- vertical_juggle_reward --- (this hsould be irregardless of +/- z direction)
+
+
+        vel_xy = self.object_linvel[:, :, :2].norm(dim=-1) # magnitiude of velocity in xy plane = sqrt(v_x^2 + v_y^2), so gonna use norm
+        abs_vel_z = self.object_linvel[:, :, 2].abs() # z velocity just the last dim, we only care for dir so i'm doing abs()
+
+
+        direction_score = ( abs_vel_z / (vel_xy + 1e-4) ) * abs_vel_z # reward should be higher if v_z>v_xy, but also prioritize high vertical speed over sidewas
+
+        # only give rew if its not touching hand , so to not bias the lift part? todo; verify this is sound?
+        # [num_envs, num_balls, num_fingers, 3] --> collapse dx/dy/dz into 1 dim -> take the min of the norms across all fingers -> check that its > thresh -> hence must be thrown
+        been_thrown = (self.fingertip_pos_rel_object.norm(dim=-1).min(dim=-2)[0] > self.has_thrown_threshold)
+        vertical_juggle_reward = (direction_score * been_thrown).sum(dim=-1)
+
+
+
+        # ------------------------------------
+
+        # --------- airtime value (TODO: need to add it into reward caluclations, this is just the dynamics pt)
+        ''' math;
+        z(t) = z_0 + (v_z * t) - (0.5 * g * t^2) = 0    <--- whne hits ground
+        (0.5 g t^2) - (v_z * t) - z_0 = 0
+
+        a = 0.5 * g
+        b = -v_z
+        c = -z_0
+
+        discrim = b^2 - 4ac
+        = v_z^2 - 4 * (0.5 * g) * (-z_0)
+        = v_z^2 + 2 * g * z_0
+
+        quadratic formula:  
+        t = (-b +/- sqrt(discrim)) / 2a
+        ~= (v_z + sqrt(discrim)) / g
+
+        
+        '''
+
+
+        z_0 = self.object_pos[:, :, 2]
+        vel_z = self.object_linvel[:, :, 2]
+        g = 9.81  #TODO: fix and grab from config.
+        discrim = vel_z**2 + (2 * g * z_0)
+        sqrt_discrim = torch.sqrt(torch.clamp(discrim, min=0.0))
+        time_to_ground = (vel_z + sqrt_discrim) / g
+
+        # edge case in case we're already on the ground. don't think it's possible bc term condition, but in case
+        time_to_ground = torch.where(z_0 <= 0, torch.zeros_like(time_to_ground), time_to_ground)
+
+
+        # ------------------------------------
+
+
+
         # print("-" * 40)
         highest_obj_height, highest_obj_idx = torch.where(self.has_thrown.bool(), torch.zeros_like(self.object_pos[:, :, 2]), self.object_pos[:, :, 2]).max(dim=-1)
         juggle_rhythm_reward = torch.clamp(self.has_thrown.any(dim=1).float() * (highest_obj_height - 0.5 - torch.clamp(self.object_linvel[torch.arange(self.num_envs), highest_obj_idx, 2], 0.0)), 0.0)
@@ -1169,6 +1227,8 @@ class AllegroKukaJuggleBase(VecTask):
         self.rewards_episode["raw_catching_reward"] += catching_reward
         self.rewards_episode["raw_upward_hand_reward"] += upward_hand_reward
         self.rewards_episode["raw_juggle_rhythm_reward"] += juggle_rhythm_reward
+        self.rewards_episode["raw_vertical_juggle_reward"] += vertical_juggle_reward
+
 
         fingertip_delta_rew *= self.distance_delta_rew_scale
         hand_delta_penalty *= self.hand_delta_penalty_scale # * 0  # currently disabled
@@ -1183,6 +1243,8 @@ class AllegroKukaJuggleBase(VecTask):
         catching_reward *= self.catching_reward_scale
         upward_hand_reward *= self.upward_hand_reward_scale
         juggle_rhythm_reward *= self.juggle_rhythm_reward_scale
+        vertical_juggle_reward *= self.vertical_juggle_reward_scale
+
 
         kuka_actions_penalty, allegro_actions_penalty = self._action_penalties()
 
@@ -1208,6 +1270,7 @@ class AllegroKukaJuggleBase(VecTask):
             + catching_reward
             + upward_hand_reward
             + juggle_rhythm_reward
+            + vertical_juggle_reward
         )
 
         self.rew_buf[:] = reward
@@ -1242,6 +1305,7 @@ class AllegroKukaJuggleBase(VecTask):
             (catching_reward, "catching_reward"),
             (upward_hand_reward, "upward_hand_reward"),
             (juggle_rhythm_reward, "juggle_rhythm_reward"),
+            (vertical_juggle_reward, "vertical_juggle_reward"),
         ]
 
         episode_cumulative = dict()

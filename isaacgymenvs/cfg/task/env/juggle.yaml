@@ -31,6 +31,8 @@ hasThrownRewardScale: 400.0 #TODO: return back to reorder
 catchingRewardScale: 50.0
 upwardHandRewardScale: 0.2
 juggleRhythmRewardScale: 0.0
+verticalJuggleRewardScale: 1.0 #og value should be ~[0, ~30], and its per step
+
 
 numBalls: 2
 juggleMinHeight: 0.6
