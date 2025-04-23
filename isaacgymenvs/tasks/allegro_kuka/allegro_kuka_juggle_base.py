@@ -104,6 +104,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.hand_max_height = self.cfg["env"]["handMaxHeight"]
         self.has_thrown_threshold = self.cfg["env"]["hasThrownThreshold"]
         self.closeness_threshold = self.cfg["env"]["closenessThreshold"]
+        self.gravity = abs(cfg['sim']['gravity'][2])
 
         self.dof_params: DofParameters = DofParameters.from_cfg(self.cfg)
 
@@ -603,7 +604,9 @@ class AllegroKukaJuggleBase(VecTask):
     def _extra_reset_rules(self, resets):
         resets = torch.where((self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1), torch.ones_like(resets), resets)
         # print(f"Resets Due to Max Height: {(self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1).sum()}")
-        resets = torch.where((torch.abs(self.object_pos) > self.cfg["env"]["envSpacing"]).any(dim=(-1, -2)), torch.ones_like(resets), resets)
+        out_of_bounds = ((torch.abs(self.object_pos)[:, :, 0] > 0.5) | (torch.abs(self.object_pos)[:, :, 1] > 0.5) | (
+                    torch.abs(self.object_pos)[:, :, 2] > self.cfg["env"]["envSpacing"]))
+        resets = torch.where(out_of_bounds.any(dim=-1), torch.ones_like(resets), resets)
         # print(f"Resets Due to Out of Bounds: {(torch.abs(self.object_pos) > self.cfg['env']['envSpacing']).any(dim=(-1, -2)).sum()}")
         return resets
 
@@ -1056,11 +1059,47 @@ class AllegroKukaJuggleBase(VecTask):
         fingertip_pos_rel_object_xy_prev[:, :, :, 2] = 0
         # fingertip_pos_rel_object_xy_prev = torch.norm(fingertip_pos_rel_object_xy_prev, dim=-1)
 
-        lowest_obj_indices = self.object_pos[:, :, 2].min(dim=-1)[1]
+        # --------- airtime value (TODO: need to add it into reward caluclations, this is just the dynamics pt)
+        ''' math;
+        z(t) = z_0 + (v_z * t) - (0.5 * g * t^2) = 0    <--- whne hits ground
+        (0.5 g t^2) - (v_z * t) - z_0 = 0
+
+        a = 0.5 * g
+        b = -v_z
+        c = -z_0
+
+        discrim = b^2 - 4ac
+        = v_z^2 - 4 * (0.5 * g) * (-z_0)
+        = v_z^2 + 2 * g * z_0
+
+        quadratic formula:  
+        t = (-b +/- sqrt(discrim)) / 2a
+        ~= (v_z + sqrt(discrim)) / g
+
+
+        '''
+
+        z_0 = self.object_pos[:, :, 2]
+        vel_z = self.object_linvel[:, :, 2]
+        g = self.gravity  # TODO: fix and grab from config.
+        discrim = vel_z ** 2 + (2 * g * z_0)
+        sqrt_discrim = torch.sqrt(torch.clamp(discrim, min=0.0))
+        time_to_ground = (vel_z + sqrt_discrim) / g
+
+        # edge case in case we're already on the ground. don't think it's possible bc term condition, but in case
+        time_to_ground = torch.where(z_0 <= 0, torch.zeros_like(time_to_ground), time_to_ground)
+
+        # ------------------------------------
+        not_lifted_indices = self.lifted_object.min(dim=-1)[1]
+        shortest_airtime_indices = time_to_ground.min(dim=-1)[1]
+        ball_focus_idx = torch.where(self.lifted_object.min(dim=-1)[0], shortest_airtime_indices, not_lifted_indices)
+        # lowest_obj_indices = self.object_pos[:, :, 2].min(dim=-1)[1]
         self.hand_delta = (torch.norm(fingertip_pos_rel_object_xy_prev.mean(dim=-2), dim=-1) - torch.norm(fingertip_pos_rel_object_xy.mean(dim=-2), dim=-1))
-        hand_delta_penalty = 4/5 * self.hand_delta[torch.arange(self.num_envs), lowest_obj_indices] + 1/5 * self.hand_delta.sum(dim=-1)
+        hand_delta_penalty = self.hand_delta[torch.arange(self.num_envs), ball_focus_idx] # + 1/5 * self.hand_delta.sum(dim=-1)
         print(f"Object Heights: {self.object_pos[0, :, 2]}")
-        print(f"Lowest Object Idx: {lowest_obj_indices[0]}")
+        print(f"Lifted: {self.lifted_object[0]}")
+        print(f"Time To Ground: {time_to_ground[0]}")
+        print(f"Ball Focus Idx: {ball_focus_idx[0]}")
         print(f"Object XY: {fingertip_pos_rel_object_xy.mean(dim=-2)[0]}")
         print(f"Palm Location: {self.palm_center_pos[0]}")
         print(f"Hand Delta Penalty: {hand_delta_penalty[0]}")
@@ -1070,7 +1109,8 @@ class AllegroKukaJuggleBase(VecTask):
         juggle_penalty = -(self.object_pos[:, :, 2] < self.juggle_min_height).sum(dim=1).float()
         hand_height_penalty = -(self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1).float() 
         fall_penalty = -(self.object_pos[:, :, 2] < self.fall_thresholds).any(dim=1).float()
-        out_of_bounds_penalty = -(torch.abs(self.object_pos) > self.cfg["env"]["envSpacing"]).any(dim=(-1, -2)).float()
+        out_of_bounds = ((torch.abs(self.object_pos)[:, :, 0] > 0.5) | (torch.abs(self.object_pos)[:, :, 1] > 0.5) | (torch.abs(self.object_pos)[:, :, 2] > self.cfg["env"]["envSpacing"]))
+        out_of_bounds_penalty = -out_of_bounds.any(dim=-1).float()
         # juggle_penalty = juggle_penalty - 100 * (self.fingertip_pos[:, :, 2] > self.hand_max_height).any(dim=-1) - 5 * (self.object_pos[:, :, 2] < 0.1).any(dim=1)
         # juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0)).sum(dim=1).float()
         
@@ -1136,57 +1176,21 @@ class AllegroKukaJuggleBase(VecTask):
         # -------- vertical_juggle_reward --- (this hsould be irregardless of +/- z direction)
 
 
-        vel_xy = self.object_linvel[:, :, :2].norm(dim=-1) # magnitiude of velocity in xy plane = sqrt(v_x^2 + v_y^2), so gonna use norm
-        abs_vel_z = self.object_linvel[:, :, 2].abs() # z velocity just the last dim, we only care for dir so i'm doing abs()
-
-
-        direction_score = ( abs_vel_z / (vel_xy + 1e-4) ) * abs_vel_z # reward should be higher if v_z>v_xy, but also prioritize high vertical speed over sidewas
-
-        # only give rew if its not touching hand , so to not bias the lift part? todo; verify this is sound?
-        # [num_envs, num_balls, num_fingers, 3] --> collapse dx/dy/dz into 1 dim -> take the min of the norms across all fingers -> check that its > thresh -> hence must be thrown
-        been_thrown = (self.fingertip_pos_rel_object.norm(dim=-1).min(dim=-2)[0] > self.has_thrown_threshold)
-        vertical_juggle_reward = (direction_score * been_thrown).sum(dim=-1)
+        # vel_xy = self.object_linvel[:, :, :2].norm(dim=-1) # magnitiude of velocity in xy plane = sqrt(v_x^2 + v_y^2), so gonna use norm
+        # abs_vel_z = self.object_linvel[:, :, 2].abs() # z velocity just the last dim, we only care for dir so i'm doing abs()
+        #
+        #
+        # direction_score = ( abs_vel_z / (vel_xy + 1e-4) ) * abs_vel_z # reward should be higher if v_z>v_xy, but also prioritize high vertical speed over sidewas
+        #
+        # # only give rew if its not touching hand , so to not bias the lift part? todo; verify this is sound?
+        # # [num_envs, num_balls, num_fingers, 3] --> collapse dx/dy/dz into 1 dim -> take the min of the norms across all fingers -> check that its > thresh -> hence must be thrown
+        # been_thrown = (self.fingertip_pos_rel_object.norm(dim=-1).min(dim=-2)[0] > self.has_thrown_threshold)
+        # vertical_juggle_reward = (direction_score * been_thrown).sum(dim=-1)
+        vertical_juggle_reward = torch.zeros_like(lifting_rew)
 
 
 
         # ------------------------------------
-
-        # --------- airtime value (TODO: need to add it into reward caluclations, this is just the dynamics pt)
-        ''' math;
-        z(t) = z_0 + (v_z * t) - (0.5 * g * t^2) = 0    <--- whne hits ground
-        (0.5 g t^2) - (v_z * t) - z_0 = 0
-
-        a = 0.5 * g
-        b = -v_z
-        c = -z_0
-
-        discrim = b^2 - 4ac
-        = v_z^2 - 4 * (0.5 * g) * (-z_0)
-        = v_z^2 + 2 * g * z_0
-
-        quadratic formula:  
-        t = (-b +/- sqrt(discrim)) / 2a
-        ~= (v_z + sqrt(discrim)) / g
-
-        
-        '''
-
-
-        z_0 = self.object_pos[:, :, 2]
-        vel_z = self.object_linvel[:, :, 2]
-        g = 9.81  #TODO: fix and grab from config.
-        discrim = vel_z**2 + (2 * g * z_0)
-        sqrt_discrim = torch.sqrt(torch.clamp(discrim, min=0.0))
-        time_to_ground = (vel_z + sqrt_discrim) / g
-
-        # edge case in case we're already on the ground. don't think it's possible bc term condition, but in case
-        time_to_ground = torch.where(z_0 <= 0, torch.zeros_like(time_to_ground), time_to_ground)
-
-
-        # ------------------------------------
-
-
-
         # print("-" * 40)
         highest_obj_height, highest_obj_idx = torch.where(self.has_thrown.bool(), torch.zeros_like(self.object_pos[:, :, 2]), self.object_pos[:, :, 2]).max(dim=-1)
         juggle_rhythm_reward = torch.clamp(self.has_thrown.any(dim=1).float() * (highest_obj_height - 0.5 - torch.clamp(self.object_linvel[torch.arange(self.num_envs), highest_obj_idx, 2], 0.0)), 0.0)
