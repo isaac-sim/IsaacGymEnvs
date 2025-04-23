@@ -39,6 +39,7 @@ handMaxHeight: 0.9
 envSpacing: 1.5
 
 hasThrownThreshold: 0.2 #for thrown signal
+closenessThreshold: 0.1
 
 
 # Done:	Make Juggle Height Reward One Time

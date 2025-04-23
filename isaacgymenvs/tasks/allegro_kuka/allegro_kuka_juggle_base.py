@@ -102,6 +102,7 @@ class AllegroKukaJuggleBase(VecTask):
         self.juggle_success_height = self.cfg["env"]["juggleSuccessHeight"]
         self.hand_max_height = self.cfg["env"]["handMaxHeight"]
         self.has_thrown_threshold = self.cfg["env"]["hasThrownThreshold"]
+        self.closeness_threshold = self.cfg["env"]["closenessThreshold"]
 
         self.dof_params: DofParameters = DofParameters.from_cfg(self.cfg)
 
@@ -226,6 +227,8 @@ class AllegroKukaJuggleBase(VecTask):
         hand_delta_size = 1 * self.num_balls
         best_catching_velocity_size = 1 * self.num_balls
         fall_threshold_size = 1 * self.num_balls
+        ball_schedule_size = 1 * self.num_balls
+        reward_indicator_size = 3 * self.num_balls
         # best_lifting_height_size = 1 * self.num_balls
 
         self.full_state_size = (
@@ -249,6 +252,8 @@ class AllegroKukaJuggleBase(VecTask):
             + hand_delta_size
             + best_catching_velocity_size
             + fall_threshold_size
+            + ball_schedule_size
+            + reward_indicator_size
             # + best_lifting_height_size
         )
 
@@ -388,6 +393,12 @@ class AllegroKukaJuggleBase(VecTask):
 
         # how many steps we were within the goal tolerance
         # self.near_goal_steps = torch.zeros(self.num_envs, dtype=torch.int, device=self.device)
+
+        # indicators for reward: 0 is juggle, 1 is throw, 2 is catch
+        self.reward_indicators = torch.ones( (self.num_envs, self.num_balls, 3), dtype=torch.bool, device=self.device)
+        self.ball_schedule = torch.zeros ( self.num_envs, dtype=torch.long, device=self.device)
+
+
 
         self.lifted_object = torch.zeros((self.num_envs, self.num_balls), dtype=torch.bool, device=self.device)
         # self.closest_keypoint_max_dist = -torch.ones(self.num_envs, dtype=torch.float, device=self.device)
@@ -1006,9 +1017,10 @@ class AllegroKukaJuggleBase(VecTask):
         
         # finger tips are within thresh of both balls
         # env,
-        closeness_thresh = 0.1
-        closeness_dist = torch.norm(self.fingertip_pos[:, :, None, 2] - self.object_pos[:, None, :, 2], dim = -1) #TODO check dimensions . -1 should be last deimsnions
-        resets = torch.where((self.fingertip_pos_rel_object.norm(dim=-1) < closeness_thresh).any(dim=(-1, -2)), torch.ones_like(self.reset_buf), self.reset_buf)
+        # closeness_dist = torch.norm(self.fingertip_pos[:, :, None, 2] - self.object_pos[:, None, :, 2], dim = -1) #TODO check dimensions . -1 should be last deimsnions
+        resets = torch.where((self.fingertip_pos_rel_object.norm(dim=-1) < self.closeness_threshold).any(dim=-1).all(dim=-1), torch.ones_like(resets), resets)
+        print(f"Fingertip Rel: {self.fingertip_pos_rel_object.norm(dim=-1)[0]}")
+        print("#" * 40)
         # resets = torch.where((self.object_pos[:, :, 2] < self.fall_thresholds).any(dim=1), torch.ones_like(self.reset_buf), self.reset_buf)  # close to two balls
         # balsl out of bounds: resets = torch.where((torch.abs(self.object_pos) > self.cfg["env"]["envSpacing"]).any(dim=(-1, -2)), torch.ones_like(resets), resets)
         # print(f"Resets Due to Too close to 2 balls: {(self.object_pos[:, :, 2] < self.fall_thresholds).any(dim=1).sum()}")
@@ -1042,7 +1054,7 @@ class AllegroKukaJuggleBase(VecTask):
 
         lowest_obj_indices = self.object_pos[:, :, 2].min(dim=-1)[1]
         self.hand_delta = (torch.norm(fingertip_pos_rel_object_xy_prev.mean(dim=-2), dim=-1) - torch.norm(fingertip_pos_rel_object_xy.mean(dim=-2), dim=-1))
-        hand_delta_penalty = self.hand_delta[torch.arange(self.num_envs), lowest_obj_indices]
+        hand_delta_penalty = 4/5 * self.hand_delta[torch.arange(self.num_envs), lowest_obj_indices] + 1/5 * self.hand_delta.sum(dim=-1)
         print(f"Object Heights: {self.object_pos[0, :, 2]}")
         print(f"Lowest Object Idx: {lowest_obj_indices[0]}")
         print(f"Object XY: {fingertip_pos_rel_object_xy.mean(dim=-2)[0]}")
@@ -1059,12 +1071,37 @@ class AllegroKukaJuggleBase(VecTask):
         # juggle_reward = ((self.juggle_state == 1) & (self.prev_juggle_state == 0)).sum(dim=1).float()
         
         #one time toss reward
-        juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1)).sum(dim=1).float()
+        juggle_reward = ((self.juggle_state == 0) & (self.prev_juggle_state == 1) & self.reward_indicators[:, :, 0]).sum(dim=1).float()
+        self.reward_indicators[:, :, 0] = torch.where((self.juggle_state == 0) & (self.prev_juggle_state == 1), torch.zeros_like(self.reward_indicators[:, :, 0]).bool(), self.reward_indicators[:, :, 0])
+
         self.fall_thresholds = torch.where(((self.juggle_state == 0) & (self.prev_juggle_state == 1)), torch.ones_like(self.fall_thresholds) * 0.6, self.fall_thresholds)
-        self.best_catching_velocity = torch.where(((self.juggle_state == 0) & (self.prev_juggle_state == 1)), torch.ones_like(self.best_catching_velocity) * -2.0, self.best_catching_velocity)
+        self.best_catching_velocity = torch.where(((self.juggle_state == 0) & (self.prev_juggle_state == 1) & self.reward_indicators[:, :, 2]), torch.ones_like(self.best_catching_velocity) * -2.0, self.best_catching_velocity)
+        self.reward_indicators[:, :, 2] = torch.where((self.juggle_state == 0) & (self.prev_juggle_state == 1),
+                                                      torch.zeros_like(self.reward_indicators[:, :, 2]).bool(),
+                                                      self.reward_indicators[:, :, 2])
+
+
+        reward_indicator_mask = self.has_thrown[torch.arange(self.num_envs), self.ball_schedule].bool()[:, None, None].expand(-1, self.num_balls, 3)
+        reward_indicator_mask[torch.arange(self.num_envs), self.ball_schedule] = False
+        self.reward_indicators = self.reward_indicators | reward_indicator_mask
+
+        self.ball_schedule = torch.where(self.has_thrown[torch.arange(self.num_envs), self.ball_schedule].bool() , (self.ball_schedule + 1) % self.num_balls, self.ball_schedule)
 
         #new throw signal (positive velocity + change in delta)
-        has_thrown_reward = self.has_thrown.sum(dim=1).float()
+        has_thrown_reward = (self.has_thrown.bool() & self.reward_indicators[:, :, 1]).sum(dim=1).float()
+        self.reward_indicators[:, :, 1] = torch.where(self.has_thrown.bool(),
+                                                      torch.zeros_like(self.reward_indicators[:, :, 1]).bool(),
+                                                      self.reward_indicators[:, :, 1])
+
+        print(f"Ball Schedule: {self.ball_schedule[0]}")
+        print(f"Has Thrown: {self.has_thrown[0].bool()}")
+        print(f"Juggle Complete: {((self.juggle_state == 0) & (self.prev_juggle_state == 1))[0]}")
+        print(f"Reward Indicators: {self.reward_indicators[0]}")
+        print(f"Throw Reward Raw: {has_thrown_reward[0]}")
+        print(f"Best Catching Velocity: {self.best_catching_velocity[0]}")
+        print(f"Juggle Reward {juggle_reward[0]}")
+        print("-" * 40)
+
 
         # Upward hand reward
         upward_hand_reward = (lifted_object.any(dim=-1)[:, None] & (self.fingertip_pos[:, :, 2] > self.palm_center_pos[:, 2][:, None])).float().sum(dim=-1)
@@ -1488,6 +1525,12 @@ class AllegroKukaJuggleBase(VecTask):
         buf[:, ofs: ofs + 1 * self.num_balls] = self.fall_thresholds.reshape(self.num_envs, -1)
         ofs += 1 * self.num_balls
 
+        buf[:, ofs: ofs + 1 * self.num_balls] = torch.nn.functional.one_hot(self.ball_schedule, self.num_balls).float()
+        ofs += 1 * self.num_balls
+
+        buf[:, ofs: ofs + 3 * self.num_balls] = self.reward_indicators.reshape(self.num_envs, -1)
+        ofs += 3 * self.num_balls
+
         # buf[:, ofs : ofs + 1 * self.num_balls] = self.best_lifting_height.reshape(self.num_envs, -1)
         # ofs += 1 * self.num_balls
 
@@ -1704,6 +1747,9 @@ class AllegroKukaJuggleBase(VecTask):
         self.closest_fingertip_dist[env_ids] = -1
         self.furthest_hand_dist[env_ids] = -1
         self.fall_thresholds[env_ids] = 0.1
+
+        self.ball_schedule[env_ids] = 0
+        self.reward_indicators[env_ids] = True
 
         # self.near_goal_steps[env_ids] = 0
 
