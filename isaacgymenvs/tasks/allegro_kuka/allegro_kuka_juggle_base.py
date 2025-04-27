@@ -231,6 +231,7 @@ class AllegroKukaJuggleBase(VecTask):
         fall_threshold_size = 1 * self.num_balls
         ball_schedule_size = 1 * self.num_balls
         reward_indicator_size = 3 * self.num_balls
+        time_to_ground_size = 1 * self.num_balls
         # best_lifting_height_size = 1 * self.num_balls
 
         self.full_state_size = (
@@ -257,6 +258,7 @@ class AllegroKukaJuggleBase(VecTask):
             + ball_schedule_size
             + reward_indicator_size
             # + best_lifting_height_size
+            + time_to_ground_size
         )
 
         num_states = self.full_state_size
@@ -1026,16 +1028,16 @@ class AllegroKukaJuggleBase(VecTask):
         # env,
         # closeness_dist = torch.norm(self.fingertip_pos[:, :, None, 2] - self.object_pos[:, None, :, 2], dim = -1) #TODO check dimensions . -1 should be last deimsnions
         resets = torch.where((self.fingertip_pos_rel_object.norm(dim=-1) < self.closeness_threshold).any(dim=-1).all(dim=-1), torch.ones_like(resets), resets)
-        print(f"Fingertip Rel: {self.fingertip_pos_rel_object.norm(dim=-1)[0]}")
-        print("#" * 40)
+        # print(f"Fingertip Rel: {self.fingertip_pos_rel_object.norm(dim=-1)[0]}")
+        # print("#" * 40)
         # resets = torch.where((self.object_pos[:, :, 2] < self.fall_thresholds).any(dim=1), torch.ones_like(self.reset_buf), self.reset_buf)  # close to two balls
         # balsl out of bounds: resets = torch.where((torch.abs(self.object_pos) > self.cfg["env"]["envSpacing"]).any(dim=(-1, -2)), torch.ones_like(resets), resets)
         # print(f"Resets Due to Too close to 2 balls: {(self.object_pos[:, :, 2] < self.fall_thresholds).any(dim=1).sum()}")
         
         
         resets = self._extra_reset_rules(resets)
-        # print(f"Env 0 Reset: {resets[0]}")
-        # print("=" * 40)
+        print(f"Env 0 Reset: {resets[0]}")
+        print("=" * 40)
         return resets
 
     def _true_objective(self):
@@ -1059,51 +1061,21 @@ class AllegroKukaJuggleBase(VecTask):
         fingertip_pos_rel_object_xy_prev[:, :, :, 2] = 0
         # fingertip_pos_rel_object_xy_prev = torch.norm(fingertip_pos_rel_object_xy_prev, dim=-1)
 
-        # --------- airtime value (TODO: need to add it into reward caluclations, this is just the dynamics pt)
-        ''' math;
-        z(t) = z_0 + (v_z * t) - (0.5 * g * t^2) = 0    <--- whne hits ground
-        (0.5 g t^2) - (v_z * t) - z_0 = 0
 
-        a = 0.5 * g
-        b = -v_z
-        c = -z_0
-
-        discrim = b^2 - 4ac
-        = v_z^2 - 4 * (0.5 * g) * (-z_0)
-        = v_z^2 + 2 * g * z_0
-
-        quadratic formula:  
-        t = (-b +/- sqrt(discrim)) / 2a
-        ~= (v_z + sqrt(discrim)) / g
-
-
-        '''
-
-        z_0 = self.object_pos[:, :, 2]
-        vel_z = self.object_linvel[:, :, 2]
-        g = self.gravity  # TODO: fix and grab from config.
-        discrim = vel_z ** 2 + (2 * g * z_0)
-        sqrt_discrim = torch.sqrt(torch.clamp(discrim, min=0.0))
-        time_to_ground = (vel_z + sqrt_discrim) / g
-
-        # edge case in case we're already on the ground. don't think it's possible bc term condition, but in case
-        time_to_ground = torch.where(z_0 <= 0, torch.zeros_like(time_to_ground), time_to_ground)
-
-        # ------------------------------------
         not_lifted_indices = self.lifted_object.min(dim=-1)[1]
-        shortest_airtime_indices = time_to_ground.min(dim=-1)[1]
+        shortest_airtime_indices = self.time_to_ground.min(dim=-1)[1]
         ball_focus_idx = torch.where(self.lifted_object.min(dim=-1)[0], shortest_airtime_indices, not_lifted_indices)
         # lowest_obj_indices = self.object_pos[:, :, 2].min(dim=-1)[1]
         self.hand_delta = (torch.norm(fingertip_pos_rel_object_xy_prev.mean(dim=-2), dim=-1) - torch.norm(fingertip_pos_rel_object_xy.mean(dim=-2), dim=-1))
         hand_delta_penalty = self.hand_delta[torch.arange(self.num_envs), ball_focus_idx] # + 1/5 * self.hand_delta.sum(dim=-1)
         print(f"Object Heights: {self.object_pos[0, :, 2]}")
         print(f"Lifted: {self.lifted_object[0]}")
-        print(f"Time To Ground: {time_to_ground[0]}")
+        print(f"Time To Ground: {self.time_to_ground[0]}")
         print(f"Ball Focus Idx: {ball_focus_idx[0]}")
-        print(f"Object XY: {fingertip_pos_rel_object_xy.mean(dim=-2)[0]}")
-        print(f"Palm Location: {self.palm_center_pos[0]}")
-        print(f"Hand Delta Penalty: {hand_delta_penalty[0]}")
-        print("=" * 40)
+        # print(f"Object XY: {fingertip_pos_rel_object_xy.mean(dim=-2)[0]}")
+        # print(f"Palm Location: {self.palm_center_pos[0]}")
+        # print(f"Hand Delta Penalty: {hand_delta_penalty[0]}")
+        # print("=" * 40)
 
         # keypoint_rew = self._keypoint_reward(lifted_object)
         juggle_penalty = -(self.object_pos[:, :, 2] < self.juggle_min_height).sum(dim=1).float()
@@ -1125,7 +1097,7 @@ class AllegroKukaJuggleBase(VecTask):
                                                       self.reward_indicators[:, :, 2])
 
 
-        reward_indicator_mask = self.has_thrown[torch.arange(self.num_envs), self.ball_schedule].bool()[:, None, None].expand(-1, self.num_balls, 3)
+        reward_indicator_mask = self.has_thrown[torch.arange(self.num_envs), self.ball_schedule].bool()[:, None, None].expand(-1, self.num_balls, 3).clone()
         reward_indicator_mask[torch.arange(self.num_envs), self.ball_schedule] = False
         self.reward_indicators = self.reward_indicators | reward_indicator_mask
 
@@ -1144,7 +1116,7 @@ class AllegroKukaJuggleBase(VecTask):
         print(f"Throw Reward Raw: {has_thrown_reward[0]}")
         print(f"Best Catching Velocity: {self.best_catching_velocity[0]}")
         print(f"Juggle Reward {juggle_reward[0]}")
-        print("-" * 40)
+        # print("-" * 40)
 
 
         # Upward hand reward
@@ -1484,6 +1456,38 @@ class AllegroKukaJuggleBase(VecTask):
         self.has_thrown = (~self.prev_beyond_throw_thresh & self.beyond_throw_thresh & (
                     self.object_linvel[:, :, 2] > 0.5)).float()
 
+        # --------- airtime value (TODO: need to add it into reward caluclations, this is just the dynamics pt)
+        ''' math;
+        z(t) = z_0 + (v_z * t) - (0.5 * g * t^2) = 0    <--- whne hits ground
+        (0.5 g t^2) - (v_z * t) - z_0 = 0
+
+        a = 0.5 * g
+        b = -v_z
+        c = -z_0
+
+        discrim = b^2 - 4ac
+        = v_z^2 - 4 * (0.5 * g) * (-z_0)
+        = v_z^2 + 2 * g * z_0
+
+        quadratic formula:  
+        t = (-b +/- sqrt(discrim)) / 2a
+        ~= (v_z + sqrt(discrim)) / g
+
+
+        '''
+
+        z_0 = self.object_pos[:, :, 2]
+        vel_z = self.object_linvel[:, :, 2]
+        g = self.gravity  # TODO: fix and grab from config.
+        discrim = vel_z ** 2 + (2 * g * z_0)
+        sqrt_discrim = torch.sqrt(torch.clamp(discrim, min=0.0))
+        time_to_ground = (vel_z + sqrt_discrim) / g
+
+        # edge case in case we're already on the ground. don't think it's possible bc term condition, but in case
+        self.time_to_ground = torch.where(z_0 <= 0, torch.zeros_like(time_to_ground), time_to_ground)
+
+        # ------------------------------------
+
         if self.obs_type == "full_state":
             full_state_size, reward_obs_ofs = self.compute_full_state(self.obs_buf)
             assert (
@@ -1598,6 +1602,9 @@ class AllegroKukaJuggleBase(VecTask):
 
         buf[:, ofs: ofs + 3 * self.num_balls] = self.reward_indicators.reshape(self.num_envs, -1)
         ofs += 3 * self.num_balls
+
+        buf[:, ofs: ofs + 1 * self.num_balls] = self.time_to_ground.reshape(self.num_envs, -1)
+        ofs += 1 * self.num_balls
 
         # buf[:, ofs : ofs + 1 * self.num_balls] = self.best_lifting_height.reshape(self.num_envs, -1)
         # ofs += 1 * self.num_balls
@@ -1811,6 +1818,9 @@ class AllegroKukaJuggleBase(VecTask):
 
         # -1 here indicates that the value is not initialized
         # self.closest_keypoint_max_dist[env_ids] = -1
+
+        self.juggle_state[env_ids] = 0
+        self.prev_juggle_state[env_ids] = 0
 
         self.closest_fingertip_dist[env_ids] = -1
         self.furthest_hand_dist[env_ids] = -1
