@@ -16,6 +16,7 @@ INSTALL_REQUIRES = [
     # RL
     "gym==0.23.1",
     "torch",
+    "fsspec==2025.3.0",
     "omegaconf",
     "termcolor",
     "jinja2",
